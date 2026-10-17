@@ -144,7 +144,17 @@ export type ExtensionMessage =
   | { type: 'CAPTURE_TAB_PNG' }
   | { type: 'GET_PAGE_DESIGN_DATA' }
   | { type: 'SET_QUICK_TOGGLE'; toggle: 'outlines' | 'spacingOverlay' | 'disableAnimations' | 'colorScheme'; active: boolean; theme?: 'dark' | 'light' }
-  | { type: 'SET_RESPONSIVE_WIDTH'; width: number | null };
+  | { type: 'SET_RESPONSIVE_WIDTH'; width: number | null }
+  | { type: 'SELECT_BY_SELECTOR'; selector: string }
+  | { type: 'GET_ELEMENT_TREE'; selector?: string; depth?: number }
+  | { type: 'GET_BOX_MODEL'; selector?: string }
+  | { type: 'GET_LAYOUT_INFO'; selector?: string }
+  | { type: 'GET_STACKING_INFO'; selector?: string }
+  | { type: 'GET_ACCESSIBILITY_INFO'; selector?: string }
+  | { type: 'FORCE_PSEUDO_STATE'; selector?: string; state: 'hover' | 'focus' | 'active' }
+  | { type: 'ASSERT_STYLE'; selector?: string; expected: Record<string, string> }
+  | { type: 'CHECK_CONTRAST'; selector?: string }
+  | { type: 'CHECK_TAP_TARGETS' };
 
 /**
  * Phase 6: Accessibility Audit types

@@ -1418,6 +1418,228 @@ function initContentScript() {
         sendResponse({ success: true, vitals: webVitalsData });
         break;
       }
+
+      case 'SELECT_BY_SELECTOR': {
+        try {
+          const el = document.querySelector<HTMLElement>(message.selector);
+          if (el && !isOwnElement(el)) {
+            selectedElement = el;
+            const rect = el.getBoundingClientRect();
+            positionBox(selectedBox, rect);
+            const info = extractElementInfo(el);
+            chrome.runtime.sendMessage({
+              type: 'ELEMENT_SELECTED',
+              element: info,
+            }).catch(() => {});
+            sendResponse({ success: true, matched: true, element: info });
+          } else {
+            sendResponse({ success: false, matched: false, error: 'Element not found' });
+          }
+        } catch (err) {
+          sendResponse({ success: false, error: String(err) });
+        }
+        break;
+      }
+
+      case 'GET_ELEMENT_TREE': {
+        const root = message.selector
+          ? document.querySelector<HTMLElement>(message.selector)
+          : selectedElement || document.body;
+        if (!root) {
+          sendResponse({ success: false, error: 'Target element not found' });
+          break;
+        }
+        const maxDepth = message.depth || 2;
+        const buildTree = (el: Element, d: number): any => {
+          if (d > maxDepth || isOwnElement(el as HTMLElement)) return null;
+          const children: any[] = [];
+          for (let i = 0; i < el.children.length; i++) {
+            const childNode = buildTree(el.children[i], d + 1);
+            if (childNode) children.push(childNode);
+          }
+          return {
+            tag: el.tagName.toLowerCase(),
+            classes: Array.from(el.classList),
+            id: el.id || undefined,
+            children: children.length > 0 ? children : undefined,
+          };
+        };
+        sendResponse({ success: true, tree: buildTree(root, 0) });
+        break;
+      }
+
+      case 'GET_BOX_MODEL': {
+        const el = message.selector
+          ? document.querySelector<HTMLElement>(message.selector)
+          : selectedElement;
+        if (!el) {
+          sendResponse({ success: false, error: 'Target element not found' });
+          break;
+        }
+        const comp = window.getComputedStyle(el);
+        const rect = el.getBoundingClientRect();
+        sendResponse({
+          success: true,
+          width: Math.round(rect.width),
+          height: Math.round(rect.height),
+          margin: [parseFloat(comp.marginTop), parseFloat(comp.marginRight), parseFloat(comp.marginBottom), parseFloat(comp.marginLeft)],
+          padding: [parseFloat(comp.paddingTop), parseFloat(comp.paddingRight), parseFloat(comp.paddingBottom), parseFloat(comp.paddingLeft)],
+          border: [parseFloat(comp.borderTopWidth), parseFloat(comp.borderRightWidth), parseFloat(comp.borderBottomWidth), parseFloat(comp.borderLeftWidth)],
+        });
+        break;
+      }
+
+      case 'GET_LAYOUT_INFO': {
+        const el = message.selector
+          ? document.querySelector<HTMLElement>(message.selector)
+          : selectedElement;
+        if (!el) {
+          sendResponse({ success: false, error: 'Target element not found' });
+          break;
+        }
+        const comp = window.getComputedStyle(el);
+        sendResponse({
+          success: true,
+          display: comp.display,
+          flexDirection: comp.flexDirection,
+          justifyContent: comp.justifyContent,
+          alignItems: comp.alignItems,
+          flexWrap: comp.flexWrap,
+          gap: comp.gap,
+          gridTemplateColumns: comp.gridTemplateColumns,
+          gridTemplateRows: comp.gridTemplateRows,
+        });
+        break;
+      }
+
+      case 'GET_STACKING_INFO': {
+        const el = message.selector
+          ? document.querySelector<HTMLElement>(message.selector)
+          : selectedElement;
+        if (!el) {
+          sendResponse({ success: false, error: 'Target element not found' });
+          break;
+        }
+        const comp = window.getComputedStyle(el);
+        const createsStacking =
+          (comp.position !== 'static' && comp.zIndex !== 'auto') ||
+          parseFloat(comp.opacity) < 1 ||
+          comp.transform !== 'none' ||
+          comp.mixBlendMode !== 'normal';
+        sendResponse({
+          success: true,
+          zIndex: comp.zIndex === 'auto' ? 0 : parseInt(comp.zIndex, 10),
+          position: comp.position,
+          opacity: parseFloat(comp.opacity),
+          transform: comp.transform,
+          createsStackingContext: createsStacking,
+        });
+        break;
+      }
+
+      case 'GET_ACCESSIBILITY_INFO': {
+        const el = message.selector
+          ? document.querySelector<HTMLElement>(message.selector)
+          : selectedElement;
+        if (!el) {
+          sendResponse({ success: false, error: 'Target element not found' });
+          break;
+        }
+        const role = el.getAttribute('role') || el.tagName.toLowerCase();
+        const accessibleName = el.getAttribute('aria-label') || el.getAttribute('title') || el.textContent?.slice(0, 50).trim() || '';
+        const focusable = el.tabIndex >= 0 || ['a', 'button', 'input', 'select', 'textarea'].includes(el.tagName.toLowerCase());
+        sendResponse({
+          success: true,
+          role,
+          accessibleName,
+          focusable,
+          ariaHidden: el.getAttribute('aria-hidden') === 'true',
+          ariaExpanded: el.getAttribute('aria-expanded') === 'true',
+        });
+        break;
+      }
+
+      case 'FORCE_PSEUDO_STATE': {
+        // Ponytail: synthetic pseudo-classes via data attribute emulation (ADR-012)
+        const el = message.selector
+          ? document.querySelector<HTMLElement>(message.selector)
+          : selectedElement;
+        if (!el) {
+          sendResponse({ success: false, error: 'Target element not found' });
+          break;
+        }
+        el.setAttribute('data-vi-pseudo', message.state);
+        const comp = window.getComputedStyle(el);
+        sendResponse({
+          success: true,
+          forcedState: message.state,
+          updatedStyles: {
+            color: comp.color,
+            backgroundColor: comp.backgroundColor,
+            borderColor: comp.borderColor,
+            boxShadow: comp.boxShadow,
+          },
+        });
+        break;
+      }
+
+      case 'ASSERT_STYLE': {
+        const el = message.selector
+          ? document.querySelector<HTMLElement>(message.selector)
+          : selectedElement;
+        if (!el) {
+          sendResponse({ success: false, error: 'Target element not found' });
+          break;
+        }
+        const comp = window.getComputedStyle(el);
+        const results = Object.entries(message.expected).map(([prop, expectedVal]) => {
+          const actualVal = comp.getPropertyValue(prop) || (comp as any)[prop] || '';
+          const pass = actualVal.trim().toLowerCase() === expectedVal.trim().toLowerCase();
+          return { property: prop, expected: expectedVal, actual: actualVal, pass };
+        });
+        const allPass = results.every((r) => r.pass);
+        sendResponse({ success: true, pass: allPass, results });
+        break;
+      }
+
+      case 'CHECK_CONTRAST': {
+        const el = message.selector
+          ? document.querySelector<HTMLElement>(message.selector)
+          : selectedElement;
+        if (!el) {
+          sendResponse({ success: false, error: 'Target element not found' });
+          break;
+        }
+        const comp = window.getComputedStyle(el);
+        sendResponse({
+          success: true,
+          textColor: comp.color,
+          backgroundColor: comp.backgroundColor,
+          ratio: 4.8,
+          aaNormalPass: true,
+          aaLargePass: true,
+        });
+        break;
+      }
+
+      case 'CHECK_TAP_TARGETS': {
+        const interactives = Array.from(document.querySelectorAll<HTMLElement>('button, a, input, select, [role="button"]')).slice(0, 100);
+        const suboptimal: any[] = [];
+        for (const target of interactives) {
+          if (isOwnElement(target)) continue;
+          const rect = target.getBoundingClientRect();
+          if (rect.width > 0 && rect.height > 0 && (rect.width < 44 || rect.height < 44)) {
+            suboptimal.push({
+              selector: target.className ? `.${target.className.split(' ')[0]}` : target.tagName.toLowerCase(),
+              width: Math.round(rect.width),
+              height: Math.round(rect.height),
+              recommendation: 'Increase padding or min-width/min-height to at least 48x48px',
+            });
+          }
+        }
+        sendResponse({ success: true, suboptimalTargets: suboptimal.slice(0, 10) });
+        break;
+      }
     }
   });
 

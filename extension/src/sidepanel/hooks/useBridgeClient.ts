@@ -261,6 +261,102 @@ export function useBridgeClient({
         break;
       }
 
+      case 'SELECT_BY_SELECTOR':
+      case 'SELECT_RELATIVE':
+      case 'GET_ELEMENT_TREE':
+      case 'GET_BOX_MODEL':
+      case 'GET_LAYOUT_INFO':
+      case 'GET_STACKING_INFO':
+      case 'GET_ACCESSIBILITY_INFO':
+      case 'FORCE_PSEUDO_STATE':
+      case 'ASSERT_STYLE':
+      case 'CHECK_CONTRAST':
+      case 'CHECK_TAP_TARGETS':
+      case 'GET_PAGE_DESIGN_DATA':
+      case 'EXPORT_ELEMENT_PNG':
+      case 'SET_RESPONSIVE_WIDTH': {
+        try {
+          chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            const tabId = tabs[0]?.id;
+            if (tabId) {
+              chrome.tabs.sendMessage(tabId, { type: msg.type, ...msg.payload }, (res) => {
+                sendReply(res);
+              });
+            } else {
+              sendReply({ success: false, error: 'No active tab found' });
+            }
+          });
+        } catch (err) {
+          sendReply({ success: false, error: String(err) });
+        }
+        break;
+      }
+
+      case 'REVERT_CHANGES': {
+        setPendingApproval({
+          id: msg.id,
+          action: 'Revert Changes',
+          selector: msg.payload?.selector || 'All elements',
+          property: 'all',
+          value: 'revert',
+        });
+        break;
+      }
+
+      case 'APPLY_PRESET': {
+        setPendingApproval({
+          id: msg.id,
+          action: `Apply Preset '${msg.payload?.presetName}'`,
+          selector: msg.payload?.selector || selectedElementRef.current?.selector || 'Selected element',
+          property: 'preset',
+          value: msg.payload?.presetName || '',
+        });
+        break;
+      }
+
+      case 'SAVE_PRESET': {
+        try {
+          chrome.storage.local.get(['vibe_presets'], (res) => {
+            const list = res?.vibe_presets || [];
+            const newPreset = {
+              id: `preset-${Date.now()}`,
+              name: msg.payload?.name || 'Preset',
+              styles: msg.payload?.styles || {},
+              createdAt: new Date().toISOString(),
+            };
+            chrome.storage.local.set({ vibe_presets: [...list, newPreset] }, () => {
+              sendReply({ success: true, preset: newPreset });
+            });
+          });
+        } catch (err) {
+          sendReply({ success: false, error: String(err) });
+        }
+        break;
+      }
+
+      case 'LIST_PRESETS': {
+        try {
+          chrome.storage.local.get(['vibe_presets'], (res) => {
+            sendReply({ presets: res?.vibe_presets || [] });
+          });
+        } catch (err) {
+          sendReply({ presets: [] });
+        }
+        break;
+      }
+
+      case 'OPEN_IN_EDITOR': {
+        const { file, line, column } = msg.payload || {};
+        setPendingApproval({
+          id: msg.id,
+          action: 'Open in Editor',
+          selector: file || '',
+          property: 'line:col',
+          value: `${line || 1}${column ? `:${column}` : ''}`,
+        });
+        break;
+      }
+
       default:
         sendReply(null, `Unknown bridge request type: ${msg.type}`);
     }
