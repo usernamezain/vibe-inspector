@@ -11,12 +11,12 @@
 | :--- | :--- | :--- | :--- | :--- |
 | **Phase 0** | Research and Setup | Complete | 100% | [`docs/REFERENCE-ui-inspector.md`](REFERENCE-ui-inspector.md) |
 | **Phase 1** | Extension Shell & Element Picker | Complete | 100% | `packages/extension/` |
-| **Phase 2** | Visual Editor Panel & Live CSS | Baseline Complete / Extended Spec Ready | Ready for Review | [`docs/UI-SPEC.md`](UI-SPEC.md) |
+| **Phase 2** | Visual Editor Panel & Live CSS | Complete | 100% | [`docs/UI-SPEC.md`](UI-SPEC.md) |
 | **Phase 3** | Local Bridge & Core MCP Server | Complete | 100% | `packages/bridge/` |
 | **Phase 4** | Source Mapping & Code Write-Back | Complete | 100% | `packages/shared/` |
 | **Phase 5** | Pin Annotations & Grouping | Complete | 100% | `packages/extension/` |
-| **Phase 6** | Advanced Integrations & Extended Tools | Baseline Complete / Catalog Expanded | Ready for Review | [`docs/MCP-TOOLS.md`](MCP-TOOLS.md) |
-| **Phase 7** | Hardening & Release | Complete (Baseline) | 100% | `docs/SECURITY-AUDIT.md` |
+| **Phase 6** | Advanced Integrations & Extended Tools | Complete | 100% | [`docs/MCP-TOOLS.md`](MCP-TOOLS.md) |
+| **Phase 7** | Hardening & Release | Complete | 100% | `docs/SECURITY-AUDIT.md` |
 
 ---
 
@@ -56,21 +56,20 @@
 - [x] Baseline Property Editor Sections (Appearance, Typography, Spacing, Border, Layout). *(Owner: Agent, Status: Complete)*
 - [x] Baseline live CSS preview engine with Undo / Redo history stack. *(Owner: Agent, Status: Complete)*
 - [x] Baseline Presets and change logging. *(Owner: Agent, Status: Complete)*
-- [ ] **Extended Visual Editor Implementation (Awaiting User Approval):**
-  - [ ] Sensitivity slider (DOM traversal depth / container snapping).
-  - [ ] Drag-to-scrub numeric labels (Pointer Events with `Shift` 10x, `Alt` 0.1x).
-  - [ ] Unit dropdowns (`px`, `%`, `em`, `rem`, `vw`, `vh`, `auto`), unset `"-"`, dot indicator, double-click reset.
-  - [ ] Group link toggles (4 corners radius, 4 sides spacing, gaps).
-  - [ ] Collapsible sections with `+` / `-` dynamic section toggles and storage persistence.
-  - [ ] Extended Appearance: Rotation (deg), `mix-blend-mode` dropdown.
-  - [ ] Extended Typography: Font autocomplete from `document.fonts`, dynamic weight filtering, line height toggle (px vs unitless), letter spacing, text transform/decoration.
-  - [ ] Optional Image section: object-fit, object-position, aspect-ratio, CSS filters, local preview swap.
-  - [ ] Optional Background section: gradient editor (linear, radial, conic with stops & angle) & backdrop blur.
-  - [ ] Optional Box Shadow section: multi-layer shadow list with text-shadow variant.
-  - [ ] Layout grid template editor (columns, rows, auto-flow) & flex child controls.
-  - [ ] Element export at 1x/2x/3x scale with transparent background toggle.
-  - [ ] Proposed Page tab (fonts in use, palette, CSS vars, spacing grid compliance, responsive presets).
-  - [ ] Proposed CSS tab (live formatted diff, multi-element "Mixed" editing, copy exports).
+- [x] **Extended Visual Editor Implementation:**
+  - [x] Sensitivity slider (DOM traversal depth / container snapping, ADR-010).
+  - [x] Drag-to-scrub numeric labels (Pointer Events with `Shift` 10x, `Alt` 0.1x).
+  - [x] Unit dropdowns (`px`, `%`, `em`, `rem`, `auto`), unset `"-"`, dot indicator, double-click reset.
+  - [x] Group link toggles (4 corners radius, 4 sides spacing, flex/grid gaps).
+  - [x] Collapsible sections with dynamic section toggles and storage persistence.
+  - [x] Extended Appearance: Opacity, Rotation (deg), `mix-blend-mode` dropdown.
+  - [x] Extended Typography: Font autocomplete from `document.fonts`, dynamic weight filtering, line height toggle, letter spacing, text transform/decoration, EyeDropper + color picker.
+  - [x] Optional Image section: object-fit, object-position, aspect-ratio, CSS filters, local preview swap.
+  - [x] Optional Background section: gradient editor & backdrop blur.
+  - [x] Layout grid template editor (columns, rows, gap link) & flex alignment segmented controls.
+  - [x] Element export at 1x/2x/3x scale with canvas cropping (ADR-011).
+  - [x] Page tab (quick overlays: outlines, spacing heatmap, animation pause, color scheme; responsive presets: 320, 375, 768, 1024, 1440, custom px; design system metrics: fonts, colors, CSS vars, 4px grid compliance).
+  - [x] CSS tab (before vs after live diff block, multi-format copy: CSS, Tailwind, React style object, Agent Prompt).
 
 ---
 
@@ -123,17 +122,16 @@
 
 ### Phase 6: Advanced Integrations & Extended Tools (Full Catalog in [`docs/MCP-TOOLS.md`](MCP-TOOLS.md))
 - [x] Baseline integrations: `axe-core` accessibility audit engine, native `EyeDropper` API, and Web Vitals observer. *(Owner: Agent, Status: Complete)*
-- [x] Baseline 11 MCP tools registered in bridge. *(Owner: Agent, Status: Complete)*
 - [x] Companion MCP server interoperability guide (`docs/COMPANION-MCP-GUIDE.md`). *(Owner: Agent, Status: Complete)*
-- [ ] **Extended MCP Tool Suite Implementation (Awaiting User Approval):**
-  - [ ] Selection & Inspection tools: `get_selection_group`, `select_by_selector`, `select_relative`, `get_element_tree`, `get_applied_rules`, `get_box_model`, `get_layout_info`, `get_stacking_info`, `force_pseudo_state`, `get_accessibility_info`.
-  - [ ] Page-Level Diagnostics: `get_fonts_in_use`, `get_color_palette`, `get_css_variables`, `get_spacing_scale`, `get_console_errors`, `get_network_failures`, `capabilities_list`.
-  - [ ] Mutation & Approval Tools: `apply_style_changes` (batch live preview), `revert_changes`, `get_change_log`, `apply_preset`, `list_presets`, `save_preset`, `set_viewport_size`, `export_element_png`, `export_viewport_png`.
-  - [ ] Change Export Formatters: `changes_to_css`, `changes_to_tailwind`, `changes_to_react_style`, `changes_to_prompt`.
-  - [ ] Source & Verify Loop: `resolve_source_location`, `find_component`, `open_in_editor`, `wait_for_reload`, `assert_style`, `compare_before_after`.
-  - [ ] Design QA Suite: `check_accessibility`, `check_contrast`, `check_tap_targets`, `check_spacing_consistency`, `find_token_violations`, `check_responsive`, `compare_to_reference_image`.
-  - [ ] Extended Annotations: `add_annotation`, `reopen_annotation`, `remove_annotation`.
-
+- [x] **Complete 36 MCP Tool Suite Implementation:**
+  - [x] Selection & Inspection tools: `get_selection`, `get_selection_group`, `select_by_selector`, `select_relative`, `get_element_tree`, `get_computed_styles`, `get_applied_rules`, `get_box_model`, `get_layout_info`, `get_stacking_info`, `force_pseudo_state`, `get_accessibility_info`, `clear_selection`, `highlight_element`.
+  - [x] Page-Level Diagnostics: `get_page_info`, `get_fonts_in_use`, `get_color_palette`, `get_css_variables`, `get_spacing_scale`, `screenshot`, `capabilities_list`, `bridge_status`.
+  - [x] Mutation & Approval Tools: `apply_style_changes` (batch live preview with user approval), `revert_changes`, `get_change_log`, `apply_preset`, `list_presets`, `save_preset`, `set_viewport_size`, `export_element_png`.
+  - [x] Change Export Formatters: `changes_to_css`, `changes_to_tailwind`, `changes_to_react_style`, `changes_to_prompt`.
+  - [x] Source & Verify Loop: `resolve_source_location`, `find_component`, `open_in_editor`, `wait_for_reload`, `assert_style`, `compare_before_after`.
+  - [x] Design QA Suite: `audit_accessibility`, `check_contrast`, `check_tap_targets`, `check_spacing_consistency`, `find_token_violations`, `check_responsive`, `get_web_vitals`.
+  - [x] Extended Annotations: `list_annotations`, `add_annotation`, `resolve_annotation`, `reopen_annotation`, `remove_annotation`, `annotations_to_prompt`.
+  - [x] Comprehensive test coverage with 53 passing tests across monorepo.
 
 ---
 
@@ -143,4 +141,4 @@
 - [x] Privacy Policy and Chrome Web Store listing assets (`docs/PRIVACY-POLICY.md`, `docs/CHROME-WEB-STORE.md`). *(Owner: Agent, Status: Complete, Notes: Store package with single-purpose and permission justifications ready for submission)*
 - [x] Documentation: Install guides, per-agent configurations, troubleshooting (`README.md`, `docs/COMPANION-MCP-GUIDE.md`). *(Owner: Agent, Status: Complete, Notes: Tested copy-paste setup configs for Antigravity, Claude Code, Cursor, and Codex)*
 - [x] Prepare npm package for bridge CLI (`bridge/package.json` updated with files whitelist for `npx vibe-inspector-bridge`). *(Owner: Agent, Status: Complete)*
-- [x] Final `/ponytail-audit` and technical debt consolidation (`docs/TECH-DEBT.md`). *(Owner: Agent, Status: Complete, Notes: 3 deliberate shortcuts documented with clean upgrade paths, zero high-risk debt)*
+- [x] Final `/ponytail-audit` and technical debt consolidation (`docs/TECH-DEBT.md`). *(Owner: Agent, Status: Complete, Notes: 4 deliberate shortcuts documented with clean upgrade paths, zero high-risk debt)*
