@@ -22,6 +22,7 @@ export default function App() {
   const [selectedGroup, setSelectedGroup] = useState<AnnotationGroup | null>(null);
   const [isMarqueeActive, setIsMarqueeActive] = useState(false);
   const [pageUrl, setPageUrl] = useState(window.location.href);
+  const [panelError, setPanelError] = useState<string | null>(null);
 
   const {
     modifiedStyles,
@@ -68,11 +69,12 @@ export default function App() {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       const tabId = tabs[0]?.id;
       if (tabId) {
-        if (callback) {
-          chrome.tabs.sendMessage(tabId, msg, callback);
-        } else {
-          chrome.tabs.sendMessage(tabId, msg);
-        }
+        chrome.tabs.sendMessage(tabId, msg, (res) => {
+          if (chrome.runtime?.lastError) {
+            return;
+          }
+          callback?.(res);
+        });
       }
     });
   };
@@ -80,6 +82,7 @@ export default function App() {
   // Check initial picker status on mount and listen for runtime messages
   useEffect(() => {
     chrome.runtime.sendMessage({ type: 'GET_PICKER_STATUS' }, (res) => {
+      if (chrome.runtime?.lastError) return;
       if (res && typeof res.active === 'boolean') {
         setIsPicking(res.active);
       }
@@ -91,6 +94,7 @@ export default function App() {
       if (tab?.url) setPageUrl(tab.url);
       if (tab?.id) {
         chrome.tabs.sendMessage(tab.id, { type: 'GET_ANNOTATIONS' }, (res) => {
+          if (chrome.runtime?.lastError) return;
           if (res?.annotations) setAnnotations(res.annotations);
         });
       }
@@ -101,6 +105,7 @@ export default function App() {
         setSelectedElement(message.element);
         if (message.element.pageUrl) setPageUrl(message.element.pageUrl);
         setIsPicking(false);
+        setPanelError(null);
         setActiveTab('edit');
       } else if (message.type === 'PICKER_STATUS') {
         setIsPicking(message.active);
@@ -120,13 +125,24 @@ export default function App() {
   }, []);
 
   const handleTogglePicker = () => {
+    setPanelError(null);
     if (isPicking) {
       chrome.runtime.sendMessage({ type: 'STOP_PICKING' }, () => {
         setIsPicking(false);
       });
     } else {
-      chrome.runtime.sendMessage({ type: 'START_PICKING' }, () => {
-        setIsPicking(true);
+      chrome.runtime.sendMessage({ type: 'START_PICKING' }, (res) => {
+        if (chrome.runtime?.lastError) {
+          setIsPicking(false);
+          setPanelError(chrome.runtime.lastError.message || 'Failed to start inspector.');
+          return;
+        }
+        if (res && !res.success) {
+          setIsPicking(false);
+          setPanelError(res.error || 'Cannot inspect this page.');
+        } else {
+          setIsPicking(true);
+        }
       });
     }
   };
@@ -264,6 +280,42 @@ export default function App() {
           </button>
         )}
       </div>
+
+      {panelError && (
+        <div
+          style={{
+            margin: '0 var(--panel-padding, 12px) 10px',
+            padding: '8px 10px',
+            background: 'rgba(239, 68, 68, 0.12)',
+            border: '1px solid rgba(239, 68, 68, 0.35)',
+            borderRadius: '6px',
+            color: '#f87171',
+            fontSize: '11px',
+            lineHeight: 1.4,
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '8px',
+          }}
+        >
+          <span style={{ fontSize: '13px', lineHeight: 1 }}>⚠️</span>
+          <div style={{ flex: 1 }}>{panelError}</div>
+          <button
+            onClick={() => setPanelError(null)}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: '#f87171',
+              cursor: 'pointer',
+              padding: '0 2px',
+              fontSize: '12px',
+              lineHeight: 1,
+            }}
+            title="Dismiss notice"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* Navigation Tabs (Edit / Page / Pins / CSS) */}
       <nav className="tabs-nav">

@@ -15,12 +15,40 @@ async function getActiveTab(): Promise<chrome.tabs.Tab | null> {
   return tabs[0] || null;
 }
 
+// Check if a URL is an internal or restricted browser page
+function isRestrictedUrl(url?: string): boolean {
+  if (!url) return false;
+  const restrictedProtocols = [
+    'chrome:',
+    'chrome-extension:',
+    'devtools:',
+    'edge:',
+    'about:',
+    'view-source:',
+    'chrome-untrusted:',
+    'chrome-search:',
+  ];
+  try {
+    const parsed = new URL(url);
+    return restrictedProtocols.includes(parsed.protocol);
+  } catch {
+    return false;
+  }
+}
+
 // Ensure content script is injected into the active tab before sending a message
-async function ensureContentScriptInjected(tabId: number): Promise<boolean> {
+async function ensureContentScriptInjected(tabId: number, url?: string): Promise<{ ok: boolean; error?: string }> {
+  if (url && isRestrictedUrl(url)) {
+    return {
+      ok: false,
+      error: 'Cannot inspect browser internal pages (e.g. chrome://, edge://, about:blank). Please navigate to any web page (http:// or https://) or localhost.',
+    };
+  }
+
   try {
     // Ping content script
     const response = await chrome.tabs.sendMessage(tabId, { type: 'GET_PICKER_STATUS' });
-    if (response) return true;
+    if (response) return { ok: true };
   } catch {
     // Content script not answering; inject dynamically
   }
@@ -32,10 +60,16 @@ async function ensureContentScriptInjected(tabId: number): Promise<boolean> {
     });
     // Brief settle delay
     await new Promise((resolve) => setTimeout(resolve, 50));
-    return true;
-  } catch (err) {
-    console.error('[Vibe Inspector Background] Failed to inject content script:', err);
-    return false;
+    return { ok: true };
+  } catch (err: any) {
+    const errorMsg = err?.message || String(err);
+    console.warn('[Vibe Inspector Background] Failed to inject content script:', errorMsg);
+    return {
+      ok: false,
+      error: errorMsg.includes('Cannot access')
+        ? 'Cannot inspect this page. Chrome restricts extension access on browser internal pages and the Web Store.'
+        : errorMsg,
+    };
   }
 }
 
@@ -46,14 +80,16 @@ chrome.runtime.onMessage.addListener((message: ExtensionMessage, _sender, sendRe
       case 'START_PICKING': {
         const tab = await getActiveTab();
         if (tab?.id) {
-          const injected = await ensureContentScriptInjected(tab.id);
-          if (injected) {
+          const res = await ensureContentScriptInjected(tab.id, tab.url);
+          if (res.ok) {
             chrome.tabs.sendMessage(tab.id, { type: 'START_PICKING' }).catch(() => {});
             sendResponse({ success: true });
             return;
           }
+          sendResponse({ success: false, error: res.error || 'Cannot inject script on this page.' });
+          return;
         }
-        sendResponse({ success: false, error: 'No active tab or cannot inject script on this page.' });
+        sendResponse({ success: false, error: 'No active web page tab found. Please open a web page.' });
         break;
       }
 
