@@ -1,0 +1,6 @@
+packages:
+  - 'shared'
+  - 'extension'
+  - 'bridge'
+allowBuilds:
+  esbuild: true

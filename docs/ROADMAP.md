@@ -9,9 +9,9 @@
 
 | Phase | Description | Status | Completion |
 | :--- | :--- | :--- | :--- |
-| **Phase 0** | Research and Setup | In Progress | 95% (Awaiting User Approval) |
-| **Phase 1** | Extension Shell & Element Picker | Pending | 0% |
-| **Phase 2** | Visual Editor Panel & Live CSS | Pending | 0% |
+| **Phase 0** | Research and Setup | Complete | 100% |
+| **Phase 1** | Extension Shell & Element Picker | Complete | 100% |
+| **Phase 2** | Visual Editor Panel & Live CSS | Ready to Start | 0% |
 | **Phase 3** | Local Bridge & MCP Server | Pending | 0% |
 | **Phase 4** | Source Mapping & Code Write-Back | Pending | 0% |
 | **Phase 5** | Pin Annotations & Grouping | Pending | 0% |
@@ -27,25 +27,27 @@
 - [x] Write `docs/REFERENCE-ui-inspector.md`. *(Owner: Agent, Status: Complete, Notes: Comprehensive comparison and architectural learnings)*
 - [x] Verify current APIs: Chrome MV3, `chrome.sidePanel`, `chrome.debugger`, Native Messaging vs WebSocket, MCP SDK, and React 19 source mapping. *(Owner: Agent, Status: Complete, Notes: Verified React 19 PR #28265 _debugSource removal, MV3 CSP restrictions, and tokenized localhost WS model)*
 - [x] Find, audit, and install Ponytail skill. *(Owner: Agent, Status: Complete, Notes: Sourced from official repo `DietrichGebert/ponytail`, installed globally into Antigravity config and locally in `.agent/skills`)*
-- [x] Create project deliverables: `CONTEXT.md`, `AGENTS.md`, `docs/DECISIONS.md`, `docs/TECH-DEBT.md`, and `.agent/skills/`. *(Owner: Agent, Status: In Progress)*
-- [x] Propose monorepo structure and technology choices. *(Owner: Agent, Status: Complete, Notes: Monorepo with `/extension`, `/bridge`, `/shared`, `/docs` using TypeScript, Vite + CRXJS, and MCP SDK)*
-- [ ] Present Phase 0 summary to user and obtain explicit approval before Phase 1 code. *(Owner: Agent, Status: Pending)*
+- [x] Create project deliverables: `CONTEXT.md`, `AGENTS.md`, `docs/DECISIONS.md`, `docs/TECH-DEBT.md`, and `.agent/skills/`. *(Owner: Agent, Status: Complete)*
+- [x] Propose monorepo structure and technology choices. *(Owner: Agent, Status: Complete, Notes: Monorepo with `/extension`, `/bridge`, `/shared`, `/docs` using TypeScript, Vite, and MCP SDK)*
+- [x] Present Phase 0 summary to user and obtain explicit approval before Phase 1 code. *(Owner: User/Agent, Status: Complete, Notes: Approved by user)*
 
 ---
 
-### Phase 1: Extension Shell
-- [ ] Scaffold `/extension` package with Manifest V3 and TypeScript. *(Owner: Agent, Status: Pending, Notes: Strict CSP, minimal permissions: activeTab, sidePanel, storage)*
-- [ ] Implement Background Service Worker and Side Panel entry. *(Owner: Agent, Status: Pending, Notes: Configured with `chrome.sidePanel.setPanelBehavior`)*
-- [ ] Build Content Script inside Shadow DOM (`attachShadow`). *(Owner: Agent, Status: Pending, Notes: Ensures zero style bleed between host page and extension UI)*
-- [ ] Build Element Picker (hover highlight box, click select, ESC key cancel). *(Owner: Agent, Status: Pending)*
-- [ ] Implement Element Metadata Extractor:
-  - [ ] Tag, classes, ID, text (truncated to 200 chars).
-  - [ ] Bounding rect and computed styles.
-  - [ ] Parent chain.
-  - [ ] 12-tier Element Name Priority Waterfall (id, testId, aria-label, aria-labelledby, label[for], component, name, alt, title, placeholder, class, tag).
-  - [ ] UI/UX Terminology inference engine.
-- [ ] Implement robust CSS selector generator with fallback strategies. *(Owner: Agent, Status: Pending)*
-- [ ] Phase 1 verification on test web pages and Ponytail review. *(Owner: Agent, Status: Pending)*
+### Phase 1: Extension Shell & Element Picker
+- [x] Scaffold `/extension` package with Manifest V3 and TypeScript. *(Owner: Agent, Status: Complete, Notes: Strict CSP, minimal permissions: activeTab, sidePanel, storage, scripting)*
+- [x] Implement Background Service Worker and Side Panel entry. *(Owner: Agent, Status: Complete, Notes: Configured with `chrome.sidePanel.setPanelBehavior` and fallback dynamic script injection)*
+- [x] Build Content Script inside Shadow DOM (`attachShadow`). *(Owner: Agent, Status: Complete, Notes: `#vibe-inspector-host` with scoped styles, zero style bleed)*
+- [x] Build Element Picker (hover highlight box, click select, ESC key cancel). *(Owner: Agent, Status: Complete, Notes: Crosshair cursor, interactive badge `[Term] Tag · Name · WxH`)*
+- [x] Implement Element Metadata Extractor:
+  - [x] Tag, classes, ID, text (truncated to 200 chars).
+  - [x] Bounding rect and computed styles.
+  - [x] Parent chain.
+  - [x] 12-tier Element Name Priority Waterfall with framework-generated ID filtering.
+  - [x] UI/UX Terminology inference engine (Button, Search Input, Heading, Nav, Card, etc.).
+- [x] Implement robust CSS selector generator with fallback strategies (ID, testId, ARIA, unique class, structural nth-of-type, absolute path). *(Owner: Agent, Status: Complete)*
+- [x] Side Panel React UI with Inspect toggle, Hero Element Card, Selector copy, Source Location badge, and Computed Styles summary. *(Owner: Agent, Status: Complete)*
+- [x] Automated unit test suite with happy-dom and vitest (11/11 tests passing). *(Owner: Agent, Status: Complete)*
+- [x] Phase 1 verification and clean build (`dist/` verified). *(Owner: Agent, Status: Complete)*
 
 ---
 

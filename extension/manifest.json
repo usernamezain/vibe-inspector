@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "Vibe Inspector",
+  "version": "1.0.0",
+  "description": "Visual element inspector and live CSS editor connected to AI coding agents via MCP",
+  "permissions": [
+    "activeTab",
+    "sidePanel",
+    "storage",
+    "scripting"
+  ],
+  "action": {
+    "default_title": "Open Vibe Inspector"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "background": {
+    "service_worker": "assets/background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["assets/content.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
