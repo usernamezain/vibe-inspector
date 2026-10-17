@@ -2174,3 +2174,228 @@ kbd {
   font-style: italic;
   padding: 8px 0;
 }
+
+/* Page Tab & Quick Toggles */
+.vi-quick-toggles-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.vi-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--vi-surface-input);
+  border: 1px solid var(--vi-border-input);
+  border-radius: var(--vi-radius-md);
+  padding: 8px 10px;
+  color: var(--vi-text-secondary);
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--vi-duration-fast);
+}
+
+.vi-toggle-btn:hover {
+  background: var(--vi-surface-input-hover);
+  color: var(--vi-text-primary);
+}
+
+.vi-toggle-btn.active {
+  background: var(--vi-accent-subtle);
+  border-color: var(--vi-accent-base);
+  color: var(--vi-text-primary);
+}
+
+.vi-toggle-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--vi-border-input);
+}
+
+.vi-toggle-btn.active .vi-toggle-indicator {
+  background: var(--vi-accent-base);
+  box-shadow: 0 0 6px var(--vi-accent-glow);
+}
+
+/* Responsive Preview Buttons */
+.vi-responsive-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.vi-responsive-btn {
+  flex: 1 1 calc(33.333% - 6px);
+  min-width: 70px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--vi-surface-input);
+  border: 1px solid var(--vi-border-input);
+  border-radius: var(--vi-radius-md);
+  padding: 6px 8px;
+  color: var(--vi-text-secondary);
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--vi-duration-fast);
+}
+
+.vi-responsive-btn:hover {
+  background: var(--vi-surface-input-hover);
+  color: var(--vi-text-primary);
+}
+
+.vi-responsive-btn.active {
+  background: var(--vi-accent-subtle);
+  border-color: var(--vi-accent-base);
+  color: var(--vi-text-primary);
+}
+
+.vi-responsive-sub {
+  font-size: 9px;
+  color: var(--vi-text-muted);
+  font-family: var(--vi-text-mono);
+  margin-top: 2px;
+}
+
+/* Color Swatches Grid */
+.vi-swatches-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(28px, 1fr));
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.vi-swatch-item {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--vi-radius-sm);
+  border: 1px solid var(--vi-border-input);
+  cursor: pointer;
+  position: relative;
+  transition: transform var(--vi-duration-fast);
+}
+
+.vi-swatch-item:hover {
+  transform: scale(1.15);
+  z-index: 2;
+  box-shadow: var(--vi-shadow-md);
+}
+
+/* Fonts & Design Metrics */
+.vi-fonts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.vi-font-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--vi-surface-input);
+  border-radius: var(--vi-radius-sm);
+  padding: 6px 8px;
+  font-size: 11px;
+}
+
+.vi-font-family {
+  font-weight: 600;
+  color: var(--vi-text-primary);
+}
+
+.vi-font-weights {
+  font-size: 10px;
+  color: var(--vi-text-muted);
+  font-family: var(--vi-text-mono);
+}
+
+/* Spacing Compliance */
+.vi-compliance-meter {
+  height: 6px;
+  background: var(--vi-surface-input);
+  border-radius: 999px;
+  overflow: hidden;
+  margin: 6px 0;
+}
+
+.vi-compliance-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--vi-accent-base), var(--vi-status-success));
+  border-radius: 999px;
+  transition: width var(--vi-duration-normal);
+}
+
+/* CSS Tab Diff View */
+.vi-diff-block {
+  background: var(--vi-surface-base);
+  border: 1px solid var(--vi-border-subtle);
+  border-radius: var(--vi-radius-md);
+  overflow: hidden;
+  margin-top: 8px;
+  font-family: var(--vi-text-mono);
+  font-size: 11px;
+}
+
+.vi-diff-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--vi-surface-card);
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--vi-border-subtle);
+}
+
+.vi-diff-selector-badge {
+  color: var(--vi-accent-base);
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.vi-diff-lines {
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.vi-diff-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1.4;
+}
+
+.vi-diff-line.removed {
+  color: var(--vi-status-danger);
+  background: var(--vi-status-danger-bg);
+  padding: 1px 4px;
+  border-radius: 2px;
+}
+
+.vi-diff-line.added {
+  color: var(--vi-status-success);
+  background: var(--vi-status-success-bg);
+  padding: 1px 4px;
+  border-radius: 2px;
+}
+
+.vi-diff-sign {
+  width: 12px;
+  font-weight: bold;
+}
+
+/* Copy Action Button Bar */
+.vi-copy-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: 8px;
+}

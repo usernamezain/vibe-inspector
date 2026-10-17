@@ -97,3 +97,22 @@ export function isPropertyModified(
   if (computedValue === undefined) return true;
   return userValue.trim() !== computedValue.trim();
 }
+
+/**
+ * Converts a kebab-case CSS property name to camelCase for React inline styles
+ * Preserves CSS custom properties (variables) starting with '--'
+ */
+export function kebabToCamelCase(prop: string): string {
+  if (prop.startsWith('--')) return prop;
+  return prop.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+}
+
+/**
+ * Converts a dictionary of CSS properties to a formatted React style object string
+ */
+export function cssPropertiesToReactStyle(props: Record<string, string>): string {
+  const entries = Object.entries(props);
+  if (entries.length === 0) return '{}';
+  const lines = entries.map(([k, v]) => `  ${kebabToCamelCase(k)}: '${v.replace(/'/g, "\\'")}',`);
+  return `{\n${lines.join('\n')}\n}`;
+}

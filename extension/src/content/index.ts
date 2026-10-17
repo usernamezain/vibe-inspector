@@ -16,6 +16,7 @@ import {
   A11yAuditResult,
   A11yViolation,
   WebVitalsSummary,
+  analyzePageDesign,
 } from '@vibe-inspector/shared';
 
 // Guard against multiple injections
@@ -1208,6 +1209,80 @@ function initContentScript() {
           img.src = res.dataUrl;
         });
         return true;
+      }
+
+      case 'GET_PAGE_DESIGN_DATA': {
+        const summary = analyzePageDesign();
+        sendResponse({ success: true, data: summary });
+        break;
+      }
+
+      case 'SET_QUICK_TOGGLE': {
+        const { toggle, active, theme } = message;
+        const styleId = `vi-toggle-${toggle}`;
+        let el = document.getElementById(styleId);
+
+        if (toggle === 'outlines') {
+          if (active) {
+            if (!el) {
+              el = document.createElement('style');
+              el.id = styleId;
+              el.textContent = '*:not(#vibe-inspector-host *) { outline: 1px dashed rgba(124, 140, 248, 0.45) !important; outline-offset: -1px; }';
+              document.documentElement.appendChild(el);
+            }
+          } else if (el) {
+            el.remove();
+          }
+        } else if (toggle === 'spacingOverlay') {
+          if (active) {
+            if (!el) {
+              el = document.createElement('style');
+              el.id = styleId;
+              el.textContent = '*:not(#vibe-inspector-host *) { background-color: rgba(99, 102, 241, 0.05) !important; }';
+              document.documentElement.appendChild(el);
+            }
+          } else if (el) {
+            el.remove();
+          }
+        } else if (toggle === 'disableAnimations') {
+          if (active) {
+            if (!el) {
+              el = document.createElement('style');
+              el.id = styleId;
+              el.textContent = '*:not(#vibe-inspector-host *) { animation-duration: 0s !important; transition-duration: 0s !important; }';
+              document.documentElement.appendChild(el);
+            }
+          } else if (el) {
+            el.remove();
+          }
+        } else if (toggle === 'colorScheme') {
+          if (active && theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            document.documentElement.style.colorScheme = theme;
+          } else {
+            document.documentElement.removeAttribute('data-theme');
+            document.documentElement.style.colorScheme = '';
+          }
+        }
+        sendResponse({ success: true });
+        break;
+      }
+
+      case 'SET_RESPONSIVE_WIDTH': {
+        const { width } = message;
+        if (width) {
+          document.documentElement.style.maxWidth = `${width}px`;
+          document.documentElement.style.margin = '0 auto';
+          document.documentElement.style.minHeight = '100vh';
+          document.documentElement.style.boxShadow = '0 0 50px rgba(0, 0, 0, 0.5)';
+        } else {
+          document.documentElement.style.maxWidth = '';
+          document.documentElement.style.margin = '';
+          document.documentElement.style.minHeight = '';
+          document.documentElement.style.boxShadow = '';
+        }
+        sendResponse({ success: true });
+        break;
       }
 
       case 'GET_ANNOTATIONS':

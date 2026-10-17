@@ -141,7 +141,10 @@ export type ExtensionMessage =
   | { type: 'SET_PICKER_SENSITIVITY'; sensitivity: number }
   | { type: 'SELECT_RELATIVE'; direction: 'parent' | 'child' | 'prev' | 'next' }
   | { type: 'EXPORT_ELEMENT_PNG'; selector?: string; scale?: number; transparent?: boolean }
-  | { type: 'CAPTURE_TAB_PNG' };
+  | { type: 'CAPTURE_TAB_PNG' }
+  | { type: 'GET_PAGE_DESIGN_DATA' }
+  | { type: 'SET_QUICK_TOGGLE'; toggle: 'outlines' | 'spacingOverlay' | 'disableAnimations' | 'colorScheme'; active: boolean; theme?: 'dark' | 'light' }
+  | { type: 'SET_RESPONSIVE_WIDTH'; width: number | null };
 
 /**
  * Phase 6: Accessibility Audit types

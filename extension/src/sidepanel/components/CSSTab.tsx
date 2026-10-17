@@ -1,5 +1,10 @@
 import { useState, useEffect, type FC, type FormEvent } from 'react';
-import { ElementInfo, StylePreset, synthesizeTailwindClasses } from '@vibe-inspector/shared';
+import {
+  ElementInfo,
+  StylePreset,
+  synthesizeTailwindClasses,
+  cssPropertiesToReactStyle,
+} from '@vibe-inspector/shared';
 
 interface CSSTabProps {
   element: ElementInfo | null;
@@ -14,6 +19,7 @@ export const CSSTab: FC<CSSTabProps> = ({
 }) => {
   const [copiedCSS, setCopiedCSS] = useState(false);
   const [copiedTailwind, setCopiedTailwind] = useState(false);
+  const [copiedReactStyle, setCopiedReactStyle] = useState(false);
   const [copiedPrompt, setCopiedPrompt] = useState(false);
   const [presets, setPresets] = useState<StylePreset[]>([]);
   const [newPresetName, setNewPresetName] = useState('');
@@ -59,6 +65,7 @@ export const CSSTab: FC<CSSTabProps> = ({
 
   const currentProps = element ? (modifiedStyles[element.selector] || {}) : {};
   const tailwindClasses = synthesizeTailwindClasses(currentProps);
+  const reactStyleCode = cssPropertiesToReactStyle(currentProps);
 
   // Generate Agent-ready prompt markdown
   const generateAgentPrompt = () => {
@@ -72,13 +79,16 @@ export const CSSTab: FC<CSSTabProps> = ({
     const tailwindSnippet = tailwindClasses
       ? `\n### Synthesized Tailwind Classes:\n\`\`\`html\nclassName="${tailwindClasses}"\n\`\`\`\n`
       : '';
+    const reactSnippet = Object.keys(currentProps).length > 0
+      ? `\n### React Inline Style:\n\`\`\`tsx\nstyle={${reactStyleCode}}\n\`\`\`\n`
+      : '';
 
     return `Please update the styling for the inspected component with the following visual changes:
 
 ${elementName}
 ${selector}
 ${sourceInfo}
-${tailwindSnippet}
+${tailwindSnippet}${reactSnippet}
 \`\`\`css
 ${cssContent}
 \`\`\`
@@ -96,6 +106,12 @@ Ensure changes match the project's styling system (Tailwind classes or CSS/SCSS 
     navigator.clipboard.writeText(tailwindClasses);
     setCopiedTailwind(true);
     setTimeout(() => setCopiedTailwind(false), 1500);
+  };
+
+  const handleCopyReactStyle = () => {
+    navigator.clipboard.writeText(`style={${reactStyleCode}}`);
+    setCopiedReactStyle(true);
+    setTimeout(() => setCopiedReactStyle(false), 1500);
   };
 
   const handleCopyPrompt = () => {
@@ -133,14 +149,102 @@ Ensure changes match the project's styling system (Tailwind classes or CSS/SCSS 
     savePresetsToStorage(presets.filter((p) => p.id !== presetId));
   };
 
-  const hasModifications = Object.keys(modifiedStyles).length > 0;
+  const modifiedSelectors = Object.keys(modifiedStyles);
+  const hasModifications = modifiedSelectors.length > 0;
 
   return (
     <div className="tab-pane-content">
-      {/* Generated CSS Block */}
+      {/* 1. Quick Copy Action Grid */}
+      <div className="property-group-card">
+        <div className="group-title">Export & Copy Actions</div>
+        <div className="vi-copy-bar">
+          <button
+            className={`btn-copy-code ${copiedCSS ? 'copied' : ''}`}
+            onClick={handleCopyCSS}
+          >
+            {copiedCSS ? '✓ CSS Copied' : 'Copy CSS'}
+          </button>
+          <button
+            className={`btn-copy-code ${copiedTailwind ? 'copied' : ''}`}
+            onClick={handleCopyTailwind}
+            disabled={!tailwindClasses}
+          >
+            {copiedTailwind ? '✓ Tailwind Copied' : 'Copy Tailwind'}
+          </button>
+          <button
+            className={`btn-copy-code ${copiedReactStyle ? 'copied' : ''}`}
+            onClick={handleCopyReactStyle}
+            disabled={Object.keys(currentProps).length === 0}
+          >
+            {copiedReactStyle ? '✓ React Copied' : 'Copy React Style'}
+          </button>
+          <button
+            className={`btn-copy-code ${copiedPrompt ? 'copied' : ''}`}
+            onClick={handleCopyPrompt}
+          >
+            {copiedPrompt ? '✓ Prompt Copied' : 'Copy Agent Prompt'}
+          </button>
+        </div>
+      </div>
+
+      {/* 2. Before vs After Style Diff View */}
       <div className="property-group-card">
         <div className="section-header-flex">
-          <div className="group-title">Generated CSS Changes</div>
+          <div className="group-title">Visual Style Diff</div>
+          <span style={{ fontSize: '10px', color: 'var(--vi-text-muted)' }}>
+            {hasModifications ? `${modifiedSelectors.length} target(s)` : 'No changes'}
+          </span>
+        </div>
+
+        {!hasModifications ? (
+          <div className="empty-subtext">
+            No active style changes. Edit element properties in the Edit tab to see side-by-side diffs.
+          </div>
+        ) : (
+          <div>
+            {modifiedSelectors.map((sel) => {
+              const props = modifiedStyles[sel];
+              const isSelectedTarget = element?.selector === sel;
+
+              return (
+                <div key={sel} className="vi-diff-block">
+                  <div className="vi-diff-header">
+                    <span className="vi-diff-selector-badge">{sel}</span>
+                    {isSelectedTarget && (
+                      <span style={{ fontSize: '9px', background: 'var(--vi-accent-subtle)', color: 'var(--vi-accent-base)', padding: '1px 6px', borderRadius: '4px' }}>
+                        Selected
+                      </span>
+                    )}
+                  </div>
+                  <div className="vi-diff-lines">
+                    {Object.entries(props).map(([prop, newVal]) => {
+                      // Attempt to retrieve previous computed style if available
+                      const oldVal = (isSelectedTarget && element?.computedStyles?.[prop]) || 'initial';
+                      return (
+                        <div key={prop} style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginBottom: '4px' }}>
+                          <div className="vi-diff-line removed">
+                            <span className="vi-diff-sign">-</span>
+                            <span>{prop}: {oldVal};</span>
+                          </div>
+                          <div className="vi-diff-line added">
+                            <span className="vi-diff-sign">+</span>
+                            <span>{prop}: {newVal};</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* 3. Generated CSS Block */}
+      <div className="property-group-card">
+        <div className="section-header-flex">
+          <div className="group-title">Generated CSS Rules</div>
           <button
             className={`btn-copy-code ${copiedCSS ? 'copied' : ''}`}
             onClick={handleCopyCSS}
@@ -155,7 +259,7 @@ Ensure changes match the project's styling system (Tailwind classes or CSS/SCSS 
         </div>
       </div>
 
-      {/* Synthesized Tailwind Classes */}
+      {/* 4. Synthesized Tailwind Classes */}
       {tailwindClasses && (
         <div className="property-group-card">
           <div className="section-header-flex">
@@ -177,7 +281,29 @@ Ensure changes match the project's styling system (Tailwind classes or CSS/SCSS 
         </div>
       )}
 
-      {/* Copy for AI Agent */}
+      {/* 5. React Inline Style Object */}
+      {Object.keys(currentProps).length > 0 && (
+        <div className="property-group-card">
+          <div className="section-header-flex">
+            <div className="group-title" style={{ color: '#818cf8' }}>
+              React Style Object
+            </div>
+            <button
+              className={`btn-copy-code ${copiedReactStyle ? 'copied' : ''}`}
+              onClick={handleCopyReactStyle}
+            >
+              {copiedReactStyle ? 'Copied!' : 'Copy React Style'}
+            </button>
+          </div>
+          <div className="css-code-viewer">
+            <pre>
+              <code>{`style = ${reactStyleCode}`}</code>
+            </pre>
+          </div>
+        </div>
+      )}
+
+      {/* 6. AI Agent Handoff */}
       <div className="property-group-card">
         <div className="group-title">AI Agent Handoff</div>
         <p className="section-desc">
@@ -189,7 +315,7 @@ Ensure changes match the project's styling system (Tailwind classes or CSS/SCSS 
         </button>
       </div>
 
-      {/* Style Presets */}
+      {/* 7. Style Presets */}
       <div className="property-group-card">
         <div className="section-header-flex">
           <div className="group-title">Style Presets ({presets.length})</div>
