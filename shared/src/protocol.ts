@@ -21,6 +21,8 @@ export type BridgeRequestType =
   | 'GET_ANNOTATIONS'
   | 'RESOLVE_ANNOTATION'
   | 'GET_COMPUTED_STYLES'
+  | 'AUDIT_ACCESSIBILITY'
+  | 'GET_WEB_VITALS'
   | 'PING';
 
 export type BridgeNotificationType =

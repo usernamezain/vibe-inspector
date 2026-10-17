@@ -52,6 +52,19 @@ export const EditTab: FC<EditTabProps> = ({
     onApplyStyle(cssProp, val, oldVal);
   };
 
+  // ponytail: native EyeDropper API, no third-party color-picker canvas library needed
+  const handleEyeDropper = async (cssProp: string, jsProp: string) => {
+    if (typeof window !== 'undefined' && 'EyeDropper' in window) {
+      try {
+        const eyeDropper = new (window as any).EyeDropper();
+        const res = await eyeDropper.open();
+        if (res?.sRGBHex) {
+          handlePropertyChange(cssProp, jsProp, res.sRGBHex);
+        }
+      } catch {}
+    }
+  };
+
   const hasModifications = Object.keys(modifiedProps).length > 0;
 
   return (
@@ -196,6 +209,25 @@ export const EditTab: FC<EditTabProps> = ({
               value={getVal('color', '#ffffff')}
               onChange={(e) => handlePropertyChange('color', 'color', e.target.value)}
             />
+            {typeof window !== 'undefined' && 'EyeDropper' in window && (
+              <button
+                type="button"
+                className="btn-eyedropper"
+                title="Pick color from screen (EyeDropper)"
+                onClick={() => handleEyeDropper('color', 'color')}
+                style={{
+                  background: '#27272a',
+                  border: '1px solid #3f3f46',
+                  borderRadius: '4px',
+                  color: '#e4e4e7',
+                  cursor: 'pointer',
+                  padding: '3px 6px',
+                  fontSize: '11px',
+                }}
+              >
+                💧
+              </button>
+            )}
           </div>
         </div>
 
@@ -233,6 +265,25 @@ export const EditTab: FC<EditTabProps> = ({
               value={getVal('backgroundColor', 'transparent')}
               onChange={(e) => handlePropertyChange('background-color', 'backgroundColor', e.target.value)}
             />
+            {typeof window !== 'undefined' && 'EyeDropper' in window && (
+              <button
+                type="button"
+                className="btn-eyedropper"
+                title="Pick color from screen (EyeDropper)"
+                onClick={() => handleEyeDropper('background-color', 'backgroundColor')}
+                style={{
+                  background: '#27272a',
+                  border: '1px solid #3f3f46',
+                  borderRadius: '4px',
+                  color: '#e4e4e7',
+                  cursor: 'pointer',
+                  padding: '3px 6px',
+                  fontSize: '11px',
+                }}
+              >
+                💧
+              </button>
+            )}
           </div>
         </div>
         <div className="prop-row" style={{ marginTop: '8px' }}>
@@ -313,9 +364,29 @@ export const EditTab: FC<EditTabProps> = ({
               value={getVal('borderColor', '#334155')}
               onChange={(e) => handlePropertyChange('border-color', 'borderColor', e.target.value)}
             />
+            {typeof window !== 'undefined' && 'EyeDropper' in window && (
+              <button
+                type="button"
+                className="btn-eyedropper"
+                title="Pick color from screen (EyeDropper)"
+                onClick={() => handleEyeDropper('border-color', 'borderColor')}
+                style={{
+                  background: '#27272a',
+                  border: '1px solid #3f3f46',
+                  borderRadius: '4px',
+                  color: '#e4e4e7',
+                  cursor: 'pointer',
+                  padding: '3px 6px',
+                  fontSize: '11px',
+                }}
+              >
+                💧
+              </button>
+            )}
           </div>
         </div>
       </div>
+
 
       {/* 6. Layout Section */}
       <div className="property-group-card">

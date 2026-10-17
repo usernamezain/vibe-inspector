@@ -67,3 +67,34 @@
 - **Alternatives Considered:**
   1. *Unrestricted Tool Execution*: Risky if an agent misunderstands context and overwrites files unexpectedly.
 - **Rationale:** Guarantees safety for the developer while retaining the speed of agentic coding.
+
+---
+
+## ADR-007: Native Extension Screenshot APIs vs `chrome.debugger` (CDP)
+
+- **Date:** 2026-10-18
+- **Decision:** Utilize `chrome.tabs.captureVisibleTab` and DOM tree serialization instead of attaching `chrome.debugger` (CDP) for standard snapshots.
+- **Alternatives Considered:**
+  1. *`chrome.debugger` / CDP Protocol*: Triggers Chrome's intrusive yellow debugging banner: `"Vibe Inspector" started debugging this browser`, which alarms developers and breaks immersive vibe coding. Also requires broad process-level permissions.
+- **Rationale:** `chrome.tabs.captureVisibleTab` provides instant, high-fidelity PNG captures with zero permission warnings and zero disruptive browser banners.
+
+---
+
+## ADR-008: Native `EyeDropper` API for Color Sampling
+
+- **Date:** 2026-10-18
+- **Decision:** Use the browser's native `window.EyeDropper` API (`// ponytail: native EyeDropper API`) for desktop screen color picking.
+- **Alternatives Considered:**
+  1. *Heavy Third-Party Canvas / Color-Wheel Libraries*: Add 50-100KB to bundle size, restricted to the web page viewport, and cannot sample OS pixels outside the browser window.
+- **Rationale:** Zero bundle overhead, samples any pixel on the entire screen (including OS UI and other monitors), and adheres to the Ponytail philosophy.
+
+---
+
+## ADR-009: In-Browser `axe-core` Integration for Accessibility Auditing
+
+- **Date:** 2026-10-18
+- **Decision:** Integrate the `axe-core` engine directly into the extension content script to execute WCAG 2.1 AA audits on demand.
+- **Alternatives Considered:**
+  1. *Homegrown Contrast & Label Heuristics*: Prone to false positives and misses complex ARIA relationship rules, tabindex cycles, and hidden element checks.
+- **Rationale:** `axe-core` is the industry benchmark with zero false positives. Integrating it directly empowers AI coding assistants to automatically detect and remediate accessibility violations.
+

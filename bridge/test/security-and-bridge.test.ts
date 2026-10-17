@@ -208,6 +208,77 @@ describe('Phase 3: WebSocket Live Server Integration', () => {
 
       ws.on('error', (err) => reject(err));
     });
+
+    // 4. Advanced Integrations RPC flow -> Handles AUDIT_ACCESSIBILITY and GET_WEB_VITALS
+    await new Promise<void>((resolve, reject) => {
+
+      const ws = new WebSocket(`ws://127.0.0.1:${port}?token=${testToken}`, {
+        headers: { Origin: 'chrome-extension://vibe-inspector-test-id' },
+      });
+
+      ws.on('open', async () => {
+        ws.on('message', (data) => {
+          const msg = JSON.parse(data.toString());
+          if (msg.type === 'AUDIT_ACCESSIBILITY') {
+            ws.send(
+              JSON.stringify({
+                id: msg.id,
+                type: 'AUDIT_ACCESSIBILITY_RESPONSE',
+                payload: {
+                  violationsCount: 1,
+                  passesCount: 14,
+                  violations: [
+                    {
+                      id: 'color-contrast',
+                      impact: 'serious',
+                      description: 'Elements must have sufficient color contrast',
+                      help: 'Elements must have sufficient color contrast',
+                      helpUrl: 'https://dequeuniversity.com/rules/axe/4.10/color-contrast',
+                      nodes: [{ html: '<button class="low-contrast">', target: ['.low-contrast'] }],
+                    },
+                  ],
+                  timestamp: new Date().toISOString(),
+                },
+                timestamp: Date.now(),
+              })
+            );
+          } else if (msg.type === 'GET_WEB_VITALS') {
+            ws.send(
+              JSON.stringify({
+                id: msg.id,
+                type: 'GET_WEB_VITALS_RESPONSE',
+                payload: {
+                  lcp: 1420,
+                  cls: 0.04,
+                  fcp: 850,
+                  ttfb: 120,
+                },
+                timestamp: Date.now(),
+              })
+            );
+          }
+        });
+
+        try {
+          const a11y = await server.sendRequest<any>('AUDIT_ACCESSIBILITY');
+          expect(a11y.violationsCount).toBe(1);
+          expect(a11y.violations[0].id).toBe('color-contrast');
+
+          const vitals = await server.sendRequest<any>('GET_WEB_VITALS');
+          expect(vitals.lcp).toBe(1420);
+          expect(vitals.cls).toBe(0.04);
+
+          ws.close();
+          resolve();
+        } catch (err) {
+          ws.close();
+          reject(err);
+        }
+      });
+
+      ws.on('error', (err) => reject(err));
+    });
   });
 });
+
 

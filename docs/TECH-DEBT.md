@@ -84,4 +84,18 @@
 - **Verdict:** Phase 5 complete and verified. Ready to begin Phase 6 (Advanced Integrations).
 - **Lines of Code:** ~1,100 LoC.
 
+### Phase 6: Advanced Integrations
+- **Review Date:** 2026-10-18
+- **Scope:** Integration of `axe-core` accessibility audit engine into content script and Side Panel (`PageTab.tsx`), native `EyeDropper` API integration in visual editor (`EditTab.tsx`), Core Web Vitals observer (LCP, CLS, FCP, TTFB), `docs/COMPANION-MCP-GUIDE.md` for Chrome DevTools MCP & Playwright MCP pairing, CDP evaluation documented in ADR-007, optional BYOK local storage AI key configuration, and MCP tools `audit_accessibility` and `get_web_vitals`.
+- **Findings:**
+  - *axe-core Integration:* Automated WCAG 2.1 AA audits produce precise violation nodes and fix suggestions without false positives.
+  - *Native EyeDropper API:* Adheres strictly to Ponytail (`// ponytail: native EyeDropper API, no third-party color-picker canvas library needed`), sampling desktop screen pixels with zero bundle bloat.
+  - *Performance Observer:* Captures paint and layout shift timings accurately with low overhead.
+  - *CDP Decision:* Consciously decided against `chrome.debugger` to avoid the yellow security banner and keep extension permissions minimal.
+  - *Quality & Verification:* 36/36 unit and integration tests passing. Clean TypeScript compilation and Vite bundling across monorepo.
+  - *Debt Status:* Zero active technical debt.
+- **Verdict:** Phase 6 complete and verified. Ready to begin Phase 7 (Hardening & Release).
+- **Lines of Code:** ~850 LoC.
+
+
 

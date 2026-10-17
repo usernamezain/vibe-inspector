@@ -1,3 +1,4 @@
+import axe from 'axe-core';
 import {
   ElementInfo,
   BoundingRect,
@@ -12,6 +13,9 @@ import {
   getCanonicalPageKey,
   calculatePinStackOffsets,
   filterOutermostElements,
+  A11yAuditResult,
+  A11yViolation,
+  WebVitalsSummary,
 } from '@vibe-inspector/shared';
 
 // Guard against multiple injections
@@ -968,6 +972,107 @@ function initContentScript() {
   // Initial load
   loadAnnotations();
 
+  // --- Phase 6: Core Web Vitals & Accessibility ---
+  const webVitalsData: WebVitalsSummary = {
+    url: window.location.href,
+  };
+
+  function setupWebVitals() {
+    try {
+      const navEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
+      if (navEntries.length > 0) {
+        const nav = navEntries[0];
+        webVitalsData.ttfb = Math.round(nav.responseStart - nav.requestStart);
+        webVitalsData.domContentLoaded = Math.round(nav.domContentLoadedEventEnd - nav.startTime);
+        webVitalsData.loadTime = Math.round(nav.loadEventEnd - nav.startTime);
+      }
+
+      if (typeof PerformanceObserver !== 'undefined') {
+        try {
+          const paintObserver = new PerformanceObserver((list) => {
+            for (const entry of list.getEntries()) {
+              if (entry.name === 'first-contentful-paint') {
+                webVitalsData.fcp = Math.round(entry.startTime);
+              }
+            }
+          });
+          paintObserver.observe({ type: 'paint', buffered: true });
+        } catch {}
+
+        try {
+          const lcpObserver = new PerformanceObserver((list) => {
+            const entries = list.getEntries();
+            const lastEntry = entries[entries.length - 1];
+            if (lastEntry) {
+              webVitalsData.lcp = Math.round(lastEntry.startTime);
+            }
+          });
+          lcpObserver.observe({ type: 'largest-contentful-paint', buffered: true });
+        } catch {}
+
+        try {
+          let clsValue = 0;
+          const clsObserver = new PerformanceObserver((list) => {
+            for (const entry of list.getEntries() as any[]) {
+              if (!entry.hadRecentInput) {
+                clsValue += entry.value;
+                webVitalsData.cls = parseFloat(clsValue.toFixed(3));
+              }
+            }
+          });
+          clsObserver.observe({ type: 'layout-shift', buffered: true });
+        } catch {}
+      }
+    } catch {}
+  }
+  setupWebVitals();
+
+  async function runAccessibilityAudit(selector?: string): Promise<A11yAuditResult> {
+    let context: HTMLElement | Document = document;
+    if (selector) {
+      try {
+        const el = document.querySelector<HTMLElement>(selector);
+        if (el) context = el;
+      } catch {}
+    }
+
+    try {
+      const results = await axe.run(context, {
+        runOnly: {
+          type: 'tag',
+          values: ['wcag2a', 'wcag2aa'],
+        },
+      });
+
+      const violations: A11yViolation[] = results.violations.map((v) => ({
+        id: v.id,
+        impact: (v.impact as any) || 'minor',
+        description: v.description,
+        help: v.help,
+        helpUrl: v.helpUrl,
+        nodes: v.nodes.map((n) => ({
+          html: (n.html || '').slice(0, 150),
+          target: n.target as string[],
+          failureSummary: n.failureSummary,
+        })),
+      }));
+
+      return {
+        violationsCount: violations.length,
+        passesCount: results.passes.length,
+        violations,
+        timestamp: new Date().toISOString(),
+      };
+    } catch {
+      return {
+        violationsCount: 0,
+        passesCount: 0,
+        violations: [],
+        timestamp: new Date().toISOString(),
+      };
+    }
+  }
+
   // Handle incoming messages from Background and Side Panel
   chrome.runtime.onMessage.addListener((message: ExtensionMessage, _sender, sendResponse) => {
     switch (message.type) {
@@ -1119,6 +1224,27 @@ function initContentScript() {
         }
         break;
       }
+
+      case 'RUN_A11Y_AUDIT': {
+        runAccessibilityAudit(message.selector).then((res) => {
+          sendResponse(res);
+        });
+        return true;
+      }
+
+      case 'GET_WEB_VITALS': {
+        try {
+          const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+          if (nav) {
+            if (!webVitalsData.ttfb) webVitalsData.ttfb = Math.round(nav.responseStart - nav.requestStart);
+            if (!webVitalsData.domContentLoaded) webVitalsData.domContentLoaded = Math.round(nav.domContentLoadedEventEnd - nav.startTime);
+            if (!webVitalsData.loadTime && nav.loadEventEnd > 0) webVitalsData.loadTime = Math.round(nav.loadEventEnd - nav.startTime);
+          }
+        } catch {}
+        sendResponse({ success: true, vitals: webVitalsData });
+        break;
+      }
     }
   });
+
 }

@@ -135,5 +135,45 @@ export type ExtensionMessage =
   | { type: 'ANNOTATIONS_UPDATED'; annotations: any[] }
   | { type: 'START_MARQUEE_SELECT' }
   | { type: 'STOP_MARQUEE_SELECT' }
-  | { type: 'GROUP_SELECTED'; group: any };
+  | { type: 'GROUP_SELECTED'; group: any }
+  | { type: 'RUN_A11Y_AUDIT'; selector?: string }
+  | { type: 'GET_WEB_VITALS' };
+
+/**
+ * Phase 6: Accessibility Audit types
+ */
+export interface A11yViolationNode {
+  html: string;
+  target: string[];
+  failureSummary?: string;
+}
+
+export interface A11yViolation {
+  id: string;
+  impact: 'critical' | 'serious' | 'moderate' | 'minor';
+  description: string;
+  help: string;
+  helpUrl: string;
+  nodes: A11yViolationNode[];
+}
+
+export interface A11yAuditResult {
+  violationsCount: number;
+  passesCount: number;
+  violations: A11yViolation[];
+  timestamp: string;
+}
+
+/**
+ * Phase 6: Core Web Vitals & Performance types
+ */
+export interface WebVitalsSummary {
+  fcp?: number; // ms
+  lcp?: number; // ms
+  cls?: number; // score
+  ttfb?: number; // ms
+  domContentLoaded?: number; // ms
+  loadTime?: number; // ms
+  url?: string;
+}
 

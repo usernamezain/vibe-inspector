@@ -221,6 +221,46 @@ export function useBridgeClient({
         break;
       }
 
+      case 'AUDIT_ACCESSIBILITY': {
+        try {
+          chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            const tabId = tabs[0]?.id;
+            if (tabId) {
+              chrome.tabs.sendMessage(
+                tabId,
+                { type: 'RUN_A11Y_AUDIT', selector: msg.payload?.selector },
+                (res) => {
+                  sendReply(res);
+                }
+              );
+            } else {
+              sendReply({ violationsCount: 0, passesCount: 0, violations: [] });
+            }
+          });
+        } catch (err) {
+          sendReply(null, String(err));
+        }
+        break;
+      }
+
+      case 'GET_WEB_VITALS': {
+        try {
+          chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            const tabId = tabs[0]?.id;
+            if (tabId) {
+              chrome.tabs.sendMessage(tabId, { type: 'GET_WEB_VITALS' }, (res) => {
+                sendReply(res?.vitals || {});
+              });
+            } else {
+              sendReply({});
+            }
+          });
+        } catch (err) {
+          sendReply(null, String(err));
+        }
+        break;
+      }
+
       default:
         sendReply(null, `Unknown bridge request type: ${msg.type}`);
     }

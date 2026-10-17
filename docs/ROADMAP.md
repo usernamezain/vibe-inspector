@@ -118,13 +118,14 @@
 ---
 
 ### Phase 6: Advanced Integrations (Evaluated)
-- [ ] `axe-core` accessibility audit engine integration. *(Owner: Agent, Status: Pending)*
-- [ ] `chrome.debugger` / CDP bridge for high-fidelity screenshots and accessibility tree inspection (with user alert regarding Chrome debugging banner). *(Owner: Agent, Status: Pending)*
-- [ ] Web Vitals & performance summary panel. *(Owner: Agent, Status: Pending)*
-- [ ] Native `EyeDropper` API integration for color sampling. *(Owner: Agent, Status: Pending)*
-- [ ] Interoperability guide for companion MCP servers (Chrome DevTools MCP, Playwright MCP). *(Owner: Agent, Status: Pending)*
-- [ ] Optional bring-your-own-key in-browser chat panel (keys strictly in `chrome.storage.local`). *(Owner: Agent, Status: Pending)*
-- [ ] Phase 6 Ponytail review. *(Owner: Agent, Status: Pending)*
+- [x] `axe-core` accessibility audit engine integration. *(Owner: Agent, Status: Complete)*
+- [x] `chrome.debugger` / CDP architectural evaluation documented in ADR-007 (avoiding disruptive yellow browser banner). *(Owner: Agent, Status: Complete)*
+- [x] Web Vitals & performance summary panel (LCP, CLS, FCP, TTFB). *(Owner: Agent, Status: Complete)*
+- [x] Native `EyeDropper` API integration for desktop screen color sampling. *(Owner: Agent, Status: Complete)*
+- [x] Interoperability guide for companion MCP servers (`docs/COMPANION-MCP-GUIDE.md`). *(Owner: Agent, Status: Complete)*
+- [x] Optional bring-your-own-key in-browser chat panel (keys strictly in `chrome.storage.local`). *(Owner: Agent, Status: Complete)*
+- [x] Phase 6 Ponytail review. *(Owner: Agent, Status: Complete)*
+
 
 ---
 
