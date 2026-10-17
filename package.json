@@ -7,7 +7,7 @@
     "build:shared": "pnpm --filter @vibe-inspector/shared build",
     "build:extension": "pnpm --filter @vibe-inspector/extension build",
     "build:bridge": "pnpm --filter @vibe-inspector/bridge build",
-    "build": "pnpm build:shared && pnpm build:extension",
+    "build": "pnpm build:shared && pnpm build:bridge && pnpm build:extension",
     "test": "vitest run",
     "dev:extension": "pnpm --filter @vibe-inspector/extension dev"
   },

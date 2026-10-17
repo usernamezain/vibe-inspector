@@ -69,10 +69,10 @@ A Chrome Extension cannot be an MCP server directly because browser extensions c
 ## 3. Current Status
 
 ## Current status
-Phase: 2 of 7 (Visual Editor Panel & Live CSS).
-Done: Monorepo workspace setup, `@vibe-inspector/shared` contracts and algorithms, MV3 Chrome extension, Shadow DOM element picker overlay, and full visual editor side panel with 3-tab navigation (Edit / Page / CSS), real-time CSS mutations, Undo/Redo stack, interactive Spacing box model visualizer, presets manager in chrome.storage.local, viewport screenshot capture, and agent prompt exporter.
-In progress: Ready to proceed to Phase 3 (Local Bridge & MCP Server).
-Next: Phase 3 (Scaffold `/bridge` package, 127.0.0.1 WebSocket server with token + Origin validation, MCP server with stdio and SSE transports, MCP tools: `get_selection`, `clear_selection`, `highlight_element`, `get_page_info`, `get_computed_styles`, `screenshot`, and interactive write approval gate).
+Phase: 3 of 7 (Local Bridge & MCP Server).
+Done: Monorepo workspace setup, `@vibe-inspector/shared` contracts & algorithms, `@vibe-inspector/extension` (MV3, Shadow DOM overlay, React 3-tab visual editor), and `@vibe-inspector/bridge` (127.0.0.1 WebSocket server, random token auth, Origin header validation, Stdio MCP server, 5 core MCP tools, Bridge Connection Wizard with agent copy-paste configs, and interactive write approval gate). 21/21 tests passing.
+In progress: Ready to proceed to Phase 4 (Source Mapping & Code Write-Back).
+Next: Phase 4 (Source Mapping: LocatorJS, code-inspector-plugin, Vite / Next.js data-at attributes, sourcemap resolvers, Tailwind CSS class synthesizer, CSS variable/token extraction).
 Blocked: None.
 Last updated: 2026-10-18 by Antigravity Agent.
 

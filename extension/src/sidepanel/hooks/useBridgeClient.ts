@@ -1,0 +1,225 @@
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { ElementInfo, BridgeMessage } from '@vibe-inspector/shared';
+
+interface UseBridgeClientProps {
+  selectedElement: ElementInfo | null;
+  onApplyStyle: (property: string, value: string) => void;
+  onClearSelection: () => void;
+  onHighlight: (selector?: string, label?: string) => void;
+}
+
+export interface PendingApproval {
+  id: string;
+  action: string;
+  selector: string;
+  property: string;
+  value: string;
+}
+
+export function useBridgeClient({
+  selectedElement,
+  onApplyStyle,
+  onClearSelection,
+  onHighlight,
+}: UseBridgeClientProps) {
+  const [isConnected, setIsConnected] = useState(false);
+  const [port, setPort] = useState(7890);
+  const [token, setToken] = useState('');
+  const [connectionError, setConnectionError] = useState<string | null>(null);
+  const [pendingApproval, setPendingApproval] = useState<PendingApproval | null>(null);
+
+  const wsRef = useRef<WebSocket | null>(null);
+  const selectedElementRef = useRef<ElementInfo | null>(selectedElement);
+  selectedElementRef.current = selectedElement;
+
+  // Load saved connection settings from storage on mount
+  useEffect(() => {
+    try {
+      chrome.storage.local.get(['vibe_bridge_port', 'vibe_bridge_token'], (res) => {
+        if (res?.vibe_bridge_port) setPort(res.vibe_bridge_port);
+        if (res?.vibe_bridge_token) setToken(res.vibe_bridge_token);
+      });
+    } catch {}
+  }, []);
+
+  // Connect to the 127.0.0.1 WebSocket bridge
+  const connect = useCallback((targetPort = port, targetToken = token) => {
+    if (wsRef.current) {
+      wsRef.current.close();
+      wsRef.current = null;
+    }
+
+    if (!targetToken) {
+      setConnectionError('Token is required. Run the bridge CLI to get your token.');
+      return;
+    }
+
+    setConnectionError(null);
+    const url = `ws://127.0.0.1:${targetPort}?token=${encodeURIComponent(targetToken)}`;
+
+    try {
+      const ws = new WebSocket(url);
+      wsRef.current = ws;
+
+      ws.onopen = () => {
+        setIsConnected(true);
+        setConnectionError(null);
+        // Save working settings
+        try {
+          chrome.storage.local.set({
+            vibe_bridge_port: targetPort,
+            vibe_bridge_token: targetToken,
+          });
+        } catch {}
+      };
+
+      ws.onclose = () => {
+        setIsConnected(false);
+      };
+
+      ws.onerror = () => {
+        setIsConnected(false);
+        setConnectionError('Could not connect to bridge at ws://127.0.0.1:' + targetPort);
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data) as BridgeMessage;
+          handleBridgeRequest(ws, msg);
+        } catch (err) {
+          console.error('[Vibe Inspector Bridge Client] Parse error:', err);
+        }
+      };
+    } catch (err) {
+      setConnectionError(String(err));
+    }
+  }, [port, token]);
+
+  const disconnect = useCallback(() => {
+    if (wsRef.current) {
+      wsRef.current.close();
+      wsRef.current = null;
+    }
+    setIsConnected(false);
+  }, []);
+
+  // Broadcast element selection updates to connected bridge
+  useEffect(() => {
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      const msg: BridgeMessage = {
+        id: crypto.randomUUID(),
+        type: 'SELECTION_CHANGED',
+        payload: selectedElement,
+        timestamp: Date.now(),
+      };
+      wsRef.current.send(JSON.stringify(msg));
+    }
+  }, [selectedElement]);
+
+  // Handle incoming RPC requests from the bridge
+  const handleBridgeRequest = (ws: WebSocket, msg: BridgeMessage) => {
+    const sendReply = (payload: any, error?: string) => {
+      const reply: BridgeMessage = {
+        id: msg.id,
+        type: `${msg.type}_RESPONSE`,
+        payload,
+        error,
+        timestamp: Date.now(),
+      };
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify(reply));
+      }
+    };
+
+    switch (msg.type) {
+      case 'GET_SELECTION':
+        sendReply(selectedElementRef.current);
+        break;
+
+      case 'CLEAR_SELECTION':
+        onClearSelection();
+        sendReply({ success: true });
+        break;
+
+      case 'HIGHLIGHT_ELEMENT':
+        onHighlight(msg.payload?.selector, msg.payload?.label);
+        sendReply({ success: true });
+        break;
+
+      case 'GET_PAGE_INFO':
+        chrome.runtime.sendMessage({ type: 'GET_PAGE_INFO' }, (info) => {
+          sendReply(info);
+        });
+        break;
+
+      case 'CAPTURE_SCREENSHOT':
+        chrome.runtime.sendMessage({ type: 'CAPTURE_SCREENSHOT' }, (res) => {
+          sendReply(res);
+        });
+        break;
+
+      case 'APPLY_STYLE': {
+        // Enforce Interactive User Approval Gate for write/mutation tools
+        const { selector, property, value } = msg.payload || {};
+        if (selector && property && value !== undefined) {
+          setPendingApproval({
+            id: msg.id,
+            action: 'Apply CSS Mutation',
+            selector,
+            property,
+            value,
+          });
+        } else {
+          sendReply(null, 'Missing selector, property, or value in style request.');
+        }
+        break;
+      }
+
+      default:
+        sendReply(null, `Unknown bridge request type: ${msg.type}`);
+    }
+  };
+
+  // User Approval Decisions
+  const approveMutation = useCallback(() => {
+    if (!pendingApproval || !wsRef.current) return;
+    onApplyStyle(pendingApproval.property, pendingApproval.value);
+
+    const reply: BridgeMessage = {
+      id: pendingApproval.id,
+      type: 'APPLY_STYLE_RESPONSE',
+      payload: { success: true, approved: true },
+      timestamp: Date.now(),
+    };
+    wsRef.current.send(JSON.stringify(reply));
+    setPendingApproval(null);
+  }, [pendingApproval, onApplyStyle]);
+
+  const rejectMutation = useCallback(() => {
+    if (!pendingApproval || !wsRef.current) return;
+
+    const reply: BridgeMessage = {
+      id: pendingApproval.id,
+      type: 'APPLY_STYLE_RESPONSE',
+      payload: { success: false, approved: false },
+      error: 'Style modification was rejected by the user in Chrome.',
+      timestamp: Date.now(),
+    };
+    wsRef.current.send(JSON.stringify(reply));
+    setPendingApproval(null);
+  }, [pendingApproval]);
+
+  return {
+    isConnected,
+    port,
+    setPort,
+    token,
+    setToken,
+    connectionError,
+    connect,
+    disconnect,
+    pendingApproval,
+    approveMutation,
+    rejectMutation,
+  };
+}

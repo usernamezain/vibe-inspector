@@ -9,7 +9,11 @@
 
 | ID | Location | Shortcut Taken | Ceiling / Limit | Upgrade Trigger | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| PONY-001 | `extension/src/sidepanel/App.tsx` | Mock bridge status ("Bridge Standby") in Side Panel UI | Visual status only, no live WS polling yet | Phase 3 WebSocket bridge implementation | Active |
+| *No active shortcuts.* | - | - | - | - | All Phase 0-3 shortcuts resolved. |
+
+### Resolved Debt
+- **PONY-001:** Mock bridge status in Side Panel UI.
+  - *Resolution in Phase 3:* Replaced with live WebSocket client (`useBridgeClient`) connected to `ws://127.0.0.1:PORT`, real-time status indicator, auto-reconnect, and interactive user approval modal.
 
 ---
 
@@ -32,8 +36,8 @@
   - *Security Verification:* Manifest requests minimal permissions (`activeTab`, `sidePanel`, `storage`, `scripting`). In-page overlay uses encapsulated Shadow DOM (`#vibe-inspector-host`).
   - *Quality & Verification:* 11/11 automated unit tests passing in Vitest with Happy-DOM. Clean Vite production bundle.
   - *Shortcuts Taken:* PONY-001 (Mock bridge status pill until Phase 3).
-- **Verdict:** Phase 1 complete and production-grade. Ready to advance to Phase 2.
-- **Lines of Code:** ~1,200 LoC (Clean-room, zero copied code).
+- **Verdict:** Phase 1 complete and production-grade.
+- **Lines of Code:** ~1,200 LoC.
 
 ### Phase 2: Visual Editor Panel & Live CSS
 - **Review Date:** 2026-10-18
@@ -42,6 +46,15 @@
   - *Design & Usability:* Dark-themed, high-contrast accessible UI (WCAG AA compliant) fitting smoothly inside Chrome's native side panel dimensions.
   - *State Management:* History stack cleanly separates undo/redo operations with immutability, enabling instant rollback of visual tweaks.
   - *Quality & Verification:* 14/14 automated unit tests passing across shared packages. Clean Vite production bundle.
-  - *Shortcuts Taken:* None new added; PONY-001 remains active awaiting Phase 3.
-- **Verdict:** Phase 2 complete and verified. Ready to begin Phase 3 (Local Bridge & MCP Server).
-- **Lines of Code:** ~950 LoC added.
+- **Verdict:** Phase 2 complete and verified.
+- **Lines of Code:** ~950 LoC.
+
+### Phase 3: Local Bridge & MCP Server
+- **Review Date:** 2026-10-18
+- **Scope:** `@vibe-inspector/bridge` Node.js package, 127.0.0.1 WebSocket server, cryptographic token auth, Origin header validation, Stdio MCP server, MCP tools (`get_selection`, `clear_selection`, `highlight_element`, `get_page_info`, `screenshot`), untrusted content notices, and Extension Side Panel Connection Wizard + Interactive User Approval Gate.
+- **Findings:**
+  - *Security Verification:* Bridge binds strictly to `127.0.0.1`. Non-extension origins (`http://`, `https://`, `null`, `file://`) and missing/invalid tokens are rejected with HTTP 401. All tool results include untrusted data warnings. All write/mutation actions require interactive user approval in the Side Panel UI.
+  - *Quality & Verification:* 21/21 automated unit and integration tests passing. Clean TypeScript and Vite builds across all packages.
+  - *Debt Status:* PONY-001 resolved. Zero active technical debt.
+- **Verdict:** Phase 3 complete and verified. Ready to begin Phase 4 (Source Mapping & Code Write-Back).
+- **Lines of Code:** ~800 LoC.

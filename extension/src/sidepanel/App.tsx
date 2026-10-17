@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { ElementInfo, ExtensionMessage } from '@vibe-inspector/shared';
 import { useLiveStyles } from './hooks/useLiveStyles';
+import { useBridgeClient } from './hooks/useBridgeClient';
 import { EditTab } from './components/EditTab';
 import { PageTab } from './components/PageTab';
 import { CSSTab } from './components/CSSTab';
+import { BridgeWizardModal } from './components/BridgeWizardModal';
 import './styles.css';
 
 type TabType = 'edit' | 'page' | 'css';
@@ -12,8 +14,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<TabType>('edit');
   const [isPicking, setIsPicking] = useState(false);
   const [selectedElement, setSelectedElement] = useState<ElementInfo | null>(null);
-  // ponytail: bridge status toggle will be driven by ws connection in Phase 3
-  const [bridgeStatus] = useState<'connected' | 'disconnected'>('disconnected');
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
 
   const {
     modifiedStyles,
@@ -25,6 +26,35 @@ export default function App() {
     resetElement,
     resetAll,
   } = useLiveStyles();
+
+  const {
+    isConnected,
+    port,
+    setPort,
+    token,
+    setToken,
+    connectionError,
+    connect,
+    disconnect,
+    pendingApproval,
+    approveMutation,
+    rejectMutation,
+  } = useBridgeClient({
+    selectedElement,
+    onApplyStyle: (prop, val) => {
+      if (selectedElement) {
+        applyStyle(selectedElement.selector, prop, val);
+      }
+    },
+    onClearSelection: () => setSelectedElement(null),
+    onHighlight: (selector, label) => {
+      chrome.runtime.sendMessage({
+        type: 'HIGHLIGHT_ELEMENT',
+        selector,
+        label,
+      });
+    },
+  });
 
   // Check initial picker status on mount and listen for runtime messages
   useEffect(() => {
@@ -94,9 +124,15 @@ export default function App() {
           <div className="brand-icon">V</div>
           <span className="brand-title">Vibe Inspector</span>
         </div>
-        <div className="bridge-status-pill">
-          <span className={`bridge-dot ${bridgeStatus === 'connected' ? 'connected' : ''}`} />
-          <span>{bridgeStatus === 'connected' ? 'Agent Connected' : 'Bridge Standby'}</span>
+        <div
+          className="bridge-status-pill clickable"
+          onClick={() => setIsWizardOpen(true)}
+          title="Click to configure Local Bridge connection"
+          style={{ cursor: 'pointer' }}
+        >
+          <span className={`bridge-dot ${isConnected ? 'connected' : ''}`} />
+          <span>{isConnected ? 'Agent Connected' : 'Bridge Standby'}</span>
+          <span style={{ fontSize: '9px', opacity: 0.6 }}>⚙</span>
         </div>
       </header>
 
@@ -221,6 +257,23 @@ export default function App() {
           />
         )}
       </div>
+
+      {/* Bridge Connection Wizard & Mutation Approval Modal */}
+      <BridgeWizardModal
+        isOpen={isWizardOpen}
+        onClose={() => setIsWizardOpen(false)}
+        isConnected={isConnected}
+        port={port}
+        token={token}
+        connectionError={connectionError}
+        onPortChange={setPort}
+        onTokenChange={setToken}
+        onConnect={() => connect(port, token)}
+        onDisconnect={disconnect}
+        pendingApproval={pendingApproval}
+        onApprove={approveMutation}
+        onReject={rejectMutation}
+      />
     </div>
   );
 }

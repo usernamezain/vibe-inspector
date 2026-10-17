@@ -1039,3 +1039,298 @@ kbd {
   display: flex;
   justify-content: flex-end;
 }
+
+/* -------------------------------------------------------------------------- */
+/* Phase 3: Bridge Connection Wizard & Security Approval Modal                */
+/* -------------------------------------------------------------------------- */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.modal-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 440px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+}
+
+.btn-close-modal {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.btn-close-modal:hover {
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+}
+
+.modal-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.form-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.form-input {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  padding: 7px 10px;
+  font-size: 12px;
+  outline: none;
+}
+
+.form-input:focus {
+  border-color: var(--brand-primary);
+}
+
+.form-input.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  color: var(--text-muted);
+}
+
+.form-error-banner {
+  background: rgba(244, 63, 94, 0.15);
+  border: 1px solid rgba(244, 63, 94, 0.4);
+  border-radius: var(--radius-sm);
+  color: #fda4af;
+  padding: 8px 10px;
+  font-size: 11px;
+  margin-bottom: 10px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-connect {
+  flex: 1;
+  padding: 9px 16px;
+  background: var(--brand-primary);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-connect:hover {
+  background: var(--brand-hover);
+}
+
+.btn-disconnect {
+  flex: 1;
+  padding: 9px 16px;
+  background: rgba(244, 63, 94, 0.15);
+  border: 1px solid rgba(244, 63, 94, 0.3);
+  border-radius: var(--radius-sm);
+  color: #fda4af;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-disconnect:hover {
+  background: rgba(244, 63, 94, 0.25);
+  color: #ffffff;
+}
+
+/* Agent Guides */
+.guide-tabs {
+  display: flex;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+  gap: 2px;
+  margin-bottom: 8px;
+}
+
+.guide-tab-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 5px 4px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.guide-tab-btn:hover {
+  color: var(--text-secondary);
+}
+
+.guide-tab-btn.active {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.code-box-wrap {
+  position: relative;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+}
+
+.guide-code-pre {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.4;
+  color: #38bdf8;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 140px;
+  overflow-y: auto;
+}
+
+/* Security Approval Card */
+.approval-card {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: #171219;
+  border-radius: var(--radius-lg);
+}
+
+.approval-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.approval-warning-icon {
+  font-size: 28px;
+}
+
+.approval-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fca5a5;
+}
+
+.approval-sub {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.approval-details {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.approval-detail-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 11px;
+}
+
+.approval-key {
+  color: var(--text-muted);
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.approval-val {
+  color: var(--text-primary);
+  text-align: right;
+  word-break: break-all;
+}
+
+.approval-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.btn-approve {
+  flex: 1;
+  padding: 10px 16px;
+  background: #10b981;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-approve:hover {
+  background: #059669;
+}
+
+.btn-reject {
+  flex: 1;
+  padding: 10px 16px;
+  background: rgba(244, 63, 94, 0.2);
+  border: 1px solid rgba(244, 63, 94, 0.4);
+  border-radius: var(--radius-sm);
+  color: #fda4af;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-reject:hover {
+  background: rgba(244, 63, 94, 0.35);
+  color: #ffffff;
+}
