@@ -112,6 +112,8 @@ pnpm build
 4. Select the `extension/dist` folder in this repository.
 5. Click the Vibe Inspector puzzle-piece icon in your browser toolbar to open the Side Panel.
 
+> **Tip:** Whenever you rebuild the extension (`pnpm build`), click the **Reload circle icon (🔄)** on `chrome://extensions` and refresh your web page tab. Note that Chrome strictly prohibits extension inspection on internal pages like `chrome://` or `about:blank`; test on any normal web page (`http://localhost:*` or `https://*`).
+
 ### 4. Start the Local Bridge
 Run the bridge CLI in your terminal:
 ```bash
@@ -170,21 +172,17 @@ claude mcp add vibe-inspector node <PATH_TO_REPO>/bridge/dist/index.js
 
 ---
 
-## 🛠️ Registered MCP Tools (11 Tools)
+## 🛠️ Complete MCP Tool Catalog (36 Tools)
 
-| Tool Name | Type | Description |
-| :--- | :---: | :--- |
-| `get_selection` | Read | Returns details of the currently selected element (tag, selector, source file, dimensions, styles). |
-| `clear_selection` | Write | Deselects the current element in the browser. |
-| `highlight_element` | Write | Flash-highlights an element on the live web page with an animated indicator to verify targeting. |
-| `get_page_info` | Read | Returns the active tab URL, page title, and viewport dimensions. |
-| `screenshot` | Read | Captures a high-resolution PNG snapshot of the current viewport. |
-| `get_computed_styles` | Read | Returns full computed CSS styles for an element or selector. |
-| `list_annotations` | Read | Retrieves all visual numbered pins on the active page (index, status, comments, source locations). |
-| `resolve_annotation` | Write | Marks a pin as resolved with an optional resolution note or git commit hash. |
-| `annotations_to_prompt`| Read | Compiles all page annotations into a structured, production-ready markdown prompt for an AI assistant. |
-| `audit_accessibility` | Read | Executes an automated `axe-core` WCAG 2.1 AA audit on the page or target element subtree. |
-| `get_web_vitals` | Read | Retrieves real-time Core Web Vitals (LCP, CLS, FCP, TTFB, DOMContentLoaded, Load Time). |
+Vibe Inspector provides 36 production tools across 7 categories. See [`docs/MCP-TOOLS.md`](docs/MCP-TOOLS.md) for full schemas and examples:
+
+1. **Selection & Inspection (14 Tools):** `get_selection`, `get_selection_group`, `select_by_selector`, `select_relative`, `get_element_tree`, `get_computed_styles`, `get_applied_rules`, `get_box_model`, `get_layout_info`, `get_stacking_info`, `force_pseudo_state`, `get_accessibility_info`, `clear_selection`, `highlight_element`.
+2. **Page Diagnostics (8 Tools):** `get_page_info`, `get_fonts_in_use`, `get_color_palette`, `get_css_variables`, `get_spacing_scale`, `screenshot`, `capabilities_list`, `bridge_status`.
+3. **Mutation & Approvals (8 Tools):** `apply_style_changes` (batch live styling with user approval gate), `revert_changes`, `get_change_log`, `apply_preset`, `list_presets`, `save_preset`, `set_viewport_size`, `export_element_png`.
+4. **Change Export Formatters (4 Tools):** `changes_to_css`, `changes_to_tailwind`, `changes_to_react_style`, `changes_to_prompt`.
+5. **Source & Verification Loop (6 Tools):** `resolve_source_location`, `find_component`, `open_in_editor`, `wait_for_reload`, `assert_style`, `compare_before_after`.
+6. **Design QA Suite (7 Tools):** `audit_accessibility` (axe-core WCAG 2.1 AA), `check_contrast`, `check_tap_targets`, `check_spacing_consistency`, `find_token_violations`, `check_responsive`, `get_web_vitals`.
+7. **Extended Annotations (6 Tools):** `list_annotations`, `add_annotation`, `resolve_annotation`, `reopen_annotation`, `remove_annotation`, `annotations_to_prompt`.
 
 ---
 
@@ -194,7 +192,7 @@ Run the comprehensive unit and integration test suite:
 ```bash
 pnpm test
 ```
-The suite executes 36 automated tests across the monorepo using Vitest and Happy-DOM, verifying element waterfall resolution, selector synthesis, Tailwind utility conversion, design token extraction, pin stack offsets, outermost ancestor filtering, and WebSocket bridge authentication security.
+The suite executes **53 automated tests across 8 test suites** using Vitest and Happy-DOM, verifying element waterfall resolution, selector synthesis, Tailwind utility conversion, design token extraction, pin stack offsets, outermost ancestor filtering, and WebSocket bridge authentication security.
 
 ---
 

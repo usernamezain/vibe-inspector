@@ -69,16 +69,19 @@ A Chrome Extension cannot be an MCP server directly because browser extensions c
 ## 3. Current Status
 
 ## Current status
-Phase: Extended Visual Editor & MCP Tool Suite Implementation Complete.
+Phase: All Phases (0 through 7) Complete & Production Verified.
 Done: 
 - Delivered master design tokens (`extension/src/sidepanel/tokens.css`) with dark/light themes and periwinkle blue (`#7c8cf8`) accent.
 - Built extended Edit tab (`EditTab.tsx`) with element chip + copy, DOM hierarchy navigator (Parent/Child/Prev/Next), Sensitivity slider (0-100, ADR-010), drag-to-scrub inputs (`ScrubbableInput.tsx`) with Pointer Events (`Shift` 10x, `Alt` 0.1x), unit dropdowns, unset `-`, modified dot indicator, double-click reset, 4-corner linked Border Radius, Opacity, Rotation, mix-blend-mode, Typography (font autocomplete, dynamic weights, line-height toggle, letter spacing, alignment segmented controls, EyeDropper + color picker), SpacingBox, Border, Background with gradient/blur, Image with local preview swap, Layout (Flex/Grid with gap link toggle), Style Presets modal (`PresetsModal.tsx`), and element PNG export (1x/2x/3x canvas crop, ADR-011).
 - Built upgraded Page tab (`PageTab.tsx`) with Quick Inspection Overlays (outlines, spacing heatmap, pause animations, color scheme cycle), Responsive Preview Presets (320px Mobile, 375px iPhone, 768px Tablet, 1024px Laptop, 1440px Desktop, custom px), Page Design System analysis (fonts in use, color palette swatches, CSS custom properties viewer, 4px grid spacing compliance meter), axe-core WCAG 2.1 AA audit with report copy, Core Web Vitals, and BYOK storage.
 - Built upgraded CSS tab (`CSSTab.tsx`) with before vs after live visual diff block, multi-format copy toolbar (Copy CSS, Copy Tailwind, Copy React Style Object, Copy Agent Prompt), and style presets manager.
 - Implemented full suite of 36 MCP tools across all 7 categories in `bridge/src/tools.ts` with untrusted page content security notices, Zod schema validation, and interactive user approval gate in Chrome.
+- Resolved runtime injection permissions: Added `"host_permissions": ["http://*/*", "https://*/*"]` to `manifest.json`.
+- Added restricted URL safety checks (`chrome://`, `devtools://`, `edge://`, `about:`) in background worker and in-panel alert banners.
+- Resolved Chrome content script ES module restrictions by creating a dedicated standalone IIFE bundle (`extension/vite.config.content.ts`), completely eliminating `SyntaxError: Cannot use import statement outside a module`.
 - 53/53 tests passing across 8 test suites in Vitest. All packages compile cleanly with zero errors (`pnpm build`).
-In progress: Production-ready and verified.
-Next: Ready for developer dogfooding and Chrome Web Store package distribution.
+In progress: Complete and verified. Paused for user's future development milestones.
+Next: Ready for live testing, developer dogfooding, and Chrome Web Store submission.
 Blocked: None.
 Last updated: 2026-10-18 by Antigravity Agent.
 
