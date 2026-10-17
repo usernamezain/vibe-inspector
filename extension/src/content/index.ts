@@ -32,6 +32,7 @@ function initContentScript() {
   let selectedElement: HTMLElement | null = null;
   let currentAnnotations: AnnotationItem[] = [];
   let activePopoverPinId: string | null = null;
+  let pickerSensitivity = 50;
 
   // 1. Create Shadow DOM Host
   const host = document.createElement('div');
@@ -539,16 +540,38 @@ function initContentScript() {
     badge.style.left = `${badgeLeft}px`;
   }
 
+  // Resolves target element based on sensitivity (ADR-010)
+  function resolveElementBySensitivity(el: HTMLElement, sensitivity: number): HTMLElement {
+    if (sensitivity <= 25) return el;
+    let current: HTMLElement = el;
+    if (sensitivity > 25 && sensitivity <= 70) {
+      const inlineLeafs = ['SPAN', 'B', 'STRONG', 'I', 'EM', 'SVG', 'PATH', 'SMALL'];
+      if (inlineLeafs.includes(current.tagName) && current.parentElement && current.parentElement !== document.body) {
+        current = current.parentElement;
+      }
+      return current;
+    }
+    const containers = ['HEADER', 'NAV', 'MAIN', 'FOOTER', 'SECTION', 'ARTICLE', 'FORM', 'ASIDE'];
+    while (current.parentElement && current.parentElement !== document.body) {
+      if (containers.includes(current.tagName) || current.classList.contains('card') || current.classList.contains('container')) {
+        return current;
+      }
+      current = current.parentElement;
+    }
+    return el;
+  }
+
   // Mouse move handler during picker mode
   function onMouseMove(e: MouseEvent) {
     if (!isPicking) return;
-    const target = e.target;
-    if (isOwnElement(target) || !(target instanceof HTMLElement)) {
+    const rawTarget = e.target;
+    if (isOwnElement(rawTarget) || !(rawTarget instanceof HTMLElement)) {
       hoverBox.style.display = 'none';
       badge.style.display = 'none';
       return;
     }
 
+    const target = resolveElementBySensitivity(rawTarget, pickerSensitivity);
     const rect = target.getBoundingClientRect();
     positionBox(hoverBox, rect);
     updateBadge(target, rect);
@@ -557,12 +580,13 @@ function initContentScript() {
   // Click handler during picker mode
   function onClick(e: MouseEvent) {
     if (!isPicking) return;
-    const target = e.target;
-    if (isOwnElement(target) || !(target instanceof HTMLElement)) return;
+    const rawTarget = e.target;
+    if (isOwnElement(rawTarget) || !(rawTarget instanceof HTMLElement)) return;
 
     e.preventDefault();
     e.stopPropagation();
 
+    const target = resolveElementBySensitivity(rawTarget, pickerSensitivity);
     selectedElement = target;
     const rect = target.getBoundingClientRect();
     positionBox(selectedBox, rect);
@@ -1110,6 +1134,81 @@ function initContentScript() {
         selectedBox.style.display = 'none';
         sendResponse({ success: true });
         break;
+
+      case 'SET_PICKER_SENSITIVITY':
+        if (typeof message.sensitivity === 'number') {
+          pickerSensitivity = message.sensitivity;
+        }
+        sendResponse({ success: true, sensitivity: pickerSensitivity });
+        break;
+
+      case 'SELECT_RELATIVE': {
+        if (!selectedElement) {
+          sendResponse({ success: false, error: 'No active selection' });
+          break;
+        }
+        let target: HTMLElement | null = null;
+        if (message.direction === 'parent') {
+          target = selectedElement.parentElement && selectedElement.parentElement !== document.documentElement ? selectedElement.parentElement : null;
+        } else if (message.direction === 'child') {
+          target = selectedElement.firstElementChild as HTMLElement;
+        } else if (message.direction === 'prev') {
+          target = selectedElement.previousElementSibling as HTMLElement;
+        } else if (message.direction === 'next') {
+          target = selectedElement.nextElementSibling as HTMLElement;
+        }
+
+        if (target && !isOwnElement(target)) {
+          selectedElement = target;
+          const rect = target.getBoundingClientRect();
+          positionBox(selectedBox, rect);
+          const info = extractElementInfo(target);
+          chrome.runtime.sendMessage({
+            type: 'ELEMENT_SELECTED',
+            element: info,
+          }).catch(() => {});
+          sendResponse({ success: true, element: info });
+        } else {
+          sendResponse({ success: false, error: `No relative element in direction: ${message.direction}` });
+        }
+        break;
+      }
+
+      case 'EXPORT_ELEMENT_PNG': {
+        chrome.runtime.sendMessage({ type: 'CAPTURE_TAB_PNG' }, (res) => {
+          if (!res?.dataUrl) {
+            sendResponse({ success: false, error: 'Failed to capture tab' });
+            return;
+          }
+          const target = message.selector ? document.querySelector<HTMLElement>(message.selector) : selectedElement;
+          if (!target) {
+            sendResponse({ success: false, error: 'Target element not found' });
+            return;
+          }
+          const rect = target.getBoundingClientRect();
+          const img = new Image();
+          img.onload = () => {
+            const scale = message.scale || 2;
+            const canvas = document.createElement('canvas');
+            canvas.width = rect.width * scale;
+            canvas.height = rect.height * scale;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+              sendResponse({ success: false, error: 'Canvas context failed' });
+              return;
+            }
+            const devicePixelRatio = window.devicePixelRatio || 1;
+            const sx = rect.left * devicePixelRatio;
+            const sy = rect.top * devicePixelRatio;
+            const sWidth = rect.width * devicePixelRatio;
+            const sHeight = rect.height * devicePixelRatio;
+            ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, canvas.width, canvas.height);
+            sendResponse({ success: true, dataUrl: canvas.toDataURL('image/png') });
+          };
+          img.src = res.dataUrl;
+        });
+        return true;
+      }
 
       case 'GET_ANNOTATIONS':
         sendResponse({ success: true, annotations: currentAnnotations });

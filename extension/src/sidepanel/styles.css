@@ -1,3 +1,5 @@
+@import './tokens.css';
+
 /* Vibe Inspector Side Panel Dark Theme */
 :root {
   --bg-primary: #090d16;
@@ -1333,4 +1335,842 @@ kbd {
 .btn-reject:hover {
   background: rgba(244, 63, 94, 0.35);
   color: #ffffff;
+}
+
+/* ==========================================================================
+   Extended Visual Editor & Design System Styles (docs/UI-SPEC.md)
+   ========================================================================== */
+
+.vi-edit-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 14px 40px;
+}
+
+/* 1. Element Card & Hierarchy Nav */
+.vi-element-card {
+  background: var(--vi-surface-card);
+  border: 1px solid var(--vi-border-subtle);
+  border-radius: var(--vi-radius-lg);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: var(--vi-shadow-sm);
+}
+
+.vi-element-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.vi-selector-chip {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--vi-surface-input);
+  border: 1px solid var(--vi-border-input);
+  border-radius: var(--vi-radius-md);
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: all var(--vi-duration-fast) var(--vi-ease-out);
+  overflow: hidden;
+}
+
+.vi-selector-chip:hover {
+  background: var(--vi-surface-input-hover);
+  border-color: var(--vi-border-focus);
+}
+
+.vi-selector-text {
+  font-family: var(--vi-text-mono);
+  font-size: 11px;
+  color: var(--vi-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vi-chip-copy-icon {
+  font-size: 11px;
+  color: var(--vi-accent-base);
+  margin-left: 6px;
+}
+
+.vi-nav-group {
+  display: flex;
+  gap: 2px;
+  background: var(--vi-surface-input);
+  padding: 2px;
+  border-radius: var(--vi-radius-md);
+  border: 1px solid var(--vi-border-input);
+}
+
+.vi-nav-btn {
+  background: transparent;
+  border: none;
+  color: var(--vi-text-secondary);
+  font-size: 10px;
+  padding: 4px 6px;
+  border-radius: var(--vi-radius-sm);
+  cursor: pointer;
+  transition: all var(--vi-duration-fast);
+}
+
+.vi-nav-btn:hover {
+  background: var(--vi-surface-active);
+  color: var(--vi-accent-base);
+}
+
+.vi-element-card-bottom {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.vi-dim-pill,
+.vi-term-pill {
+  font-size: 10px;
+  font-family: var(--vi-text-mono);
+  padding: 2px 6px;
+  border-radius: var(--vi-radius-pill);
+  background: var(--vi-surface-input);
+  color: var(--vi-text-secondary);
+  border: 1px solid var(--vi-border-subtle);
+}
+
+.vi-term-pill {
+  background: var(--vi-accent-subtle);
+  color: var(--vi-accent-base);
+  border-color: rgba(124, 140, 248, 0.2);
+  font-family: inherit;
+  font-weight: 600;
+}
+
+.vi-btn-highlight-sm {
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid var(--vi-border-input);
+  color: var(--vi-text-secondary);
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: var(--vi-radius-pill);
+  cursor: pointer;
+  transition: all var(--vi-duration-fast);
+}
+
+.vi-btn-highlight-sm:hover {
+  background: var(--vi-surface-input-hover);
+  color: var(--vi-text-primary);
+  border-color: var(--vi-border-focus);
+}
+
+/* 2. Sensitivity & Presets Toolbar */
+.vi-toolbar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--vi-surface-card);
+  border: 1px solid var(--vi-border-subtle);
+  border-radius: var(--vi-radius-lg);
+  padding: 10px 12px;
+}
+
+.vi-sensitivity-box {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.vi-toolbar-label {
+  font-size: 11px;
+  color: var(--vi-text-secondary);
+  font-weight: 500;
+}
+
+.vi-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  background: var(--vi-surface-input);
+  border-radius: 2px;
+  outline: none;
+}
+
+.vi-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--vi-accent-base);
+  cursor: pointer;
+  box-shadow: 0 0 6px var(--vi-accent-glow);
+  transition: transform 0.1s ease;
+}
+
+.vi-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.vi-presets-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.vi-btn-presets {
+  background: var(--vi-surface-input);
+  border: 1px solid var(--vi-border-input);
+  color: var(--vi-text-primary);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: var(--vi-radius-md);
+  cursor: pointer;
+  transition: all var(--vi-duration-fast);
+}
+
+.vi-btn-presets:hover {
+  background: var(--vi-surface-input-hover);
+  border-color: var(--vi-border-focus);
+  color: var(--vi-accent-base);
+}
+
+.vi-btn-icon-save {
+  background: var(--vi-surface-input);
+  border: 1px solid var(--vi-border-input);
+  color: var(--vi-text-secondary);
+  font-size: 13px;
+  padding: 4px 8px;
+  border-radius: var(--vi-radius-md);
+  cursor: pointer;
+  transition: all var(--vi-duration-fast);
+}
+
+.vi-btn-icon-save:hover:not(:disabled) {
+  background: var(--vi-surface-input-hover);
+  color: var(--vi-text-primary);
+  border-color: var(--vi-border-focus);
+}
+
+.vi-btn-icon-save:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* History Strip */
+.vi-history-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.vi-history-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.vi-btn-history {
+  background: var(--vi-surface-card);
+  border: 1px solid var(--vi-border-subtle);
+  color: var(--vi-text-secondary);
+  font-size: 11px;
+  padding: 5px 10px;
+  border-radius: var(--vi-radius-md);
+  cursor: pointer;
+  transition: all var(--vi-duration-fast);
+}
+
+.vi-btn-history:hover:not(:disabled) {
+  background: var(--vi-surface-input-hover);
+  color: var(--vi-text-primary);
+  border-color: var(--vi-border-input);
+}
+
+.vi-btn-history:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.vi-btn-reset-element {
+  background: transparent;
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  color: var(--vi-status-danger);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: var(--vi-radius-md);
+  cursor: pointer;
+  transition: all var(--vi-duration-fast);
+}
+
+.vi-btn-reset-element:hover {
+  background: var(--vi-status-danger-bg);
+  border-color: var(--vi-status-danger);
+}
+
+/* 3. Sections & Accordions */
+.vi-section {
+  background: var(--vi-surface-card);
+  border: 1px solid var(--vi-border-subtle);
+  border-radius: var(--vi-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--vi-shadow-sm);
+}
+
+.vi-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  cursor: pointer;
+  user-select: none;
+  border-bottom: 1px solid transparent;
+  transition: background var(--vi-duration-fast);
+}
+
+.vi-section-header:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.vi-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--vi-text-primary);
+  letter-spacing: -0.01em;
+}
+
+.vi-section-arrow {
+  font-size: 9px;
+  color: var(--vi-text-muted);
+}
+
+.vi-section-toggle-btn {
+  background: transparent;
+  border: 1px solid var(--vi-border-input);
+  color: var(--vi-text-secondary);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  cursor: pointer;
+  line-height: 1;
+  transition: all var(--vi-duration-fast);
+}
+
+.vi-section-toggle-btn:hover {
+  border-color: var(--vi-accent-base);
+  color: var(--vi-accent-base);
+  background: var(--vi-accent-subtle);
+}
+
+.vi-section-content {
+  padding: 14px;
+  border-top: 1px solid var(--vi-border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Grid Layouts & Fields */
+.vi-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.vi-field-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.vi-field-col {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.vi-field-label {
+  font-size: 11px;
+  color: var(--vi-text-secondary);
+  font-weight: 500;
+}
+
+.vi-select,
+.vi-input {
+  background: var(--vi-surface-input);
+  border: 1px solid var(--vi-border-input);
+  border-radius: var(--vi-radius-md);
+  color: var(--vi-text-primary);
+  font-size: 12px;
+  padding: 6px 10px;
+  outline: none;
+  transition: border-color var(--vi-duration-fast);
+}
+
+.vi-select:focus,
+.vi-input:focus {
+  border-color: var(--vi-border-focus);
+}
+
+/* Scrubbable Input Component */
+.vi-scrub-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.vi-field-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.vi-scrub-label {
+  font-size: 11px;
+  color: var(--vi-text-secondary);
+  font-weight: 500;
+  cursor: col-resize;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: color var(--vi-duration-fast);
+}
+
+.vi-scrub-label:hover {
+  color: var(--vi-accent-base);
+}
+
+.vi-modified-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--vi-accent-dot);
+  display: inline-block;
+}
+
+.vi-field-input-box {
+  display: flex;
+  align-items: center;
+  background: var(--vi-surface-input);
+  border: 1px solid var(--vi-border-input);
+  border-radius: var(--vi-radius-md);
+  overflow: hidden;
+  transition: border-color var(--vi-duration-fast);
+}
+
+.vi-field-input-box:focus-within {
+  border-color: var(--vi-border-focus);
+}
+
+.vi-input-mono {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--vi-text-primary);
+  font-family: var(--vi-text-mono);
+  font-size: 11px;
+  padding: 6px 8px;
+  outline: none;
+  min-width: 0;
+}
+
+.vi-input-mono.is-unset {
+  color: var(--vi-text-muted);
+}
+
+.vi-input-mono.is-mixed {
+  color: var(--vi-status-warning);
+  font-style: italic;
+}
+
+.vi-unit-select {
+  background: transparent;
+  border: none;
+  color: var(--vi-text-muted);
+  font-size: 10px;
+  font-family: var(--vi-text-mono);
+  padding: 0 6px 0 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.vi-unit-select:hover {
+  color: var(--vi-text-secondary);
+}
+
+/* Corner Box Radius */
+.vi-corner-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--vi-surface-input);
+  border: 1px solid var(--vi-border-subtle);
+  border-radius: var(--vi-radius-md);
+  padding: 8px 10px;
+}
+
+.vi-corner-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.vi-link-btn {
+  background: transparent;
+  border: none;
+  color: var(--vi-text-muted);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: var(--vi-radius-sm);
+  transition: all var(--vi-duration-fast);
+}
+
+.vi-link-btn.is-linked {
+  color: var(--vi-accent-base);
+}
+
+.vi-corners-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 6px;
+}
+
+/* Segmented Control */
+.vi-segmented-control {
+  display: flex;
+  background: var(--vi-surface-input);
+  border: 1px solid var(--vi-border-input);
+  border-radius: var(--vi-radius-md);
+  padding: 2px;
+  gap: 2px;
+}
+
+.vi-segmented-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--vi-text-secondary);
+  font-size: 11px;
+  padding: 5px 8px;
+  border-radius: var(--vi-radius-sm);
+  cursor: pointer;
+  transition: all var(--vi-duration-fast);
+  text-align: center;
+}
+
+.vi-segmented-btn:hover {
+  color: var(--vi-text-primary);
+}
+
+.vi-segmented-btn.is-active {
+  background: var(--vi-accent-subtle);
+  color: var(--vi-accent-base);
+  font-weight: 600;
+}
+
+/* Color Picker Group */
+.vi-color-picker-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.vi-color-swatch {
+  -webkit-appearance: none;
+  appearance: none;
+  border: 1px solid var(--vi-border-input);
+  width: 28px;
+  height: 28px;
+  border-radius: var(--vi-radius-sm);
+  cursor: pointer;
+  background: none;
+  padding: 0;
+}
+
+.vi-color-swatch::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.vi-color-swatch::-webkit-color-swatch {
+  border: none;
+  border-radius: var(--vi-radius-sm);
+}
+
+.vi-eyedropper-btn {
+  background: var(--vi-surface-input);
+  border: 1px solid var(--vi-border-input);
+  color: var(--vi-text-secondary);
+  font-size: 13px;
+  padding: 5px 8px;
+  border-radius: var(--vi-radius-md);
+  cursor: pointer;
+  transition: all var(--vi-duration-fast);
+}
+
+.vi-eyedropper-btn:hover {
+  background: var(--vi-surface-input-hover);
+  border-color: var(--vi-accent-base);
+  color: var(--vi-accent-base);
+}
+
+/* Export Buttons */
+.vi-export-buttons-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.vi-btn-accent {
+  background: var(--vi-accent-base);
+  border: none;
+  border-radius: var(--vi-radius-md);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: background var(--vi-duration-fast);
+}
+
+.vi-btn-accent:hover:not(:disabled) {
+  background: var(--vi-accent-hover);
+}
+
+.vi-btn-accent:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.vi-btn-secondary {
+  background: var(--vi-surface-input);
+  border: 1px solid var(--vi-border-input);
+  border-radius: var(--vi-radius-md);
+  color: var(--vi-text-primary);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: all var(--vi-duration-fast);
+}
+
+.vi-btn-secondary:hover {
+  background: var(--vi-surface-input-hover);
+  border-color: var(--vi-border-focus);
+}
+
+.vi-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--vi-text-secondary);
+  cursor: pointer;
+}
+
+/* Presets Modal */
+.vi-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.vi-modal-container {
+  background: var(--vi-surface-card);
+  border: 1px solid var(--vi-border-subtle);
+  border-radius: var(--vi-radius-lg);
+  width: 100%;
+  max-width: 380px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--vi-shadow-lg);
+  overflow: hidden;
+}
+
+.vi-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--vi-border-subtle);
+}
+
+.vi-modal-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--vi-text-primary);
+}
+
+.vi-modal-close {
+  background: transparent;
+  border: none;
+  color: var(--vi-text-muted);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.vi-modal-close:hover {
+  color: var(--vi-text-primary);
+}
+
+.vi-modal-body {
+  padding: 14px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.vi-save-preset-card {
+  background: var(--vi-surface-input);
+  border: 1px solid var(--vi-border-input);
+  border-radius: var(--vi-radius-md);
+  padding: 10px;
+}
+
+.vi-save-preset-row {
+  display: flex;
+  gap: 8px;
+}
+
+.vi-preset-input {
+  flex: 1;
+  background: var(--vi-surface-base);
+  border: 1px solid var(--vi-border-input);
+  border-radius: var(--vi-radius-sm);
+  color: var(--vi-text-primary);
+  font-size: 12px;
+  padding: 6px 10px;
+  outline: none;
+}
+
+.vi-preset-input:focus {
+  border-color: var(--vi-border-focus);
+}
+
+.vi-presets-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vi-presets-group-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--vi-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.vi-preset-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.vi-btn-ghost-sm {
+  background: transparent;
+  border: 1px solid var(--vi-border-input);
+  color: var(--vi-text-secondary);
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: var(--vi-radius-sm);
+  cursor: pointer;
+}
+
+.vi-btn-ghost-sm:hover {
+  background: var(--vi-surface-input);
+  color: var(--vi-text-primary);
+}
+
+.vi-presets-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.vi-preset-card {
+  background: var(--vi-surface-input);
+  border: 1px solid var(--vi-border-input);
+  border-radius: var(--vi-radius-md);
+  padding: 10px;
+  cursor: pointer;
+  transition: all var(--vi-duration-fast);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.vi-preset-card:hover {
+  background: var(--vi-surface-input-hover);
+  border-color: var(--vi-border-focus);
+  transform: translateY(-1px);
+}
+
+.vi-preset-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--vi-text-primary);
+}
+
+.vi-preset-props-count {
+  font-size: 10px;
+  color: var(--vi-text-muted);
+}
+
+.vi-preset-row-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.vi-preset-del {
+  background: transparent;
+  border: none;
+  color: var(--vi-text-muted);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.vi-preset-del:hover {
+  color: var(--vi-status-danger);
+}
+
+.vi-empty-presets {
+  font-size: 11px;
+  color: var(--vi-text-muted);
+  font-style: italic;
+  padding: 8px 0;
 }

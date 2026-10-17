@@ -123,6 +123,7 @@ chrome.runtime.onMessage.addListener((message: ExtensionMessage, _sender, sendRe
         break;
       }
 
+      case 'CAPTURE_TAB_PNG':
       case 'CAPTURE_SCREENSHOT': {
         const tab = await getActiveTab();
         if (tab?.windowId) {

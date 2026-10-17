@@ -137,7 +137,11 @@ export type ExtensionMessage =
   | { type: 'STOP_MARQUEE_SELECT' }
   | { type: 'GROUP_SELECTED'; group: any }
   | { type: 'RUN_A11Y_AUDIT'; selector?: string }
-  | { type: 'GET_WEB_VITALS' };
+  | { type: 'GET_WEB_VITALS' }
+  | { type: 'SET_PICKER_SENSITIVITY'; sensitivity: number }
+  | { type: 'SELECT_RELATIVE'; direction: 'parent' | 'child' | 'prev' | 'next' }
+  | { type: 'EXPORT_ELEMENT_PNG'; selector?: string; scale?: number; transparent?: boolean }
+  | { type: 'CAPTURE_TAB_PNG' };
 
 /**
  * Phase 6: Accessibility Audit types
