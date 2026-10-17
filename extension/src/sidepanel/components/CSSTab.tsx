@@ -1,5 +1,5 @@
 import { useState, useEffect, type FC, type FormEvent } from 'react';
-import { ElementInfo, StylePreset } from '@vibe-inspector/shared';
+import { ElementInfo, StylePreset, synthesizeTailwindClasses } from '@vibe-inspector/shared';
 
 interface CSSTabProps {
   element: ElementInfo | null;
@@ -13,6 +13,7 @@ export const CSSTab: FC<CSSTabProps> = ({
   onApplyStyle,
 }) => {
   const [copiedCSS, setCopiedCSS] = useState(false);
+  const [copiedTailwind, setCopiedTailwind] = useState(false);
   const [copiedPrompt, setCopiedPrompt] = useState(false);
   const [presets, setPresets] = useState<StylePreset[]>([]);
   const [newPresetName, setNewPresetName] = useState('');
@@ -56,6 +57,9 @@ export const CSSTab: FC<CSSTabProps> = ({
       .join('\n\n');
   };
 
+  const currentProps = element ? (modifiedStyles[element.selector] || {}) : {};
+  const tailwindClasses = synthesizeTailwindClasses(currentProps);
+
   // Generate Agent-ready prompt markdown
   const generateAgentPrompt = () => {
     const cssContent = generateCSSText();
@@ -65,13 +69,16 @@ export const CSSTab: FC<CSSTabProps> = ({
 
     const elementName = element ? `Element: ${element.elementName.primary} (<${element.tag}>)` : '';
     const selector = element ? `Selector: \`${element.selector}\`` : '';
+    const tailwindSnippet = tailwindClasses
+      ? `\n### Synthesized Tailwind Classes:\n\`\`\`html\nclassName="${tailwindClasses}"\n\`\`\`\n`
+      : '';
 
     return `Please update the styling for the inspected component with the following visual changes:
 
 ${elementName}
 ${selector}
 ${sourceInfo}
-
+${tailwindSnippet}
 \`\`\`css
 ${cssContent}
 \`\`\`
@@ -83,6 +90,12 @@ Ensure changes match the project's styling system (Tailwind classes or CSS/SCSS 
     navigator.clipboard.writeText(generateCSSText());
     setCopiedCSS(true);
     setTimeout(() => setCopiedCSS(false), 1500);
+  };
+
+  const handleCopyTailwind = () => {
+    navigator.clipboard.writeText(tailwindClasses);
+    setCopiedTailwind(true);
+    setTimeout(() => setCopiedTailwind(false), 1500);
   };
 
   const handleCopyPrompt = () => {
@@ -141,6 +154,28 @@ Ensure changes match the project's styling system (Tailwind classes or CSS/SCSS 
           </pre>
         </div>
       </div>
+
+      {/* Synthesized Tailwind Classes */}
+      {tailwindClasses && (
+        <div className="property-group-card">
+          <div className="section-header-flex">
+            <div className="group-title" style={{ color: '#38bdf8' }}>
+              Synthesized Tailwind Classes
+            </div>
+            <button
+              className={`btn-copy-code ${copiedTailwind ? 'copied' : ''}`}
+              onClick={handleCopyTailwind}
+            >
+              {copiedTailwind ? 'Copied!' : 'Copy Tailwind'}
+            </button>
+          </div>
+          <div className="code-box-row">
+            <span className="code-text" style={{ color: '#38bdf8' }}>
+              {tailwindClasses}
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Copy for AI Agent */}
       <div className="property-group-card">

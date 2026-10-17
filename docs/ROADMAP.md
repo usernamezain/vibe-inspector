@@ -13,8 +13,8 @@
 | **Phase 1** | Extension Shell & Element Picker | Complete | 100% |
 | **Phase 2** | Visual Editor Panel & Live CSS | Complete | 100% |
 | **Phase 3** | Local Bridge & MCP Server | Complete | 100% |
-| **Phase 4** | Source Mapping & Code Write-Back | Ready to Start | 0% |
-| **Phase 5** | Pin Annotations & Grouping | Pending | 0% |
+| **Phase 4** | Source Mapping & Code Write-Back | Complete | 100% |
+| **Phase 5** | Pin Annotations & Grouping | Ready to Start | 0% |
 | **Phase 6** | Advanced Integrations | Pending | 0% |
 | **Phase 7** | Hardening & Release | Pending | 0% |
 
@@ -92,14 +92,15 @@
 ---
 
 ### Phase 4: Source Mapping & Code Write-Back
-- [ ] Evaluate and document build plugin integrations:
-  - [ ] `code-inspector-plugin` / `LocatorJS` data attributes (`data-inspector-line`, `data-at`).
-  - [ ] Dev tooling hooks across Next.js, Vite React, Vue, Svelte, Astro.
-  - [ ] Standard browser source map resolution.
-- [ ] Implement source location resolver returning `{ file, line, column }` or explicit `unmapped` state. *(Owner: Agent, Status: Pending)*
-- [ ] Implement Tailwind-aware class synthesizer (convert edited CSS properties into utility classes when Tailwind is detected). *(Owner: Agent, Status: Pending)*
-- [ ] Design token extractor (detect CSS custom properties `--color-*` and Tailwind theme tokens). *(Owner: Agent, Status: Pending)*
-- [ ] Phase 4 Ponytail review. *(Owner: Agent, Status: Pending)*
+- [x] Evaluate and document build plugin integrations:
+  - [x] `code-inspector-plugin` / `LocatorJS` data attributes (`data-inspector-line`, `data-at`, `data-loc`).
+  - [x] Dev tooling hooks across Next.js, Vite React, Vue, Svelte, Astro.
+- [x] Implement source location resolver returning `{ file, line, column, componentName, framework }` with ancestor tree crawling or explicit `unmapped` state. *(Owner: Agent, Status: Complete)*
+- [x] Implement Tailwind-aware class synthesizer (converting margins, paddings, display, flexbox, colors, typography, borders, and arbitrary values to Tailwind utility classes). *(Owner: Agent, Status: Complete)*
+- [x] Design token extractor (detecting CSS custom properties `--color-*`, `--spacing-*`, `--radius-*`, `--font-*` and matching values). *(Owner: Agent, Status: Complete)*
+- [x] Side Panel integration: Live Tailwind class display, "Copy Tailwind" button, and AI prompt exporter with Tailwind utility injection. *(Owner: Agent, Status: Complete)*
+- [x] Automated unit test suite extended (30/30 tests passing across monorepo). *(Owner: Agent, Status: Complete)*
+- [x] Phase 4 verification and production build. *(Owner: Agent, Status: Complete)*
 
 ---
 

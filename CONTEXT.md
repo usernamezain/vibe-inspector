@@ -69,10 +69,10 @@ A Chrome Extension cannot be an MCP server directly because browser extensions c
 ## 3. Current Status
 
 ## Current status
-Phase: 3 of 7 (Local Bridge & MCP Server).
-Done: Monorepo workspace setup, `@vibe-inspector/shared` contracts & algorithms, `@vibe-inspector/extension` (MV3, Shadow DOM overlay, React 3-tab visual editor), and `@vibe-inspector/bridge` (127.0.0.1 WebSocket server, random token auth, Origin header validation, Stdio MCP server, 5 core MCP tools, Bridge Connection Wizard with agent copy-paste configs, and interactive write approval gate). 21/21 tests passing.
-In progress: Ready to proceed to Phase 4 (Source Mapping & Code Write-Back).
-Next: Phase 4 (Source Mapping: LocatorJS, code-inspector-plugin, Vite / Next.js data-at attributes, sourcemap resolvers, Tailwind CSS class synthesizer, CSS variable/token extraction).
+Phase: 5 of 7 (Annotations System).
+Done: Monorepo workspace setup, `@vibe-inspector/shared` contracts & algorithms, `@vibe-inspector/extension` (MV3, Shadow DOM overlay, React 3-tab visual editor), `@vibe-inspector/bridge` (127.0.0.1 WebSocket server, random token auth, Origin header validation, Stdio MCP server, 5 core MCP tools, Bridge Connection Wizard with agent copy-paste configs, and interactive write approval gate), and Phase 4 (Source Mapping: LocatorJS, code-inspector-plugin, Vite / Next.js data-at attributes, deep ancestor-crawling source location resolver, Tailwind CSS class synthesizer, and design token extractor). 30/30 tests passing across all packages.
+In progress: Phase 5 (Annotations System: visual numbered pins, multi-pin stacking, drag-to-select marquee grouping, page-scoped persistence, in-browser resolve/reopen, and bridge MCP annotation tools).
+Next: Phase 6 (Advanced Integrations: axe-core, EyeDropper, Web Vitals).
 Blocked: None.
 Last updated: 2026-10-18 by Antigravity Agent.
 

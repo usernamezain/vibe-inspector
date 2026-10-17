@@ -5,6 +5,7 @@ import {
   inferElementName,
   inferUITerm,
   generateSelectors,
+  resolveSourceLocation,
   ExtensionMessage,
 } from '@vibe-inspector/shared';
 
@@ -209,45 +210,15 @@ function initContentScript() {
   ];
 
   // Extract source location from DOM attributes (React, Vite, LocatorJS, code-inspector)
-  function extractSourceLocation(element: HTMLElement): SourceLocation | null {
-    // 1. data-at (Vite plugin / UI-Inspector convention: "file:line:col")
-    const dataAt = element.getAttribute('data-at') || element.getAttribute('data-loc');
-    if (dataAt) {
-      const parts = dataAt.split(':');
-      if (parts.length >= 2) {
-        return {
-          file: parts[0],
-          line: parseInt(parts[1], 10) || 1,
-          column: parts[2] ? parseInt(parts[2], 10) : undefined,
-        };
-      }
-    }
-
-    // 2. code-inspector-plugin attributes
-    const file = element.getAttribute('data-inspector-file') || element.getAttribute('data-file');
-    const line = element.getAttribute('data-inspector-line') || element.getAttribute('data-line');
-    const column = element.getAttribute('data-inspector-column') || element.getAttribute('data-column');
-    if (file && line) {
+  function getSourceLocation(element: HTMLElement): SourceLocation | null {
+    const resolved = resolveSourceLocation(element);
+    if (resolved.isMapped && resolved.file) {
       return {
-        file,
-        line: parseInt(line, 10) || 1,
-        column: column ? parseInt(column, 10) : undefined,
+        file: resolved.file,
+        line: resolved.line,
+        column: resolved.column,
       };
     }
-
-    // 3. LocatorJS data attribute
-    const dataLocator = element.getAttribute('data-locatorjs-id');
-    if (dataLocator) {
-      const match = dataLocator.match(/^(.*?)::(\d+)(?:::(\d+))?$/);
-      if (match) {
-        return {
-          file: match[1],
-          line: parseInt(match[2], 10) || 1,
-          column: match[3] ? parseInt(match[3], 10) : undefined,
-        };
-      }
-    }
-
     return null;
   }
 
@@ -290,7 +261,7 @@ function initContentScript() {
       p = p.parentElement;
     }
 
-    const sourceLocation = extractSourceLocation(element);
+    const sourceLocation = getSourceLocation(element);
     const elementName = inferElementName(element, sourceLocation);
     const { term, description } = inferUITerm(element);
     const { primary: selector, fallbacks: fallbackSelectors } = generateSelectors(element);
