@@ -69,11 +69,11 @@ A Chrome Extension cannot be an MCP server directly because browser extensions c
 ## 3. Current Status
 
 ## Current status
-Phase: All 7 Phases Complete (Project Release Ready).
-Done: Monorepo workspace setup, `@vibe-inspector/shared` contracts & algorithms, `@vibe-inspector/extension` (MV3, Shadow DOM overlay, React 4-tab visual editor with Edit/Page/Pins/CSS), `@vibe-inspector/bridge` (127.0.0.1 WebSocket server, random token auth, Origin header validation, Stdio MCP server, 11 MCP tools, Bridge Connection Wizard with agent copy-paste configs, and interactive write approval gate), Phase 4 (Source Mapping: LocatorJS, code-inspector-plugin, Vite / Next.js data-at attributes, deep source location resolver, Tailwind CSS class synthesizer, and design token extractor), Phase 5 (Annotations System: visual numbered pins, multi-pin stacking with horizontal offsets, drag-to-select marquee grouping capped at 30 outermost ancestors, page-scoped persistence with SPA route detection, in-browser resolve/reopen dialogs, copy prompt exporter, and MCP tools `list_annotations`, `resolve_annotation`, `annotations_to_prompt`, `get_computed_styles`), Phase 6 (Advanced Integrations: axe-core accessibility audit engine with WCAG 2.1 AA violation detection, native EyeDropper API color picker, Core Web Vitals performance observer with LCP/CLS/FCP/TTFB metrics, `docs/COMPANION-MCP-GUIDE.md`, BYOK local storage AI key configuration, and MCP tools `audit_accessibility` and `get_web_vitals`), and Phase 7 (Hardening & Release: full security audit matrix in `docs/SECURITY-AUDIT.md`, zero unnecessary permissions verified in `manifest.json`, privacy policy in `docs/PRIVACY-POLICY.md`, Chrome Web Store submission package in `docs/CHROME-WEB-STORE.md`, root documentation & agent quickstarts in `README.md`, bridge npm package config for `npx vibe-inspector-bridge`, and final Ponytail technical debt audit in `docs/TECH-DEBT.md`).
-In progress: None. Ready for packaging, Chrome Web Store submission, and npm release.
-Next: Final verification and project sign-off.
-Blocked: None.
+Phase: Extended Visual Editor & MCP Tool Expansion (Specification Phase Complete).
+Done: All baseline 7 phases completed and verified (36/36 tests passing, clean production build, zero unnecessary permissions, strict 127.0.0.1 token auth, Shadow DOM overlay, React Side Panel, 11 core MCP tools). Extended specifications delivered: [`docs/UI-SPEC.md`](docs/UI-SPEC.md) (complete visual editor spec with drag-to-scrub, unit dropdowns, link toggles, presets, box model, collapsible sections, image/background/shadow/layout editors, proposed Page and CSS tabs), [`docs/MCP-TOOLS.md`](docs/MCP-TOOLS.md) (comprehensive catalog of 36 MCP tools across 7 categories with input/output schemas and approval rules), and [`docs/DECISIONS.md`](docs/DECISIONS.md) (ADR-010 to ADR-014 documenting sensitivity slider semantics, CDP export tradeoffs, pseudo-state emulation, reload verification, and local bridge diffing).
+In progress: Awaiting explicit user approval before beginning implementation of the extended Edit tab.
+Next: Build extended Edit tab in Side Panel upon receiving "approved".
+Blocked: Waiting for user approval on architectural tradeoffs and assumptions.
 Last updated: 2026-10-18 by Antigravity Agent.
 
 ---

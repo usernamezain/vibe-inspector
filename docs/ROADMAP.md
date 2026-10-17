@@ -7,16 +7,16 @@
 
 ## Progress Overview
 
-| Phase | Description | Status | Completion |
-| :--- | :--- | :--- | :--- |
-| **Phase 0** | Research and Setup | Complete | 100% |
-| **Phase 1** | Extension Shell & Element Picker | Complete | 100% |
-| **Phase 2** | Visual Editor Panel & Live CSS | Complete | 100% |
-| **Phase 3** | Local Bridge & MCP Server | Complete | 100% |
-| **Phase 4** | Source Mapping & Code Write-Back | Complete | 100% |
-| **Phase 5** | Pin Annotations & Grouping | Complete | 100% |
-| **Phase 6** | Advanced Integrations | Complete | 100% |
-| **Phase 7** | Hardening & Release | Complete | 100% |
+| Phase | Description | Status | Completion | Specification |
+| :--- | :--- | :--- | :--- | :--- |
+| **Phase 0** | Research and Setup | Complete | 100% | [`docs/REFERENCE-ui-inspector.md`](REFERENCE-ui-inspector.md) |
+| **Phase 1** | Extension Shell & Element Picker | Complete | 100% | `packages/extension/` |
+| **Phase 2** | Visual Editor Panel & Live CSS | Baseline Complete / Extended Spec Ready | Ready for Review | [`docs/UI-SPEC.md`](UI-SPEC.md) |
+| **Phase 3** | Local Bridge & Core MCP Server | Complete | 100% | `packages/bridge/` |
+| **Phase 4** | Source Mapping & Code Write-Back | Complete | 100% | `packages/shared/` |
+| **Phase 5** | Pin Annotations & Grouping | Complete | 100% | `packages/extension/` |
+| **Phase 6** | Advanced Integrations & Extended Tools | Baseline Complete / Catalog Expanded | Ready for Review | [`docs/MCP-TOOLS.md`](MCP-TOOLS.md) |
+| **Phase 7** | Hardening & Release | Complete (Baseline) | 100% | `docs/SECURITY-AUDIT.md` |
 
 ---
 
@@ -51,22 +51,26 @@
 
 ---
 
-### Phase 2: Visual Editor Panel & Live CSS
-- [x] Implement Side Panel UI with 3-tab navigation: **Edit** / **Page** / **CSS**. *(Owner: Agent, Status: Complete, Notes: Badge counters for active element deltas and page-wide modifications)*
-- [x] Build Property Editor Sections:
-  - [x] **Appearance**: Opacity slider, border radius slider.
-  - [x] **Typography**: Font size, font weight select, text align segmented control, text color picker.
-  - [x] **Background**: Color picker, transparent toggle.
-  - [x] **Spacing**: Interactive margin and padding box model visualizer with click-to-edit values.
-  - [x] **Border**: Border width slider, border style select, border color picker.
-  - [x] **Layout**: Display segmented control (block, flex, grid, inline-block), flex direction, align-items, justify-content, gap slider.
-- [x] Implement live CSS preview engine with Undo / Redo history stack and keyboard shortcuts (`Ctrl+Z`, `Ctrl+Y`). *(Owner: Agent, Status: Complete, Notes: Managed via `useLiveStyles` custom hook)*
-- [x] Build per-element change log and reset capabilities ("Reset Styles" per element and "Reset All" page-wide). *(Owner: Agent, Status: Complete)*
-- [x] Presets management (save current changes as named preset, load, apply, and delete presets in `chrome.storage.local`). *(Owner: Agent, Status: Complete)*
-- [x] Export features: Viewport screenshot snapshot capture with instant PNG download. *(Owner: Agent, Status: Complete)*
-- [x] Copy actions: "Copy CSS" (clean formatted rules) and "Copy Changes as Agent Prompt" (markdown prompt for AI agents). *(Owner: Agent, Status: Complete)*
-- [x] Unit test suite extended for style deltas, presets, and CSS formatting (14/14 tests passing). *(Owner: Agent, Status: Complete)*
-- [x] Phase 2 verification and production build. *(Owner: Agent, Status: Complete)*
+### Phase 2: Visual Editor Panel & Live CSS (Full Spec in [`docs/UI-SPEC.md`](UI-SPEC.md))
+- [x] Baseline Side Panel UI with 3-tab navigation (**Edit** / **Page** / **CSS**). *(Owner: Agent, Status: Complete)*
+- [x] Baseline Property Editor Sections (Appearance, Typography, Spacing, Border, Layout). *(Owner: Agent, Status: Complete)*
+- [x] Baseline live CSS preview engine with Undo / Redo history stack. *(Owner: Agent, Status: Complete)*
+- [x] Baseline Presets and change logging. *(Owner: Agent, Status: Complete)*
+- [ ] **Extended Visual Editor Implementation (Awaiting User Approval):**
+  - [ ] Sensitivity slider (DOM traversal depth / container snapping).
+  - [ ] Drag-to-scrub numeric labels (Pointer Events with `Shift` 10x, `Alt` 0.1x).
+  - [ ] Unit dropdowns (`px`, `%`, `em`, `rem`, `vw`, `vh`, `auto`), unset `"-"`, dot indicator, double-click reset.
+  - [ ] Group link toggles (4 corners radius, 4 sides spacing, gaps).
+  - [ ] Collapsible sections with `+` / `-` dynamic section toggles and storage persistence.
+  - [ ] Extended Appearance: Rotation (deg), `mix-blend-mode` dropdown.
+  - [ ] Extended Typography: Font autocomplete from `document.fonts`, dynamic weight filtering, line height toggle (px vs unitless), letter spacing, text transform/decoration.
+  - [ ] Optional Image section: object-fit, object-position, aspect-ratio, CSS filters, local preview swap.
+  - [ ] Optional Background section: gradient editor (linear, radial, conic with stops & angle) & backdrop blur.
+  - [ ] Optional Box Shadow section: multi-layer shadow list with text-shadow variant.
+  - [ ] Layout grid template editor (columns, rows, auto-flow) & flex child controls.
+  - [ ] Element export at 1x/2x/3x scale with transparent background toggle.
+  - [ ] Proposed Page tab (fonts in use, palette, CSS vars, spacing grid compliance, responsive presets).
+  - [ ] Proposed CSS tab (live formatted diff, multi-element "Mixed" editing, copy exports).
 
 ---
 
@@ -117,14 +121,18 @@
 
 ---
 
-### Phase 6: Advanced Integrations (Evaluated)
-- [x] `axe-core` accessibility audit engine integration. *(Owner: Agent, Status: Complete)*
-- [x] `chrome.debugger` / CDP architectural evaluation documented in ADR-007 (avoiding disruptive yellow browser banner). *(Owner: Agent, Status: Complete)*
-- [x] Web Vitals & performance summary panel (LCP, CLS, FCP, TTFB). *(Owner: Agent, Status: Complete)*
-- [x] Native `EyeDropper` API integration for desktop screen color sampling. *(Owner: Agent, Status: Complete)*
-- [x] Interoperability guide for companion MCP servers (`docs/COMPANION-MCP-GUIDE.md`). *(Owner: Agent, Status: Complete)*
-- [x] Optional bring-your-own-key in-browser chat panel (keys strictly in `chrome.storage.local`). *(Owner: Agent, Status: Complete)*
-- [x] Phase 6 Ponytail review. *(Owner: Agent, Status: Complete)*
+### Phase 6: Advanced Integrations & Extended Tools (Full Catalog in [`docs/MCP-TOOLS.md`](MCP-TOOLS.md))
+- [x] Baseline integrations: `axe-core` accessibility audit engine, native `EyeDropper` API, and Web Vitals observer. *(Owner: Agent, Status: Complete)*
+- [x] Baseline 11 MCP tools registered in bridge. *(Owner: Agent, Status: Complete)*
+- [x] Companion MCP server interoperability guide (`docs/COMPANION-MCP-GUIDE.md`). *(Owner: Agent, Status: Complete)*
+- [ ] **Extended MCP Tool Suite Implementation (Awaiting User Approval):**
+  - [ ] Selection & Inspection tools: `get_selection_group`, `select_by_selector`, `select_relative`, `get_element_tree`, `get_applied_rules`, `get_box_model`, `get_layout_info`, `get_stacking_info`, `force_pseudo_state`, `get_accessibility_info`.
+  - [ ] Page-Level Diagnostics: `get_fonts_in_use`, `get_color_palette`, `get_css_variables`, `get_spacing_scale`, `get_console_errors`, `get_network_failures`, `capabilities_list`.
+  - [ ] Mutation & Approval Tools: `apply_style_changes` (batch live preview), `revert_changes`, `get_change_log`, `apply_preset`, `list_presets`, `save_preset`, `set_viewport_size`, `export_element_png`, `export_viewport_png`.
+  - [ ] Change Export Formatters: `changes_to_css`, `changes_to_tailwind`, `changes_to_react_style`, `changes_to_prompt`.
+  - [ ] Source & Verify Loop: `resolve_source_location`, `find_component`, `open_in_editor`, `wait_for_reload`, `assert_style`, `compare_before_after`.
+  - [ ] Design QA Suite: `check_accessibility`, `check_contrast`, `check_tap_targets`, `check_spacing_consistency`, `find_token_violations`, `check_responsive`, `compare_to_reference_image`.
+  - [ ] Extended Annotations: `add_annotation`, `reopen_annotation`, `remove_annotation`.
 
 
 ---

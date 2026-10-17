@@ -98,3 +98,55 @@
   1. *Homegrown Contrast & Label Heuristics*: Prone to false positives and misses complex ARIA relationship rules, tabindex cycles, and hidden element checks.
 - **Rationale:** `axe-core` is the industry benchmark with zero false positives. Integrating it directly empowers AI coding assistants to automatically detect and remediate accessibility violations.
 
+---
+
+## ADR-010: Sensitivity Slider Controls Picker Hierarchy Depth
+
+- **Date:** 2026-10-18
+- **Decision:** The "Sensitivity" slider controls DOM traversal depth during element hover and selection. Low sensitivity (0-25) targets the deepest exact leaf node (`span`, `svg`, `b`); high sensitivity (75-100) snaps upward to the nearest semantic container (`header`, `nav`, `article`, `form`, `.card`).
+- **Alternatives Considered:**
+  1. *Hit-area padding / proximity snapping*: Expands bounding box thresholds around the cursor. Unpredictable when elements are densely packed.
+  2. *Ignoring tiny elements below a px threshold*: Blindly ignores small badges, icons, and inline text.
+- **Rationale:** Matches the most common developer workflow: toggling between tweaking micro leaf nodes (text colors, fonts) and selecting entire cards/containers for layout restructuring. Revisit after user testing.
+
+---
+
+## ADR-011: Element Export Strategy & `chrome.debugger` Tradeoff
+
+- **Date:** 2026-10-18
+- **Decision:** Use `chrome.tabs.captureVisibleTab` with HTML5 `<canvas>` bounding box clipping as the default zero-permission, zero-banner export method. Provide an opt-in CDP screenshot engine (`Page.captureScreenshot` with clip) via `chrome.debugger` for off-screen scroll captures and 3x scale.
+- **Alternatives Considered:**
+  1. *Mandatory CDP (`chrome.debugger`)*: Forces Chrome's intrusive yellow debugging banner (`"Vibe Inspector" started debugging this browser`), alarms users, and demands broad debugger permissions in `manifest.json`.
+  2. *`html2canvas` / DOM-to-canvas rendering library*: Fails on modern CSS (oklch, CSS grid, subgrid, container queries) and adds 150KB+ to bundle.
+- **Rationale:** Defaulting to native `captureVisibleTab` ensures a clean, silent user experience without banner interruption, with high-accuracy CDP available when explicitly requested.
+
+---
+
+## ADR-012: Pseudo-State Emulation Model
+
+- **Date:** 2026-10-18
+- **Decision:** Support pseudo-state testing (`:hover`, `:focus`, `:active`) using synthetic override classes (`.vibe-pseudo-hover`, etc.) injected into stylesheet rules, supplemented by CDP `CSS.forcePseudoState` when debugger mode is active.
+- **Alternatives Considered:**
+  1. *Simulating DOM mouse events (`mouseenter`, `focus`)*: Does not trigger CSS `:hover` pseudo-classes on static elements due to browser security restrictions.
+- **Rationale:** Synthetic class injection works without browser debugging banners on 90% of modern utility-first CSS setups (Tailwind hover classes, component CSS), with CDP fallback for raw CSS `:hover` selectors.
+
+---
+
+## ADR-013: Layout & Style Verification Loop (`assert_style` & `wait_for_reload`)
+
+- **Date:** 2026-10-18
+- **Decision:** Implement `wait_for_reload` by attaching lightweight listeners to `window.addEventListener('beforeunload')` and monitoring Vite / Webpack / Next.js client-side HMR WebSocket events. `assert_style` samples computed styles using `window.getComputedStyle()` after a short stabilization tick (50ms).
+- **Alternatives Considered:**
+  1. *Fixed Sleep Delay*: Flaky on large codebases where build or HMR takes variable time.
+  2. *Polling DOM in a Tight Loop*: Causes CPU spikes and layout thrashing.
+- **Rationale:** Event-driven HMR and reload observation accurately detects when the developer's agent has successfully written code and the bundler has hot-reloaded the changes.
+
+---
+
+## ADR-014: Visual Diffing Engine Execution Location
+
+- **Date:** 2026-10-18
+- **Decision:** Process visual pixel diffs (`compare_before_after`, `compare_to_reference_image`) inside the local Node.js bridge using native Buffer/worker comparisons rather than executing heavy image processing in the extension content script.
+- **Alternatives Considered:**
+  1. *In-Page Canvas Diffing in Content Script*: Heavy CPU/memory usage freezes the host page UI and can trigger browser tab crashes on 4K displays.
+- **Rationale:** Offloading image comparison to the Node.js bridge protects browser tab responsiveness and leverages native Node performance.

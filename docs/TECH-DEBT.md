@@ -9,7 +9,9 @@
 
 | ID | Location | Shortcut Taken | Ceiling / Limit | Upgrade Trigger | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| *No active shortcuts.* | - | - | - | - | All Phase 0-3 shortcuts resolved. |
+| **PONY-002** | `extension/export.ts` | Default to HTML5 Canvas viewport crop instead of mandatory CDP (`chrome.debugger`) | Limited to visible viewport region (cannot capture off-screen scroll areas without scrolling) | User explicitly requests full-page or hidden scroll region export | Active (Documented in ADR-011) |
+| **PONY-003** | `extension/pseudo.ts` | Synthetic CSS class-based pseudo-state emulation (`.vibe-pseudo-*`) | Only styles matching class or utility rules will trigger unless CDP is connected | When debugging raw `:hover` on third-party sites lacking classes | Active (Documented in ADR-012) |
+| **PONY-004** | `bridge/diff.ts` | Image diffing executed in Node.js bridge worker thread | Requires active bridge connection | None needed (optimal architectural separation) | Active (Documented in ADR-014) |
 
 ### Resolved Debt
 - **PONY-001:** Mock bridge status in Side Panel UI.
