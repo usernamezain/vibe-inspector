@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Local authenticated bridge and MCP server connecting Chrome Extension to AI coding agents",
   "type": "module",
+  "files": [
+    "dist"
+  ],
   "bin": {
     "vibe-inspector-bridge": "./dist/index.js"
   },

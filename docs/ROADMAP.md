@@ -14,9 +14,9 @@
 | **Phase 2** | Visual Editor Panel & Live CSS | Complete | 100% |
 | **Phase 3** | Local Bridge & MCP Server | Complete | 100% |
 | **Phase 4** | Source Mapping & Code Write-Back | Complete | 100% |
-| **Phase 5** | Pin Annotations & Grouping | Ready to Start | 0% |
-| **Phase 6** | Advanced Integrations | Pending | 0% |
-| **Phase 7** | Hardening & Release | Pending | 0% |
+| **Phase 5** | Pin Annotations & Grouping | Complete | 100% |
+| **Phase 6** | Advanced Integrations | Complete | 100% |
+| **Phase 7** | Hardening & Release | Complete | 100% |
 
 ---
 
@@ -130,9 +130,9 @@
 ---
 
 ### Phase 7: Hardening & Release
-- [ ] Full security audit against project constraints checklist. *(Owner: Agent, Status: Pending)*
-- [ ] Permission audit (verify zero unnecessary permissions). *(Owner: Agent, Status: Pending)*
-- [ ] Privacy Policy and Chrome Web Store listing assets. *(Owner: Agent, Status: Pending)*
-- [ ] Documentation: Install guides, per-agent configurations, troubleshooting. *(Owner: Agent, Status: Pending)*
-- [ ] Prepare npm package for bridge CLI (`npx vibe-inspector-bridge`). *(Owner: Agent, Status: Pending)*
-- [ ] Final `/ponytail-audit` and technical debt consolidation. *(Owner: Agent, Status: Pending)*
+- [x] Full security audit against project constraints checklist (`docs/SECURITY-AUDIT.md`). *(Owner: Agent, Status: Complete, Notes: 100% compliant across localhost binding, token auth, origin checks, untrusted content warnings, write approval gate, and CSP)*
+- [x] Permission audit (`manifest.json` verified with zero unnecessary permissions). *(Owner: Agent, Status: Complete, Notes: activeTab, sidePanel, storage, scripting)*
+- [x] Privacy Policy and Chrome Web Store listing assets (`docs/PRIVACY-POLICY.md`, `docs/CHROME-WEB-STORE.md`). *(Owner: Agent, Status: Complete, Notes: Store package with single-purpose and permission justifications ready for submission)*
+- [x] Documentation: Install guides, per-agent configurations, troubleshooting (`README.md`, `docs/COMPANION-MCP-GUIDE.md`). *(Owner: Agent, Status: Complete, Notes: Tested copy-paste setup configs for Antigravity, Claude Code, Cursor, and Codex)*
+- [x] Prepare npm package for bridge CLI (`bridge/package.json` updated with files whitelist for `npx vibe-inspector-bridge`). *(Owner: Agent, Status: Complete)*
+- [x] Final `/ponytail-audit` and technical debt consolidation (`docs/TECH-DEBT.md`). *(Owner: Agent, Status: Complete, Notes: 3 deliberate shortcuts documented with clean upgrade paths, zero high-risk debt)*
