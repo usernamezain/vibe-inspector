@@ -71,3 +71,17 @@
 - **Verdict:** Phase 4 complete and verified. Ready to begin Phase 5 (Annotations System).
 - **Lines of Code:** ~900 LoC.
 
+### Phase 5: Annotations System
+- **Review Date:** 2026-10-18
+- **Scope:** Numbered pin annotations anchored to DOM elements in Shadow DOM, multi-pin horizontal stacking with offset handling, drag-to-select marquee multi-element grouping capped at 30 outermost ancestors, page-scoped persistence surviving reloads and SPA client-side route transitions, in-browser resolve/reopen dialogs with modification notes, Extension Side Panel `PinsTab.tsx`, Copy Prompt button with full markdown output for AI agents without MCP, and Bridge MCP tools (`list_annotations`, `resolve_annotation`, `annotations_to_prompt`, `get_computed_styles`).
+- **Findings:**
+  - *Shadow DOM Encapsulation:* All pin badges, popovers, marquee rectangles, and temporary group highlight boxes reside in `#vibe-inspector-host` with scoped styles, completely isolating host page CSS.
+  - *Outermost Ancestor Grouping:* Marquee group selection correctly checks hierarchy containment and discards inner children when a parent container is selected, strictly preventing DOM tree explosion and enforcing a 30-element cap.
+  - *Stack Offsets:* Multi-pin stacking algorithm fans out adjacent pins horizontally (`+28px`), preventing overlapping pins from obscuring each other.
+  - *Page-Scoped Persistence & SPA:* Canonical page key generation cleanly strips query parameters and hashes, ensuring pins persist across page reloads and automatically refresh on SPA route transitions (`popstate`, `hashchange`, router transitions).
+  - *Quality & Verification:* 36/36 automated unit and integration tests passing. Clean TypeScript compilation and Vite bundling across all 3 monorepo packages.
+  - *Debt Status:* Zero active technical debt.
+- **Verdict:** Phase 5 complete and verified. Ready to begin Phase 6 (Advanced Integrations).
+- **Lines of Code:** ~1,100 LoC.
+
+

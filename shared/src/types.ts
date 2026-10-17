@@ -125,5 +125,15 @@ export type ExtensionMessage =
   | { type: 'RESET_LIVE_STYLES'; selector?: string }
   | { type: 'GET_PICKER_STATUS' }
   | { type: 'GET_PAGE_INFO' }
-  | { type: 'CAPTURE_SCREENSHOT' };
+  | { type: 'CAPTURE_SCREENSHOT' }
+  | { type: 'ADD_ANNOTATION'; annotation: { selector: string; comment: string; elementName?: string; tagName?: string; textContent?: string; sourceLocation?: SourceLocation | null; offset?: { x: number; y: number } } }
+  | { type: 'RESOLVE_ANNOTATION'; id?: string; index?: number; note?: string }
+  | { type: 'REOPEN_ANNOTATION'; id?: string; index?: number }
+  | { type: 'DELETE_ANNOTATION'; id?: string; index?: number }
+  | { type: 'CLEAR_ALL_ANNOTATIONS' }
+  | { type: 'GET_ANNOTATIONS' }
+  | { type: 'ANNOTATIONS_UPDATED'; annotations: any[] }
+  | { type: 'START_MARQUEE_SELECT' }
+  | { type: 'STOP_MARQUEE_SELECT' }
+  | { type: 'GROUP_SELECTED'; group: any };
 

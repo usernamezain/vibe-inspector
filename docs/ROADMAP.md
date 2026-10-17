@@ -105,13 +105,15 @@
 ---
 
 ### Phase 5: Annotations System
-- [ ] Visual numbered pins anchored to DOM elements. *(Owner: Agent, Status: Pending)*
-- [ ] Multi-pin stacking with horizontal offset handling. *(Owner: Agent, Status: Pending)*
-- [ ] Drag-to-select marquee multi-element grouping (capped at 30 items, filtering to outermost ancestors). *(Owner: Agent, Status: Pending)*
-- [ ] Page-scoped persistence surviving page reloads and SPA client-side route transitions. *(Owner: Agent, Status: Pending)*
-- [ ] In-browser resolve/reopen dialogs with modification notes. *(Owner: Agent, Status: Pending)*
-- [ ] Copy Prompt button for agents without active MCP connections. *(Owner: Agent, Status: Pending)*
-- [ ] Phase 5 Ponytail review. *(Owner: Agent, Status: Pending)*
+- [x] Visual numbered pins anchored to DOM elements. *(Owner: Agent, Status: Complete)*
+- [x] Multi-pin stacking with horizontal offset handling. *(Owner: Agent, Status: Complete)*
+- [x] Drag-to-select marquee multi-element grouping (capped at 30 items, filtering to outermost ancestors). *(Owner: Agent, Status: Complete)*
+- [x] Page-scoped persistence surviving page reloads and SPA client-side route transitions. *(Owner: Agent, Status: Complete)*
+- [x] In-browser resolve/reopen dialogs with modification notes. *(Owner: Agent, Status: Complete)*
+- [x] Copy Prompt button for agents without active MCP connections. *(Owner: Agent, Status: Complete)*
+- [x] Bridge MCP tools registered (`list_annotations`, `resolve_annotation`, `annotations_to_prompt`, `get_computed_styles`). *(Owner: Agent, Status: Complete)*
+- [x] Automated unit and integration test suite extended (36/36 tests passing across monorepo). *(Owner: Agent, Status: Complete)*
+- [x] Phase 5 Ponytail review. *(Owner: Agent, Status: Complete)*
 
 ---
 

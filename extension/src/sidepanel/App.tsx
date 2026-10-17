@@ -1,20 +1,27 @@
 import { useState, useEffect } from 'react';
-import { ElementInfo, ExtensionMessage } from '@vibe-inspector/shared';
+import { ElementInfo, ExtensionMessage, AnnotationItem, AnnotationGroup } from '@vibe-inspector/shared';
 import { useLiveStyles } from './hooks/useLiveStyles';
 import { useBridgeClient } from './hooks/useBridgeClient';
 import { EditTab } from './components/EditTab';
 import { PageTab } from './components/PageTab';
 import { CSSTab } from './components/CSSTab';
+import { PinsTab } from './components/PinsTab';
 import { BridgeWizardModal } from './components/BridgeWizardModal';
 import './styles.css';
 
-type TabType = 'edit' | 'page' | 'css';
+type TabType = 'edit' | 'page' | 'pins' | 'css';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabType>('edit');
   const [isPicking, setIsPicking] = useState(false);
   const [selectedElement, setSelectedElement] = useState<ElementInfo | null>(null);
   const [isWizardOpen, setIsWizardOpen] = useState(false);
+
+  // Phase 5 Annotations & Marquee State
+  const [annotations, setAnnotations] = useState<AnnotationItem[]>([]);
+  const [selectedGroup, setSelectedGroup] = useState<AnnotationGroup | null>(null);
+  const [isMarqueeActive, setIsMarqueeActive] = useState(false);
+  const [pageUrl, setPageUrl] = useState(window.location.href);
 
   const {
     modifiedStyles,
@@ -56,6 +63,20 @@ export default function App() {
     },
   });
 
+  // Query active tab helper
+  const sendTabMessage = (msg: ExtensionMessage, callback?: (res: any) => void) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const tabId = tabs[0]?.id;
+      if (tabId) {
+        if (callback) {
+          chrome.tabs.sendMessage(tabId, msg, callback);
+        } else {
+          chrome.tabs.sendMessage(tabId, msg);
+        }
+      }
+    });
+  };
+
   // Check initial picker status on mount and listen for runtime messages
   useEffect(() => {
     chrome.runtime.sendMessage({ type: 'GET_PICKER_STATUS' }, (res) => {
@@ -64,13 +85,31 @@ export default function App() {
       }
     });
 
+    // Query active tab annotations & url
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const tab = tabs[0];
+      if (tab?.url) setPageUrl(tab.url);
+      if (tab?.id) {
+        chrome.tabs.sendMessage(tab.id, { type: 'GET_ANNOTATIONS' }, (res) => {
+          if (res?.annotations) setAnnotations(res.annotations);
+        });
+      }
+    });
+
     const messageHandler = (message: ExtensionMessage) => {
       if (message.type === 'ELEMENT_SELECTED') {
         setSelectedElement(message.element);
+        if (message.element.pageUrl) setPageUrl(message.element.pageUrl);
         setIsPicking(false);
         setActiveTab('edit');
       } else if (message.type === 'PICKER_STATUS') {
         setIsPicking(message.active);
+      } else if (message.type === 'ANNOTATIONS_UPDATED') {
+        setAnnotations(message.annotations);
+      } else if (message.type === 'GROUP_SELECTED') {
+        setSelectedGroup(message.group);
+        setIsMarqueeActive(false);
+        setActiveTab('pins');
       }
     };
 
@@ -97,15 +136,79 @@ export default function App() {
     setSelectedElement(null);
   };
 
-  const handleHighlight = () => {
-    if (!selectedElement) return;
+  const handleHighlight = (selector?: string, label?: string) => {
+    const targetSel = selector || selectedElement?.selector;
+    if (!targetSel) return;
     chrome.runtime.sendMessage({
       type: 'HIGHLIGHT_ELEMENT',
-      selector: selectedElement.selector,
-      dataAt: selectedElement.sourceLocation
+      selector: targetSel,
+      dataAt: selectedElement?.sourceLocation
         ? `${selectedElement.sourceLocation.file}:${selectedElement.sourceLocation.line}`
         : undefined,
-      label: selectedElement.elementName.primary,
+      label: label || selectedElement?.elementName.primary,
+    });
+  };
+
+  // Phase 5 Annotation Handlers
+  const handleToggleMarquee = () => {
+    if (isMarqueeActive) {
+      sendTabMessage({ type: 'STOP_MARQUEE_SELECT' }, () => setIsMarqueeActive(false));
+    } else {
+      sendTabMessage({ type: 'START_MARQUEE_SELECT' }, () => setIsMarqueeActive(true));
+    }
+  };
+
+  const handleAddAnnotation = (comment: string) => {
+    if (!selectedElement) return;
+    sendTabMessage(
+      {
+        type: 'ADD_ANNOTATION',
+        annotation: {
+          selector: selectedElement.selector,
+          comment,
+          elementName: selectedElement.elementName.primary,
+          tagName: selectedElement.tag,
+          textContent: selectedElement.textContent,
+          sourceLocation: selectedElement.sourceLocation,
+        },
+      },
+      (res) => {
+        if (res?.annotation) {
+          setAnnotations((prev) => [...prev, res.annotation]);
+        }
+      }
+    );
+  };
+
+  const handleResolveAnnotation = (id: string, note?: string) => {
+    sendTabMessage({ type: 'RESOLVE_ANNOTATION', id, note }, (res) => {
+      if (res?.annotation) {
+        setAnnotations((prev) =>
+          prev.map((a) => (a.id === id ? res.annotation : a))
+        );
+      }
+    });
+  };
+
+  const handleReopenAnnotation = (id: string) => {
+    sendTabMessage({ type: 'REOPEN_ANNOTATION', id }, (res) => {
+      if (res?.annotation) {
+        setAnnotations((prev) =>
+          prev.map((a) => (a.id === id ? res.annotation : a))
+        );
+      }
+    });
+  };
+
+  const handleDeleteAnnotation = (id: string) => {
+    sendTabMessage({ type: 'DELETE_ANNOTATION', id }, () => {
+      setAnnotations((prev) => prev.filter((a) => a.id !== id));
+    });
+  };
+
+  const handleClearAllAnnotations = () => {
+    sendTabMessage({ type: 'CLEAR_ALL_ANNOTATIONS' }, () => {
+      setAnnotations([]);
     });
   };
 
@@ -115,6 +218,7 @@ export default function App() {
     : {};
   const currentElementModCount = Object.keys(currentElementModifications).length;
   const totalPageModCount = Object.keys(modifiedStyles).length;
+  const openPinsCount = annotations.filter((a) => a.status === 'open').length;
 
   return (
     <div className="panel-container">
@@ -161,7 +265,7 @@ export default function App() {
         )}
       </div>
 
-      {/* Navigation Tabs (Edit / Page / CSS) */}
+      {/* Navigation Tabs (Edit / Page / Pins / CSS) */}
       <nav className="tabs-nav">
         <button
           className={`tab-nav-btn ${activeTab === 'edit' ? 'active' : ''}`}
@@ -179,6 +283,15 @@ export default function App() {
           <span>🌐 Page</span>
           {totalPageModCount > 0 && (
             <span className="tab-badge">{totalPageModCount}</span>
+          )}
+        </button>
+        <button
+          className={`tab-nav-btn ${activeTab === 'pins' ? 'active' : ''}`}
+          onClick={() => setActiveTab('pins')}
+        >
+          <span>📌 Pins</span>
+          {openPinsCount > 0 && (
+            <span className="tab-badge">{openPinsCount}</span>
           )}
         </button>
         <button
@@ -242,6 +355,24 @@ export default function App() {
             modifiedStyles={modifiedStyles}
             onResetAll={resetAll}
             onResetElement={resetElement}
+          />
+        )}
+
+        {activeTab === 'pins' && (
+          <PinsTab
+            element={selectedElement}
+            annotations={annotations}
+            selectedGroup={selectedGroup}
+            pageUrl={pageUrl}
+            isMarqueeActive={isMarqueeActive}
+            onToggleMarquee={handleToggleMarquee}
+            onAddAnnotation={handleAddAnnotation}
+            onResolveAnnotation={handleResolveAnnotation}
+            onReopenAnnotation={handleReopenAnnotation}
+            onDeleteAnnotation={handleDeleteAnnotation}
+            onClearAll={handleClearAllAnnotations}
+            onClearGroup={() => setSelectedGroup(null)}
+            onHighlight={handleHighlight}
           />
         )}
 

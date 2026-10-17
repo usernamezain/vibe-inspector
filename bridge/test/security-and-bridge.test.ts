@@ -151,5 +151,63 @@ describe('Phase 3: WebSocket Live Server Integration', () => {
         reject(err);
       });
     });
+
+    // 3. Annotation RPC flow -> Handles GET_ANNOTATIONS and RESOLVE_ANNOTATION
+    await new Promise<void>((resolve, reject) => {
+      const ws = new WebSocket(`ws://127.0.0.1:${port}?token=${testToken}`, {
+        headers: { Origin: 'chrome-extension://vibe-inspector-test-id' },
+      });
+
+      ws.on('open', async () => {
+        ws.on('message', (data) => {
+          const msg = JSON.parse(data.toString());
+          if (msg.type === 'GET_ANNOTATIONS') {
+            ws.send(
+              JSON.stringify({
+                id: msg.id,
+                type: 'GET_ANNOTATIONS_RESPONSE',
+                payload: [
+                  {
+                    id: 'pin-1',
+                    index: 1,
+                    selector: '.hero-btn',
+                    status: 'open',
+                    comment: 'Make font bold',
+                  },
+                ],
+                timestamp: Date.now(),
+              })
+            );
+          } else if (msg.type === 'RESOLVE_ANNOTATION') {
+            ws.send(
+              JSON.stringify({
+                id: msg.id,
+                type: 'RESOLVE_ANNOTATION_RESPONSE',
+                payload: { success: true },
+                timestamp: Date.now(),
+              })
+            );
+          }
+        });
+
+        try {
+          const annotations = await server.sendRequest<any[]>('GET_ANNOTATIONS');
+          expect(annotations).toHaveLength(1);
+          expect(annotations[0].comment).toBe('Make font bold');
+
+          const resolveRes = await server.sendRequest<any>('RESOLVE_ANNOTATION', { index: 1, note: 'Done' });
+          expect(resolveRes.success).toBe(true);
+
+          ws.close();
+          resolve();
+        } catch (err) {
+          ws.close();
+          reject(err);
+        }
+      });
+
+      ws.on('error', (err) => reject(err));
+    });
   });
 });
+

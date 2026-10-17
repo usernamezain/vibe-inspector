@@ -175,6 +175,52 @@ export function useBridgeClient({
         break;
       }
 
+      case 'GET_ANNOTATIONS': {
+        try {
+          chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            const tabId = tabs[0]?.id;
+            if (tabId) {
+              chrome.tabs.sendMessage(tabId, { type: 'GET_ANNOTATIONS' }, (res) => {
+                sendReply(res?.annotations || []);
+              });
+            } else {
+              sendReply([]);
+            }
+          });
+        } catch {
+          sendReply([]);
+        }
+        break;
+      }
+
+      case 'RESOLVE_ANNOTATION': {
+        const { id, index, note } = msg.payload || {};
+        try {
+          chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            const tabId = tabs[0]?.id;
+            if (tabId) {
+              chrome.tabs.sendMessage(
+                tabId,
+                { type: 'RESOLVE_ANNOTATION', id, index, note },
+                (res) => {
+                  sendReply(res);
+                }
+              );
+            } else {
+              sendReply({ success: false, error: 'No active tab found' });
+            }
+          });
+        } catch (err) {
+          sendReply({ success: false, error: String(err) });
+        }
+        break;
+      }
+
+      case 'GET_COMPUTED_STYLES': {
+        sendReply(selectedElementRef.current?.computedStyles || {});
+        break;
+      }
+
       default:
         sendReply(null, `Unknown bridge request type: ${msg.type}`);
     }

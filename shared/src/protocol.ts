@@ -18,6 +18,9 @@ export type BridgeRequestType =
   | 'GET_PAGE_INFO'
   | 'CAPTURE_SCREENSHOT'
   | 'APPLY_STYLE'
+  | 'GET_ANNOTATIONS'
+  | 'RESOLVE_ANNOTATION'
+  | 'GET_COMPUTED_STYLES'
   | 'PING';
 
 export type BridgeNotificationType =

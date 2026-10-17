@@ -7,18 +7,27 @@ import {
   generateSelectors,
   resolveSourceLocation,
   ExtensionMessage,
+  AnnotationItem,
+  AnnotationGroup,
+  getCanonicalPageKey,
+  calculatePinStackOffsets,
+  filterOutermostElements,
 } from '@vibe-inspector/shared';
 
 // Guard against multiple injections
 if (!(window as any).__vibeInspectorInjected) {
   (window as any).__vibeInspectorInjected = true;
-
   initContentScript();
 }
 
 function initContentScript() {
   let isPicking = false;
+  let isMarqueeMode = false;
+  let isDraggingMarquee = false;
+  let marqueeStart = { x: 0, y: 0 };
   let selectedElement: HTMLElement | null = null;
+  let currentAnnotations: AnnotationItem[] = [];
+  let activePopoverPinId: string | null = null;
 
   // 1. Create Shadow DOM Host
   const host = document.createElement('div');
@@ -132,6 +141,195 @@ function initContentScript() {
       z-index: 2147483647;
       transition: opacity 0.3s ease;
     }
+
+    /* Phase 5: Pins & Annotations */
+    .vibe-pins-container {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2147483647;
+    }
+
+    .vibe-pin-marker {
+      position: fixed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #6366f1;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 700;
+      box-shadow: 0 0 0 2px #ffffff, 0 3px 10px rgba(99, 102, 241, 0.45);
+      cursor: pointer;
+      pointer-events: auto;
+      z-index: 2147483647;
+      user-select: none;
+      transition: transform 0.15s ease, background 0.15s ease;
+    }
+
+    .vibe-pin-marker:hover {
+      transform: scale(1.18);
+    }
+
+    .vibe-pin-marker.resolved {
+      background: #10b981;
+      box-shadow: 0 0 0 2px #ffffff, 0 3px 10px rgba(16, 185, 129, 0.35);
+      opacity: 0.9;
+    }
+
+    .vibe-pin-popover {
+      position: fixed;
+      background: #18181b;
+      color: #f4f4f5;
+      border: 1px solid #27272a;
+      border-radius: 8px;
+      padding: 12px;
+      width: 280px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+      pointer-events: auto;
+      z-index: 2147483647;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 12px;
+    }
+
+    .vibe-pin-popover-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #27272a;
+      padding-bottom: 6px;
+    }
+
+    .vibe-pin-popover-title {
+      font-weight: 600;
+      font-size: 12px;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .vibe-pin-popover-status {
+      font-size: 9px;
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .vibe-pin-popover-status.open {
+      background: rgba(99, 102, 241, 0.2);
+      color: #818cf8;
+    }
+
+    .vibe-pin-popover-status.resolved {
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+    }
+
+    .vibe-pin-popover-close {
+      background: transparent;
+      border: none;
+      color: #a1a1aa;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      padding: 2px 4px;
+    }
+
+    .vibe-pin-popover-close:hover {
+      color: #ffffff;
+    }
+
+    .vibe-pin-popover-body {
+      color: #d4d4d8;
+      line-height: 1.4;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .vibe-pin-popover-note {
+      background: #27272a;
+      border-radius: 4px;
+      padding: 6px 8px;
+      font-size: 11px;
+      color: #a1a1aa;
+      font-style: italic;
+    }
+
+    .vibe-pin-popover-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .vibe-pin-btn {
+      flex: 1;
+      padding: 5px 8px;
+      font-size: 11px;
+      font-weight: 500;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: background 0.1s ease;
+    }
+
+    .vibe-pin-btn-resolve {
+      background: #10b981;
+      color: #ffffff;
+    }
+
+    .vibe-pin-btn-resolve:hover {
+      background: #059669;
+    }
+
+    .vibe-pin-btn-reopen {
+      background: #6366f1;
+      color: #ffffff;
+    }
+
+    .vibe-pin-btn-reopen:hover {
+      background: #4f46e5;
+    }
+
+    .vibe-pin-btn-delete {
+      background: #27272a;
+      color: #f43f5e;
+      border: 1px solid #3f3f46;
+    }
+
+    .vibe-pin-btn-delete:hover {
+      background: rgba(244, 63, 94, 0.15);
+    }
+
+    /* Marquee Selection & Group Outlines */
+    .vibe-marquee-box {
+      position: fixed;
+      border: 2px dashed #6366f1;
+      background: rgba(99, 102, 241, 0.12);
+      pointer-events: none;
+      display: none;
+      z-index: 2147483647;
+    }
+
+    .vibe-group-outline {
+      position: fixed;
+      border: 2px dashed #ec4899;
+      background: rgba(236, 72, 153, 0.08);
+      border-radius: 4px;
+      pointer-events: none;
+      z-index: 2147483647;
+      transition: opacity 0.3s ease;
+    }
   `;
   shadow.appendChild(styleEl);
 
@@ -150,6 +348,16 @@ function initContentScript() {
   const badge = document.createElement('div');
   badge.className = 'vibe-badge';
   overlay.appendChild(badge);
+
+  // Pins Container inside Shadow DOM
+  const pinsContainer = document.createElement('div');
+  pinsContainer.className = 'vibe-pins-container';
+  overlay.appendChild(pinsContainer);
+
+  // Marquee Drag Box inside Shadow DOM
+  const marqueeBox = document.createElement('div');
+  marqueeBox.className = 'vibe-marquee-box';
+  overlay.appendChild(marqueeBox);
 
   shadow.appendChild(overlay);
 
@@ -319,7 +527,6 @@ function initContentScript() {
     `;
     badge.style.display = 'flex';
 
-    // Position above element; if too close to top, position below
     const badgeHeight = 28;
     const badgeTop = rect.top >= badgeHeight + 8 ? rect.top - badgeHeight - 6 : rect.bottom + 6;
     const badgeLeft = Math.max(8, Math.min(rect.left, window.innerWidth - 220));
@@ -356,10 +563,8 @@ function initContentScript() {
     const rect = target.getBoundingClientRect();
     positionBox(selectedBox, rect);
 
-    // Stop picker mode
     setPickerMode(false);
 
-    // Extract metadata and dispatch
     const info = extractElementInfo(target);
     chrome.runtime.sendMessage({
       type: 'ELEMENT_SELECTED',
@@ -374,6 +579,14 @@ function initContentScript() {
         e.preventDefault();
         setPickerMode(false);
       }
+      if (isMarqueeMode) {
+        e.preventDefault();
+        setMarqueeMode(false);
+      }
+      if (activePopoverPinId) {
+        activePopoverPinId = null;
+        renderPins();
+      }
     }
   }
 
@@ -381,6 +594,7 @@ function initContentScript() {
   function setPickerMode(active: boolean) {
     isPicking = active;
     if (isPicking) {
+      if (isMarqueeMode) setMarqueeMode(false);
       document.body.style.cursor = 'crosshair';
       window.addEventListener('mousemove', onMouseMove, true);
       window.addEventListener('click', onClick, true);
@@ -394,6 +608,271 @@ function initContentScript() {
       window.removeEventListener('click', onClick, true);
       window.removeEventListener('keydown', onKeyDown, true);
       chrome.runtime.sendMessage({ type: 'PICKER_STATUS', active: false }).catch(() => {});
+    }
+  }
+
+  // --- Phase 5: Marquee Group Selection ---
+
+  function positionMarquee(x1: number, y1: number, x2: number, y2: number) {
+    const minX = Math.min(x1, x2);
+    const maxX = Math.max(x1, x2);
+    const minY = Math.min(y1, y2);
+    const maxY = Math.max(y1, y2);
+
+    marqueeBox.style.left = `${minX}px`;
+    marqueeBox.style.top = `${minY}px`;
+    marqueeBox.style.width = `${maxX - minX}px`;
+    marqueeBox.style.height = `${maxY - minY}px`;
+  }
+
+  function onMarqueeMouseDown(e: MouseEvent) {
+    if (!isMarqueeMode || isOwnElement(e.target)) return;
+    isDraggingMarquee = true;
+    marqueeStart = { x: e.clientX, y: e.clientY };
+    positionMarquee(e.clientX, e.clientY, e.clientX, e.clientY);
+    marqueeBox.style.display = 'block';
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  function onMarqueeMouseMove(e: MouseEvent) {
+    if (!isMarqueeMode || !isDraggingMarquee) return;
+    positionMarquee(marqueeStart.x, marqueeStart.y, e.clientX, e.clientY);
+    e.preventDefault();
+  }
+
+  function onMarqueeMouseUp(e: MouseEvent) {
+    if (!isMarqueeMode || !isDraggingMarquee) return;
+    isDraggingMarquee = false;
+    marqueeBox.style.display = 'none';
+
+    const minX = Math.min(marqueeStart.x, e.clientX);
+    const maxX = Math.max(marqueeStart.x, e.clientX);
+    const minY = Math.min(marqueeStart.y, e.clientY);
+    const maxY = Math.max(marqueeStart.y, e.clientY);
+
+    // If drag was too small (< 10px), ignore
+    if (maxX - minX < 10 || maxY - minY < 10) {
+      return;
+    }
+
+    // Find all intersecting elements
+    const all = Array.from(document.body.querySelectorAll<HTMLElement>('*'));
+    const intersecting = all.filter((el) => {
+      if (isOwnElement(el)) return false;
+      const r = el.getBoundingClientRect();
+      if (r.width === 0 || r.height === 0) return false;
+      return !(r.right < minX || r.left > maxX || r.bottom < minY || r.top > maxY);
+    });
+
+    // Filter to outermost ancestors and cap at 30
+    const outermost = filterOutermostElements(intersecting, 30);
+    if (outermost.length === 0) return;
+
+    // Render temporary pink group highlights
+    outermost.forEach((el) => {
+      const r = el.getBoundingClientRect();
+      const outline = document.createElement('div');
+      outline.className = 'vibe-group-outline';
+      outline.style.left = `${r.x - 2}px`;
+      outline.style.top = `${r.y - 2}px`;
+      outline.style.width = `${r.width + 4}px`;
+      outline.style.height = `${r.height + 4}px`;
+      shadow.appendChild(outline);
+
+      setTimeout(() => {
+        outline.style.opacity = '0';
+        setTimeout(() => outline.remove(), 300);
+      }, 2500);
+    });
+
+    // Construct AnnotationGroup and dispatch
+    const group: AnnotationGroup = {
+      id: `group-${Date.now()}`,
+      name: `Marquee Group (${outermost.length} items)`,
+      selectors: outermost.map((el) => generateSelectors(el).primary),
+      elements: outermost.map((el) => {
+        const info = extractElementInfo(el);
+        return {
+          selector: info.selector,
+          tagName: info.tag,
+          elementName: info.elementName.primary,
+          sourceLocation: info.sourceLocation,
+          textContent: info.textContent,
+        };
+      }),
+      createdAt: new Date().toISOString(),
+    };
+
+    chrome.runtime.sendMessage({
+      type: 'GROUP_SELECTED',
+      group,
+    }).catch(() => {});
+
+    setMarqueeMode(false);
+  }
+
+  function setMarqueeMode(active: boolean) {
+    isMarqueeMode = active;
+    if (isMarqueeMode) {
+      if (isPicking) setPickerMode(false);
+      document.body.style.cursor = 'crosshair';
+      window.addEventListener('mousedown', onMarqueeMouseDown, true);
+      window.addEventListener('mousemove', onMarqueeMouseMove, true);
+      window.addEventListener('mouseup', onMarqueeMouseUp, true);
+      window.addEventListener('keydown', onKeyDown, true);
+    } else {
+      document.body.style.cursor = '';
+      marqueeBox.style.display = 'none';
+      isDraggingMarquee = false;
+      window.removeEventListener('mousedown', onMarqueeMouseDown, true);
+      window.removeEventListener('mousemove', onMarqueeMouseMove, true);
+      window.removeEventListener('mouseup', onMarqueeMouseUp, true);
+    }
+  }
+
+  // --- Phase 5: Pins & Storage ---
+
+  function getStorageKey(): string {
+    return `vibe_annotations_${getCanonicalPageKey(window.location.href)}`;
+  }
+
+  function loadAnnotations() {
+    const key = getStorageKey();
+    try {
+      chrome.storage.local.get([key], (res) => {
+        if (res && Array.isArray(res[key])) {
+          currentAnnotations = res[key];
+        } else {
+          currentAnnotations = [];
+        }
+        renderPins();
+        chrome.runtime.sendMessage({
+          type: 'ANNOTATIONS_UPDATED',
+          annotations: currentAnnotations,
+        }).catch(() => {});
+      });
+    } catch {
+      currentAnnotations = [];
+      renderPins();
+    }
+  }
+
+  function saveAnnotations() {
+    const key = getStorageKey();
+    try {
+      chrome.storage.local.set({ [key]: currentAnnotations });
+      chrome.runtime.sendMessage({
+        type: 'ANNOTATIONS_UPDATED',
+        annotations: currentAnnotations,
+      }).catch(() => {});
+    } catch {}
+  }
+
+  function renderPins() {
+    pinsContainer.innerHTML = '';
+    const offsets = calculatePinStackOffsets(currentAnnotations);
+
+    for (const ann of currentAnnotations) {
+      let target: HTMLElement | null = null;
+      try {
+        target = document.querySelector(ann.selector);
+      } catch {}
+
+      if (!target && ann.sourceLocation) {
+        try {
+          target = document.querySelector(`[data-at*="${ann.sourceLocation.file}:${ann.sourceLocation.line}"]`);
+        } catch {}
+      }
+
+      if (!target) continue;
+
+      const rect = target.getBoundingClientRect();
+      const offset = offsets.get(ann.id) || { x: 0, y: 0 };
+
+      const marker = document.createElement('div');
+      marker.className = `vibe-pin-marker ${ann.status === 'resolved' ? 'resolved' : ''}`;
+      marker.textContent = String(ann.index);
+      marker.title = `Pin #${ann.index}: ${ann.elementName} (${ann.status})`;
+
+      const pinX = rect.x + offset.x - 8;
+      const pinY = Math.max(6, rect.y + offset.y - 10);
+      marker.style.left = `${pinX}px`;
+      marker.style.top = `${pinY}px`;
+
+      marker.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (activePopoverPinId === ann.id) {
+          activePopoverPinId = null;
+        } else {
+          activePopoverPinId = ann.id;
+        }
+        renderPins();
+      });
+
+      pinsContainer.appendChild(marker);
+
+      // Render popover card if this pin is clicked/active
+      if (activePopoverPinId === ann.id) {
+        const popover = document.createElement('div');
+        popover.className = 'vibe-pin-popover';
+        popover.style.left = `${Math.min(window.innerWidth - 300, Math.max(12, pinX))}px`;
+        popover.style.top = `${pinY + 30}px`;
+
+        popover.innerHTML = `
+          <div class="vibe-pin-popover-header">
+            <span class="vibe-pin-popover-title">
+              <span>📌 Pin #${ann.index}</span>
+              <span class="vibe-pin-popover-status ${ann.status}">${ann.status}</span>
+            </span>
+            <button class="vibe-pin-popover-close" data-action="close">✕</button>
+          </div>
+          <div class="vibe-pin-popover-body">${ann.comment}</div>
+          ${ann.resolutionNote ? `<div class="vibe-pin-popover-note">Resolution Note: ${ann.resolutionNote}</div>` : ''}
+          <div class="vibe-pin-popover-actions">
+            ${
+              ann.status === 'open'
+                ? '<button class="vibe-pin-btn vibe-pin-btn-resolve" data-action="resolve">✓ Resolve</button>'
+                : '<button class="vibe-pin-btn vibe-pin-btn-reopen" data-action="reopen">↺ Reopen</button>'
+            }
+            <button class="vibe-pin-btn vibe-pin-btn-delete" data-action="delete">🗑 Delete</button>
+          </div>
+        `;
+
+        popover.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const btn = (e.target as HTMLElement).closest('button');
+          if (!btn) return;
+          const action = btn.getAttribute('data-action');
+
+          if (action === 'close') {
+            activePopoverPinId = null;
+            renderPins();
+          } else if (action === 'resolve') {
+            ann.status = 'resolved';
+            ann.resolvedAt = new Date().toISOString();
+            activePopoverPinId = null;
+            saveAnnotations();
+            renderPins();
+          } else if (action === 'reopen') {
+            ann.status = 'open';
+            ann.resolvedAt = undefined;
+            activePopoverPinId = null;
+            saveAnnotations();
+            renderPins();
+          } else if (action === 'delete') {
+            currentAnnotations = currentAnnotations.filter((a) => a.id !== ann.id);
+            currentAnnotations.forEach((a, i) => {
+              a.index = i + 1;
+            });
+            activePopoverPinId = null;
+            saveAnnotations();
+            renderPins();
+          }
+        });
+
+        pinsContainer.appendChild(popover);
+      }
     }
   }
 
@@ -461,17 +940,33 @@ function initContentScript() {
     }, 50);
   }
 
-  // Keep selected box positioned on resize / scroll
-  function updateSelectedPosition() {
+  // Keep selected box and pins positioned on resize / scroll
+  function updatePositions() {
     if (selectedElement && document.contains(selectedElement)) {
       const rect = selectedElement.getBoundingClientRect();
       positionBox(selectedBox, rect);
     } else {
       selectedBox.style.display = 'none';
     }
+    renderPins();
   }
-  window.addEventListener('scroll', updateSelectedPosition, { passive: true });
-  window.addEventListener('resize', updateSelectedPosition, { passive: true });
+  window.addEventListener('scroll', updatePositions, { passive: true });
+  window.addEventListener('resize', updatePositions, { passive: true });
+
+  // SPA Route Transition Detector (surviving reloads and client navigation)
+  let lastUrl = window.location.href;
+  const checkUrlChange = () => {
+    if (window.location.href !== lastUrl) {
+      lastUrl = window.location.href;
+      loadAnnotations();
+    }
+  };
+  window.addEventListener('popstate', checkUrlChange);
+  window.addEventListener('hashchange', checkUrlChange);
+  setInterval(checkUrlChange, 600);
+
+  // Initial load
+  loadAnnotations();
 
   // Handle incoming messages from Background and Side Panel
   chrome.runtime.onMessage.addListener((message: ExtensionMessage, _sender, sendResponse) => {
@@ -490,6 +985,16 @@ function initContentScript() {
         sendResponse({ active: isPicking });
         break;
 
+      case 'START_MARQUEE_SELECT':
+        setMarqueeMode(true);
+        sendResponse({ success: true, active: true });
+        break;
+
+      case 'STOP_MARQUEE_SELECT':
+        setMarqueeMode(false);
+        sendResponse({ success: true, active: false });
+        break;
+
       case 'HIGHLIGHT_ELEMENT':
         flashHighlight(message.selector, message.dataAt, message.label);
         sendResponse({ success: true });
@@ -501,6 +1006,92 @@ function initContentScript() {
         sendResponse({ success: true });
         break;
 
+      case 'GET_ANNOTATIONS':
+        sendResponse({ success: true, annotations: currentAnnotations });
+        break;
+
+      case 'ADD_ANNOTATION': {
+        const annData = message.annotation;
+        const newIndex = currentAnnotations.length > 0
+          ? Math.max(...currentAnnotations.map((a) => a.index)) + 1
+          : 1;
+
+        const newPin: AnnotationItem = {
+          id: `pin-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+          index: newIndex,
+          pageUrl: window.location.href,
+          selector: annData.selector,
+          sourceLocation: annData.sourceLocation || null,
+          elementName: annData.elementName || 'Element',
+          tagName: annData.tagName || 'div',
+          comment: annData.comment,
+          status: 'open',
+          createdAt: new Date().toISOString(),
+          offset: annData.offset,
+          textContent: annData.textContent,
+        };
+
+        currentAnnotations.push(newPin);
+        saveAnnotations();
+        renderPins();
+        sendResponse({ success: true, annotation: newPin });
+        break;
+      }
+
+      case 'RESOLVE_ANNOTATION': {
+        const pin = currentAnnotations.find(
+          (a) => (message.id && a.id === message.id) || (message.index && a.index === message.index)
+        );
+        if (pin) {
+          pin.status = 'resolved';
+          pin.resolvedAt = new Date().toISOString();
+          if (message.note) pin.resolutionNote = message.note;
+          saveAnnotations();
+          renderPins();
+          sendResponse({ success: true, annotation: pin });
+        } else {
+          sendResponse({ success: false, error: 'Pin not found' });
+        }
+        break;
+      }
+
+      case 'REOPEN_ANNOTATION': {
+        const pin = currentAnnotations.find(
+          (a) => (message.id && a.id === message.id) || (message.index && a.index === message.index)
+        );
+        if (pin) {
+          pin.status = 'open';
+          pin.resolvedAt = undefined;
+          saveAnnotations();
+          renderPins();
+          sendResponse({ success: true, annotation: pin });
+        } else {
+          sendResponse({ success: false, error: 'Pin not found' });
+        }
+        break;
+      }
+
+      case 'DELETE_ANNOTATION': {
+        currentAnnotations = currentAnnotations.filter(
+          (a) => !(message.id && a.id === message.id) && !(message.index && a.index === message.index)
+        );
+        currentAnnotations.forEach((a, i) => {
+          a.index = i + 1;
+        });
+        saveAnnotations();
+        renderPins();
+        sendResponse({ success: true });
+        break;
+      }
+
+      case 'CLEAR_ALL_ANNOTATIONS': {
+        currentAnnotations = [];
+        saveAnnotations();
+        renderPins();
+        sendResponse({ success: true });
+        break;
+      }
+
       case 'APPLY_LIVE_STYLE': {
         if (message.selector && message.property && message.value !== undefined) {
           try {
@@ -508,7 +1099,7 @@ function initContentScript() {
             els.forEach((el) => {
               el.style.setProperty(message.property, message.value);
             });
-            updateSelectedPosition();
+            updatePositions();
             sendResponse({ success: true, count: els.length });
           } catch (err) {
             sendResponse({ success: false, error: String(err) });
@@ -522,7 +1113,7 @@ function initContentScript() {
           try {
             const els = document.querySelectorAll<HTMLElement>(message.selector);
             els.forEach((el) => el.removeAttribute('style'));
-            updateSelectedPosition();
+            updatePositions();
             sendResponse({ success: true });
           } catch {}
         }

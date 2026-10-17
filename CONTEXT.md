@@ -69,10 +69,10 @@ A Chrome Extension cannot be an MCP server directly because browser extensions c
 ## 3. Current Status
 
 ## Current status
-Phase: 5 of 7 (Annotations System).
-Done: Monorepo workspace setup, `@vibe-inspector/shared` contracts & algorithms, `@vibe-inspector/extension` (MV3, Shadow DOM overlay, React 3-tab visual editor), `@vibe-inspector/bridge` (127.0.0.1 WebSocket server, random token auth, Origin header validation, Stdio MCP server, 5 core MCP tools, Bridge Connection Wizard with agent copy-paste configs, and interactive write approval gate), and Phase 4 (Source Mapping: LocatorJS, code-inspector-plugin, Vite / Next.js data-at attributes, deep ancestor-crawling source location resolver, Tailwind CSS class synthesizer, and design token extractor). 30/30 tests passing across all packages.
-In progress: Phase 5 (Annotations System: visual numbered pins, multi-pin stacking, drag-to-select marquee grouping, page-scoped persistence, in-browser resolve/reopen, and bridge MCP annotation tools).
-Next: Phase 6 (Advanced Integrations: axe-core, EyeDropper, Web Vitals).
+Phase: 6 of 7 (Advanced Integrations).
+Done: Monorepo workspace setup, `@vibe-inspector/shared` contracts & algorithms, `@vibe-inspector/extension` (MV3, Shadow DOM overlay, React 4-tab visual editor with Edit/Page/Pins/CSS), `@vibe-inspector/bridge` (127.0.0.1 WebSocket server, random token auth, Origin header validation, Stdio MCP server, 9 MCP tools, Bridge Connection Wizard with agent copy-paste configs, and interactive write approval gate), Phase 4 (Source Mapping: LocatorJS, code-inspector-plugin, Vite / Next.js data-at attributes, deep source location resolver, Tailwind CSS class synthesizer, and design token extractor), and Phase 5 (Annotations System: visual numbered pins, multi-pin stacking with horizontal offsets, drag-to-select marquee grouping capped at 30 outermost ancestors, page-scoped persistence with SPA route detection, in-browser resolve/reopen dialogs, copy prompt exporter, and MCP tools `list_annotations`, `resolve_annotation`, `annotations_to_prompt`, `get_computed_styles`). 36/36 tests passing across all packages.
+In progress: Ready for Phase 6 (Advanced Integrations: axe-core accessibility audit engine, native EyeDropper API color picker, Web Vitals performance summary, and companion MCP guides).
+Next: Phase 6 (Advanced Integrations).
 Blocked: None.
 Last updated: 2026-10-18 by Antigravity Agent.
 
