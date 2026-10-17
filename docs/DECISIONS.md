@@ -1,0 +1,69 @@
+# Architecture Decision Log (ADR)
+
+> Format: Date | Decision | Alternatives Considered | Rationale
+
+---
+
+## ADR-001: Local WebSocket Bridge with Token & Origin Authentication
+
+- **Date:** 2026-10-18
+- **Decision:** Use a standalone local Node.js process acting as a bridge (`127.0.0.1` WebSocket + MCP stdio/SSE server). Authentication requires a first-run random token and verification of the `Origin: chrome-extension://<id>` header.
+- **Alternatives Considered:**
+  1. *Native Messaging*: Requires writing a JSON manifest to Windows registry (`HKCU\Software\Google\Chrome\NativeMessagingHosts`). Adds severe installation friction for quick `npx` execution.
+  2. *Unauthenticated Localhost WebSocket* (as in UI-Inspector): Highly vulnerable to drive-by malicious web pages querying `ws://localhost:<port>`.
+  3. *Direct Extension MCP*: Impossible under browser sandbox constraints (no raw socket listening or stdio access).
+- **Rationale:** A tokenized WebSocket on `127.0.0.1` validating the Chrome extension Origin provides strong security against hostile browser tabs while maintaining frictionless zero-install execution via `npx vibe-inspector-bridge`.
+
+---
+
+## ADR-002: Content Script Isolation via Shadow DOM
+
+- **Date:** 2026-10-18
+- **Decision:** Encapsulate all in-page extension UI (picker hover boxes, selection outlines, numbered pins, feedback dialogs) inside a Shadow DOM attached to `document.documentElement`.
+- **Alternatives Considered:**
+  1. *Direct DOM Injection with Prefixed CSS Classes*: Host page styles (e.g. global `* { box-sizing: border-box; }`, resets, aggressive CSS variables) bleed into the extension, and extension styles can break host layouts.
+  2. *Injected `<iframe>`*: Difficult to position over arbitrary elements, interferes with page scrolling, and heavy on memory.
+- **Rationale:** Shadow DOM provides native CSS encapsulation. The host page cannot modify or inherit styles from our overlay, and our overlay will never mutate the visual presentation of the user's web page.
+
+---
+
+## ADR-003: Extension Build Tooling (Vite + `@crxjs/vite-plugin`)
+
+- **Date:** 2026-10-18
+- **Decision:** Build the Chrome extension using TypeScript and Vite with `@crxjs/vite-plugin`.
+- **Alternatives Considered:**
+  1. *WXT Framework*: High level of abstraction, extra opinionated conventions and runtime dependencies.
+  2. *Webpack*: Slower build times, verbose configuration, heavier bundle output.
+  3. *Unbundled / Vanilla*: Harder to maintain type safety, React UI components, and modern module sharing.
+- **Rationale:** Vite + CRXJS produces clean, lightning-fast Manifest V3 bundles with standard HMR during extension development, full TypeScript support, and zero lock-in.
+
+---
+
+## ADR-004: React 19 Source Mapping via Build-Time Data Attributes
+
+- **Date:** 2026-10-18
+- **Decision:** Target build plugins (`code-inspector-plugin`, `LocatorJS`, custom Vite/Babel plugins) that inject `data-at` or `data-inspector-file` into JSX, supplemented by standard source maps, with an explicit `unmapped` state for arbitrary third-party pages.
+- **Alternatives Considered:**
+  1. *Relying on React Fiber `_debugSource`*: Completely removed in React 19 (PR #28265).
+  2. *Refusing to inspect unmapped pages*: Reduces product value for users who want to tweak external websites or live staging environments.
+- **Rationale:** Build-time DOM attribute injection is future-proof and framework-agnostic. Supporting unmapped styling ensures the extension is useful on any website, not just locally instrumented projects.
+
+---
+
+## ADR-005: Clean-Room Implementation & Original Visual Design
+
+- **Date:** 2026-10-18
+- **Decision:** Write all code from scratch without copying any files from `beyondworks/UI-Inspector`. Design an original, accessible visual interface for the Side Panel and in-page pins.
+- **Alternatives Considered:**
+  1. *Forking UI-Inspector*: The reference repository lacks a license file, posing copyright risk. Its architecture is also tethered to dev server injection rather than an MV3 extension.
+- **Rationale:** Legal clarity, cleaner MV3-native architecture, and superior security.
+
+---
+
+## ADR-006: Explicit User Approval Gate for Agent Write Actions
+
+- **Date:** 2026-10-18
+- **Decision:** Any MCP tool that writes files, modifies source code, or executes mutating commands must prompt the user for interactive confirmation in the Extension Side Panel before the bridge fulfills the request.
+- **Alternatives Considered:**
+  1. *Unrestricted Tool Execution*: Risky if an agent misunderstands context and overwrites files unexpectedly.
+- **Rationale:** Guarantees safety for the developer while retaining the speed of agentic coding.
