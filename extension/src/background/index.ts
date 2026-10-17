@@ -108,6 +108,37 @@ chrome.runtime.onMessage.addListener((message: ExtensionMessage, _sender, sendRe
         break;
       }
 
+      case 'GET_PAGE_INFO': {
+        const tab = await getActiveTab();
+        if (tab?.id) {
+          sendResponse({
+            url: tab.url || '',
+            title: tab.title || '',
+            viewport: { width: tab.width || 1280, height: tab.height || 800 },
+            timestamp: new Date().toISOString(),
+          });
+          return;
+        }
+        sendResponse(null);
+        break;
+      }
+
+      case 'CAPTURE_SCREENSHOT': {
+        const tab = await getActiveTab();
+        if (tab?.windowId) {
+          try {
+            const dataUrl = await chrome.tabs.captureVisibleTab(tab.windowId, { format: 'png' });
+            sendResponse({ success: true, dataUrl });
+            return;
+          } catch (err) {
+            sendResponse({ success: false, error: String(err) });
+            return;
+          }
+        }
+        sendResponse({ success: false, error: 'No active window found' });
+        break;
+      }
+
       case 'ELEMENT_SELECTED':
       case 'ELEMENT_HOVERED':
       case 'PICKER_STATUS': {

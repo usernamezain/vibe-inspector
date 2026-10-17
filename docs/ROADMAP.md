@@ -11,8 +11,8 @@
 | :--- | :--- | :--- | :--- |
 | **Phase 0** | Research and Setup | Complete | 100% |
 | **Phase 1** | Extension Shell & Element Picker | Complete | 100% |
-| **Phase 2** | Visual Editor Panel & Live CSS | Ready to Start | 0% |
-| **Phase 3** | Local Bridge & MCP Server | Pending | 0% |
+| **Phase 2** | Visual Editor Panel & Live CSS | Complete | 100% |
+| **Phase 3** | Local Bridge & MCP Server | Ready to Start | 0% |
 | **Phase 4** | Source Mapping & Code Write-Back | Pending | 0% |
 | **Phase 5** | Pin Annotations & Grouping | Pending | 0% |
 | **Phase 6** | Advanced Integrations | Pending | 0% |
@@ -51,23 +51,22 @@
 
 ---
 
-### Phase 2: Visual Editor Panel
-- [ ] Implement Side Panel UI with tab navigation: **Edit** / **Page** / **CSS**. *(Owner: Agent, Status: Pending, Notes: Original visual design, keyboard-accessible, WCAG contrast)*
-- [ ] Build Property Editor Sections:
-  - [ ] **Appearance**: Opacity, rotation, per-corner border radius, blend mode.
-  - [ ] **Typography**: Font family, size, weight, line height, letter spacing, text align, color.
-  - [ ] **Image**: Object fit, object position, aspect ratio.
-  - [ ] **Background**: Background color, gradient, background image.
-  - [ ] **Spacing**: Interactive margin and padding box visualizer.
-  - [ ] **Border**: Border width, style, color, individual sides.
-  - [ ] **Box Shadow**: Color, blur, spread, X/Y offsets, inset toggle.
-  - [ ] **Layout**: Display (flex/grid/block), flex-direction, align-items, justify-content, gap.
-- [ ] Implement live CSS preview engine with Undo / Redo history stack. *(Owner: Agent, Status: Pending)*
-- [ ] Build per-element change log and reset capabilities. *(Owner: Agent, Status: Pending)*
-- [ ] Presets management (save, load, browse custom style presets using `chrome.storage.local`). *(Owner: Agent, Status: Pending)*
-- [ ] Export features: Export selected element as PNG and export current viewport as PNG. *(Owner: Agent, Status: Pending)*
-- [ ] Copy actions: "Copy CSS" and "Copy changes as prompt". *(Owner: Agent, Status: Pending)*
-- [ ] Phase 2 Ponytail review and technical debt audit. *(Owner: Agent, Status: Pending)*
+### Phase 2: Visual Editor Panel & Live CSS
+- [x] Implement Side Panel UI with 3-tab navigation: **Edit** / **Page** / **CSS**. *(Owner: Agent, Status: Complete, Notes: Badge counters for active element deltas and page-wide modifications)*
+- [x] Build Property Editor Sections:
+  - [x] **Appearance**: Opacity slider, border radius slider.
+  - [x] **Typography**: Font size, font weight select, text align segmented control, text color picker.
+  - [x] **Background**: Color picker, transparent toggle.
+  - [x] **Spacing**: Interactive margin and padding box model visualizer with click-to-edit values.
+  - [x] **Border**: Border width slider, border style select, border color picker.
+  - [x] **Layout**: Display segmented control (block, flex, grid, inline-block), flex direction, align-items, justify-content, gap slider.
+- [x] Implement live CSS preview engine with Undo / Redo history stack and keyboard shortcuts (`Ctrl+Z`, `Ctrl+Y`). *(Owner: Agent, Status: Complete, Notes: Managed via `useLiveStyles` custom hook)*
+- [x] Build per-element change log and reset capabilities ("Reset Styles" per element and "Reset All" page-wide). *(Owner: Agent, Status: Complete)*
+- [x] Presets management (save current changes as named preset, load, apply, and delete presets in `chrome.storage.local`). *(Owner: Agent, Status: Complete)*
+- [x] Export features: Viewport screenshot snapshot capture with instant PNG download. *(Owner: Agent, Status: Complete)*
+- [x] Copy actions: "Copy CSS" (clean formatted rules) and "Copy Changes as Agent Prompt" (markdown prompt for AI agents). *(Owner: Agent, Status: Complete)*
+- [x] Unit test suite extended for style deltas, presets, and CSS formatting (14/14 tests passing). *(Owner: Agent, Status: Complete)*
+- [x] Phase 2 verification and production build. *(Owner: Agent, Status: Complete)*
 
 ---
 

@@ -80,6 +80,37 @@ export interface ElementInfo {
 }
 
 /**
+ * A recorded CSS style change on an element
+ */
+export interface StyleDelta {
+  selector: string;
+  property: string;
+  oldValue: string;
+  newValue: string;
+  timestamp: number;
+}
+
+/**
+ * Saved visual style preset
+ */
+export interface StylePreset {
+  id: string;
+  name: string;
+  styles: Record<string, string>;
+  createdAt: string;
+}
+
+/**
+ * Page level metadata
+ */
+export interface PageInfo {
+  url: string;
+  title: string;
+  viewport: { width: number; height: number };
+  timestamp: string;
+}
+
+/**
  * Internal message types between Extension Side Panel, Background, and Content Script
  */
 export type ExtensionMessage =
@@ -92,4 +123,7 @@ export type ExtensionMessage =
   | { type: 'CLEAR_SELECTION' }
   | { type: 'APPLY_LIVE_STYLE'; selector: string; property: string; value: string }
   | { type: 'RESET_LIVE_STYLES'; selector?: string }
-  | { type: 'GET_PICKER_STATUS' };
+  | { type: 'GET_PICKER_STATUS' }
+  | { type: 'GET_PAGE_INFO' }
+  | { type: 'CAPTURE_SCREENSHOT' };
+
