@@ -103,9 +103,11 @@ export function validateConnection(
     return { authorized: false, reason: 'Missing token in connection query parameters.' };
   }
 
-  // Constant-time comparison to prevent timing attacks
-  const expectedBuf = Buffer.from(expectedToken);
-  const providedBuf = Buffer.from(providedToken);
+  // Constant-time comparison to prevent timing attacks (trimmed of accidental copy-paste whitespace)
+  const cleanProvided = providedToken.trim();
+  const cleanExpected = expectedToken.trim();
+  const expectedBuf = Buffer.from(cleanExpected);
+  const providedBuf = Buffer.from(cleanProvided);
 
   if (expectedBuf.length !== providedBuf.length || !crypto.timingSafeEqual(expectedBuf, providedBuf)) {
     return { authorized: false, reason: 'Invalid authentication token.' };

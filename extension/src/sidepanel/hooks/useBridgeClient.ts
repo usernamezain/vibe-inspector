@@ -49,13 +49,14 @@ export function useBridgeClient({
       wsRef.current = null;
     }
 
-    if (!targetToken) {
+    const cleanToken = (targetToken || '').trim();
+    if (!cleanToken) {
       setConnectionError('Token is required. Run the bridge CLI to get your token.');
       return;
     }
 
     setConnectionError(null);
-    const url = `ws://127.0.0.1:${targetPort}?token=${encodeURIComponent(targetToken)}`;
+    const url = `ws://127.0.0.1:${targetPort}?token=${encodeURIComponent(cleanToken)}`;
 
     try {
       const ws = new WebSocket(url);

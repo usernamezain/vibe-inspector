@@ -16,6 +16,9 @@
   "action": {
     "default_title": "Open Vibe Inspector"
   },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' ws://127.0.0.1:* ws://localhost:* http://127.0.0.1:* http://localhost:*;"
+  },
   "side_panel": {
     "default_path": "sidepanel.html"
   },
