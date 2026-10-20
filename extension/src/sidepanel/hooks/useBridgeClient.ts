@@ -31,21 +31,26 @@ export function useBridgeClient({
   const wsRef = useRef<WebSocket | null>(null);
   const selectedElementRef = useRef<ElementInfo | null>(selectedElement);
   selectedElementRef.current = selectedElement;
+  const shouldReconnectRef = useRef<boolean>(true);
+  const reconnectTimerRef = useRef<any>(null);
+  const heartbeatTimerRef = useRef<any>(null);
 
-  // Load saved connection settings from storage on mount
-  useEffect(() => {
-    try {
-      chrome.storage.local.get(['vibe_bridge_port', 'vibe_bridge_token'], (res) => {
-        if (res?.vibe_bridge_port) setPort(res.vibe_bridge_port);
-        if (res?.vibe_bridge_token) setToken(res.vibe_bridge_token);
-      });
-    } catch {}
-  }, []);
-
-  // Connect to the 127.0.0.1 WebSocket bridge
+  // Connect to the 127.0.0.1 WebSocket bridge with robust lifecycle management
   const connect = useCallback((targetPort = port, targetToken = token) => {
+    shouldReconnectRef.current = true;
+    if (reconnectTimerRef.current) {
+      clearTimeout(reconnectTimerRef.current);
+      reconnectTimerRef.current = null;
+    }
+    if (heartbeatTimerRef.current) {
+      clearInterval(heartbeatTimerRef.current);
+      heartbeatTimerRef.current = null;
+    }
+
     if (wsRef.current) {
-      wsRef.current.close();
+      try {
+        wsRef.current.close();
+      } catch {}
       wsRef.current = null;
     }
 
@@ -65,22 +70,52 @@ export function useBridgeClient({
       ws.onopen = () => {
         setIsConnected(true);
         setConnectionError(null);
-        // Save working settings
+
+        // Persist verified working credentials
         try {
           chrome.storage.local.set({
             vibe_bridge_port: targetPort,
-            vibe_bridge_token: targetToken,
+            vibe_bridge_token: cleanToken,
           });
         } catch {}
+
+        // Start 12s client heartbeat to prevent browser/TCP idle timeout
+        heartbeatTimerRef.current = setInterval(() => {
+          if (ws.readyState === WebSocket.OPEN) {
+            try {
+              ws.send(JSON.stringify({
+                id: crypto.randomUUID(),
+                type: 'HEARTBEAT',
+                timestamp: Date.now(),
+              }));
+            } catch {}
+          }
+        }, 12000);
       };
 
       ws.onclose = () => {
         setIsConnected(false);
+        if (heartbeatTimerRef.current) {
+          clearInterval(heartbeatTimerRef.current);
+          heartbeatTimerRef.current = null;
+        }
+
+        // Silent automatic reconnect every 3s if unexpected disconnection occurs
+        if (shouldReconnectRef.current && cleanToken) {
+          if (!reconnectTimerRef.current) {
+            reconnectTimerRef.current = setTimeout(() => {
+              reconnectTimerRef.current = null;
+              connect(targetPort, cleanToken);
+            }, 3000);
+          }
+        }
       };
 
       ws.onerror = () => {
         setIsConnected(false);
-        setConnectionError('Could not connect to bridge at ws://127.0.0.1:' + targetPort);
+        if (!shouldReconnectRef.current) {
+          setConnectionError('Could not connect to bridge at ws://127.0.0.1:' + targetPort);
+        }
       };
 
       ws.onmessage = (event) => {
@@ -96,9 +131,43 @@ export function useBridgeClient({
     }
   }, [port, token]);
 
+  // Load saved connection settings from storage and auto-connect on mount
+  useEffect(() => {
+    try {
+      chrome.storage.local.get(['vibe_bridge_port', 'vibe_bridge_token'], (res) => {
+        const savedPort = res?.vibe_bridge_port || 7890;
+        const savedToken = (res?.vibe_bridge_token || '').trim();
+        if (savedPort) setPort(savedPort);
+        if (savedToken) {
+          setToken(savedToken);
+          // Auto-connect with saved token
+          connect(savedPort, savedToken);
+        }
+      });
+    } catch {}
+
+    return () => {
+      shouldReconnectRef.current = false;
+      if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
+      if (heartbeatTimerRef.current) clearInterval(heartbeatTimerRef.current);
+      if (wsRef.current) {
+        try { wsRef.current.close(); } catch {}
+      }
+    };
+  }, []);
+
   const disconnect = useCallback(() => {
+    shouldReconnectRef.current = false;
+    if (reconnectTimerRef.current) {
+      clearTimeout(reconnectTimerRef.current);
+      reconnectTimerRef.current = null;
+    }
+    if (heartbeatTimerRef.current) {
+      clearInterval(heartbeatTimerRef.current);
+      heartbeatTimerRef.current = null;
+    }
     if (wsRef.current) {
-      wsRef.current.close();
+      try { wsRef.current.close(); } catch {}
       wsRef.current = null;
     }
     setIsConnected(false);
@@ -107,13 +176,17 @@ export function useBridgeClient({
   // Broadcast element selection updates to connected bridge
   useEffect(() => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      const msg: BridgeMessage = {
-        id: crypto.randomUUID(),
-        type: 'SELECTION_CHANGED',
-        payload: selectedElement,
-        timestamp: Date.now(),
-      };
-      wsRef.current.send(JSON.stringify(msg));
+      try {
+        const msg: BridgeMessage = {
+          id: crypto.randomUUID(),
+          type: 'SELECTION_CHANGED',
+          payload: selectedElement,
+          timestamp: Date.now(),
+        };
+        wsRef.current.send(JSON.stringify(msg));
+      } catch (err) {
+        console.warn('[Vibe Inspector Bridge Client] Failed to broadcast selection:', err);
+      }
     }
   }, [selectedElement]);
 

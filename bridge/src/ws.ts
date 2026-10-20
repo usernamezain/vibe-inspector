@@ -71,13 +71,28 @@ export class BridgeWebSocketServer extends EventEmitter {
           try {
             const raw = typeof data === 'string' ? data : data.toString('utf-8');
             const msg = JSON.parse(raw) as BridgeMessage;
+            if (msg.type === 'HEARTBEAT') {
+              return;
+            }
             this.handleIncomingMessage(msg);
           } catch (err) {
             console.error('[Vibe Inspector Bridge] Failed to parse client message:', err);
           }
         });
 
+        // 15s server ping keepalive
+        const pingInterval = setInterval(() => {
+          if (ws.readyState === WebSocket.OPEN) {
+            try {
+              ws.ping();
+            } catch {}
+          } else {
+            clearInterval(pingInterval);
+          }
+        }, 15000);
+
         ws.on('close', () => {
+          clearInterval(pingInterval);
           console.log('[Vibe Inspector Bridge] Chrome Extension disconnected.');
           if (this.activeClient === ws) {
             this.activeClient = null;
