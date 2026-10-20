@@ -263,7 +263,7 @@ Ensure changes match the project's styling system (Tailwind classes or CSS/SCSS 
       {tailwindClasses && (
         <div className="property-group-card">
           <div className="section-header-flex">
-            <div className="group-title" style={{ color: '#38bdf8' }}>
+            <div className="group-title">
               Synthesized Tailwind Classes
             </div>
             <button
@@ -274,7 +274,7 @@ Ensure changes match the project's styling system (Tailwind classes or CSS/SCSS 
             </button>
           </div>
           <div className="code-box-row">
-            <span className="code-text" style={{ color: '#38bdf8' }}>
+            <span className="code-text">
               {tailwindClasses}
             </span>
           </div>
@@ -285,7 +285,7 @@ Ensure changes match the project's styling system (Tailwind classes or CSS/SCSS 
       {Object.keys(currentProps).length > 0 && (
         <div className="property-group-card">
           <div className="section-header-flex">
-            <div className="group-title" style={{ color: '#818cf8' }}>
+            <div className="group-title">
               React Style Object
             </div>
             <button

@@ -516,28 +516,28 @@ export const PageTab: FC<PageTabProps> = ({
 
         {webVitals ? (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
-            <div style={{ background: 'var(--vi-surface-input)', padding: '8px', borderRadius: '6px', border: '1px solid var(--vi-border-subtle)' }}>
+            <div style={{ background: 'var(--vi-surface-input)', padding: '8px', borderRadius: '4px', border: '1px solid var(--vi-border-subtle)' }}>
               <div style={{ fontSize: '10px', color: 'var(--vi-text-secondary)' }}>LCP (Largest Paint)</div>
-              <div style={{ fontSize: '12px', fontWeight: 600, color: getLcpBadge(webVitals.lcp).color, marginTop: '2px' }}>
+              <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--vi-text-primary)', marginTop: '2px' }}>
                 {getLcpBadge(webVitals.lcp).text}
               </div>
             </div>
 
-            <div style={{ background: 'var(--vi-surface-input)', padding: '8px', borderRadius: '6px', border: '1px solid var(--vi-border-subtle)' }}>
+            <div style={{ background: 'var(--vi-surface-input)', padding: '8px', borderRadius: '4px', border: '1px solid var(--vi-border-subtle)' }}>
               <div style={{ fontSize: '10px', color: 'var(--vi-text-secondary)' }}>CLS (Layout Shift)</div>
-              <div style={{ fontSize: '12px', fontWeight: 600, color: getClsBadge(webVitals.cls).color, marginTop: '2px' }}>
+              <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--vi-text-primary)', marginTop: '2px' }}>
                 {getClsBadge(webVitals.cls).text}
               </div>
             </div>
 
-            <div style={{ background: 'var(--vi-surface-input)', padding: '8px', borderRadius: '6px', border: '1px solid var(--vi-border-subtle)' }}>
+            <div style={{ background: 'var(--vi-surface-input)', padding: '8px', borderRadius: '4px', border: '1px solid var(--vi-border-subtle)' }}>
               <div style={{ fontSize: '10px', color: 'var(--vi-text-secondary)' }}>FCP (First Paint)</div>
-              <div style={{ fontSize: '12px', fontWeight: 600, color: getFcpBadge(webVitals.fcp).color, marginTop: '2px' }}>
+              <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--vi-text-primary)', marginTop: '2px' }}>
                 {getFcpBadge(webVitals.fcp).text}
               </div>
             </div>
 
-            <div style={{ background: 'var(--vi-surface-input)', padding: '8px', borderRadius: '6px', border: '1px solid var(--vi-border-subtle)' }}>
+            <div style={{ background: 'var(--vi-surface-input)', padding: '8px', borderRadius: '4px', border: '1px solid var(--vi-border-subtle)' }}>
               <div style={{ fontSize: '10px', color: 'var(--vi-text-secondary)' }}>TTFB (Server Response)</div>
               <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--vi-text-primary)', marginTop: '2px' }}>
                 {webVitals.ttfb ? `${webVitals.ttfb} ms` : 'N/A'}
@@ -556,7 +556,15 @@ export const PageTab: FC<PageTabProps> = ({
           <button
             onClick={handleRunA11yAudit}
             className="btn-action-small"
-            style={{ padding: '3px 8px', fontSize: '11px', background: isAuditing ? 'var(--vi-accent-base)' : 'var(--vi-surface-input)', color: '#ffffff' }}
+            style={{
+              padding: '4px 8px',
+              fontSize: '11px',
+              background: isAuditing ? '#000000' : '#ffffff',
+              color: isAuditing ? '#ffffff' : '#09090b',
+              border: '1px solid ' + (isAuditing ? '#000000' : '#d4d4d8'),
+              borderRadius: '4px',
+              cursor: isAuditing ? 'not-allowed' : 'pointer',
+            }}
             disabled={isAuditing}
           >
             {isAuditing ? 'Scanning...' : 'Run WCAG Audit'}
@@ -618,7 +626,7 @@ export const PageTab: FC<PageTabProps> = ({
                     style={{
                       background: 'var(--vi-surface-base)',
                       padding: '8px',
-                      borderRadius: '6px',
+                      borderRadius: '4px',
                       border: '1px solid var(--vi-border-subtle)',
                       fontSize: '11px',
                     }}

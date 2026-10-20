@@ -64,10 +64,10 @@ function initContentScript() {
 
     .vibe-hover-box {
       position: fixed;
-      border: 2px solid #6366f1;
-      background: rgba(99, 102, 241, 0.08);
-      border-radius: 3px;
-      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.9), 0 4px 16px rgba(99, 102, 241, 0.25);
+      border: 2px solid #000000;
+      background: rgba(0, 0, 0, 0.04);
+      border-radius: 4px;
+      box-shadow: none;
       pointer-events: none;
       display: none;
       transition: all 0.06s cubic-bezier(0.16, 1, 0.3, 1);
@@ -75,10 +75,10 @@ function initContentScript() {
 
     .vibe-selected-box {
       position: fixed;
-      border: 2px solid #10b981;
-      background: rgba(16, 185, 129, 0.08);
-      border-radius: 3px;
-      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.95), 0 4px 18px rgba(16, 185, 129, 0.3);
+      border: 2px solid #000000;
+      background: rgba(0, 0, 0, 0.06);
+      border-radius: 4px;
+      box-shadow: none;
       pointer-events: none;
       display: none;
     }
@@ -88,47 +88,48 @@ function initContentScript() {
       display: none;
       align-items: center;
       gap: 6px;
-      background: #18181b;
-      color: #fafafa;
-      padding: 5px 10px;
-      border-radius: 6px;
+      background: #000000;
+      color: #ffffff;
+      padding: 4px 8px;
+      border-radius: 4px;
       font-size: 11px;
       font-weight: 500;
       line-height: 1.3;
       white-space: nowrap;
       pointer-events: none;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
+      box-shadow: none;
       z-index: 2147483647;
+      border: 1px solid #000000;
     }
 
     .vibe-badge-term {
-      background: #6366f1;
-      color: #ffffff;
-      padding: 1px 6px;
-      border-radius: 4px;
+      background: #ffffff;
+      color: #000000;
+      padding: 1px 5px;
+      border-radius: 3px;
       font-size: 10px;
-      font-weight: 600;
+      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.04em;
     }
 
     .vibe-badge-name {
       font-weight: 600;
-      color: #e4e4e7;
+      color: #ffffff;
     }
 
     .vibe-badge-dim {
-      color: #a1a1aa;
+      color: #d4d4d8;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       font-size: 10px;
     }
 
     .vibe-highlight-flash {
       position: fixed;
-      border: 2px solid #f43f5e;
-      background: rgba(244, 63, 94, 0.12);
+      border: 2px solid #000000;
+      background: rgba(0, 0, 0, 0.08);
       border-radius: 4px;
-      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.95), 0 4px 20px rgba(244, 63, 94, 0.4);
+      box-shadow: none;
       pointer-events: none;
       transition: opacity 0.3s ease;
       z-index: 2147483647;
@@ -136,14 +137,14 @@ function initContentScript() {
 
     .vibe-highlight-label {
       position: fixed;
-      background: #f43f5e;
+      background: #000000;
       color: #ffffff;
-      padding: 4px 10px;
-      border-radius: 999px;
+      padding: 3px 8px;
+      border-radius: 4px;
       font-size: 11px;
       font-weight: 600;
       pointer-events: none;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      box-shadow: none;
       z-index: 2147483647;
       transition: opacity 0.3s ease;
     }
@@ -161,14 +162,15 @@ function initContentScript() {
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: #6366f1;
+      width: 22px;
+      height: 22px;
+      border-radius: 4px;
+      background: #000000;
       color: #ffffff;
       font-size: 11px;
       font-weight: 700;
-      box-shadow: 0 0 0 2px #ffffff, 0 3px 10px rgba(99, 102, 241, 0.45);
+      border: 1.5px solid #ffffff;
+      box-shadow: none;
       cursor: pointer;
       pointer-events: auto;
       z-index: 2147483647;
@@ -177,24 +179,27 @@ function initContentScript() {
     }
 
     .vibe-pin-marker:hover {
-      transform: scale(1.18);
+      transform: scale(1.1);
+      background: #27272a;
     }
 
     .vibe-pin-marker.resolved {
-      background: #10b981;
-      box-shadow: 0 0 0 2px #ffffff, 0 3px 10px rgba(16, 185, 129, 0.35);
-      opacity: 0.9;
+      background: #ffffff;
+      color: #000000;
+      border: 1.5px solid #000000;
+      box-shadow: none;
+      opacity: 1;
     }
 
     .vibe-pin-popover {
       position: fixed;
-      background: #18181b;
-      color: #f4f4f5;
-      border: 1px solid #27272a;
-      border-radius: 8px;
+      background: #ffffff;
+      color: #09090b;
+      border: 1px solid #e4e4e7;
+      border-radius: 5px;
       padding: 12px;
       width: 280px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+      box-shadow: none;
       pointer-events: auto;
       z-index: 2147483647;
       display: flex;
@@ -207,14 +212,14 @@ function initContentScript() {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid #27272a;
+      border-bottom: 1px solid #e4e4e7;
       padding-bottom: 6px;
     }
 
     .vibe-pin-popover-title {
       font-weight: 600;
       font-size: 12px;
-      color: #ffffff;
+      color: #09090b;
       display: flex;
       align-items: center;
       gap: 6px;
@@ -229,19 +234,21 @@ function initContentScript() {
     }
 
     .vibe-pin-popover-status.open {
-      background: rgba(99, 102, 241, 0.2);
-      color: #818cf8;
+      background: #f4f4f5;
+      color: #09090b;
+      border: 1px solid #e4e4e7;
     }
 
     .vibe-pin-popover-status.resolved {
-      background: rgba(16, 185, 129, 0.2);
-      color: #34d399;
+      background: #f0fdf4;
+      color: #166534;
+      border: 1px solid #bbf7d0;
     }
 
     .vibe-pin-popover-close {
       background: transparent;
       border: none;
-      color: #a1a1aa;
+      color: #71717a;
       cursor: pointer;
       font-size: 14px;
       line-height: 1;
@@ -249,22 +256,22 @@ function initContentScript() {
     }
 
     .vibe-pin-popover-close:hover {
-      color: #ffffff;
+      color: #000000;
     }
 
     .vibe-pin-popover-body {
-      color: #d4d4d8;
+      color: #09090b;
       line-height: 1.4;
       white-space: pre-wrap;
       word-break: break-word;
     }
 
     .vibe-pin-popover-note {
-      background: #27272a;
+      background: #f4f4f5;
       border-radius: 4px;
       padding: 6px 8px;
       font-size: 11px;
-      color: #a1a1aa;
+      color: #52525b;
       font-style: italic;
     }
 
@@ -280,48 +287,52 @@ function initContentScript() {
       font-size: 11px;
       font-weight: 500;
       border-radius: 4px;
-      border: none;
+      border: 1px solid #e4e4e7;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 4px;
-      transition: background 0.1s ease;
+      transition: all 0.1s ease;
     }
 
     .vibe-pin-btn-resolve {
-      background: #10b981;
+      background: #000000;
       color: #ffffff;
+      border-color: #000000;
     }
 
     .vibe-pin-btn-resolve:hover {
-      background: #059669;
+      background: #27272a;
     }
 
     .vibe-pin-btn-reopen {
-      background: #6366f1;
-      color: #ffffff;
+      background: #f4f4f5;
+      color: #000000;
+      border-color: #d4d4d8;
     }
 
     .vibe-pin-btn-reopen:hover {
-      background: #4f46e5;
+      background: #e4e4e7;
     }
 
     .vibe-pin-btn-delete {
-      background: #27272a;
-      color: #f43f5e;
-      border: 1px solid #3f3f46;
+      background: #ffffff;
+      color: #09090b;
+      border: 1px solid #d4d4d8;
     }
 
     .vibe-pin-btn-delete:hover {
-      background: rgba(244, 63, 94, 0.15);
+      background: #f4f4f5;
+      border-color: #000000;
     }
 
     /* Marquee Selection & Group Outlines */
     .vibe-marquee-box {
       position: fixed;
-      border: 2px dashed #6366f1;
-      background: rgba(99, 102, 241, 0.12);
+      border: 1.5px dashed #000000;
+      background: rgba(0, 0, 0, 0.04);
+      border-radius: 4px;
       pointer-events: none;
       display: none;
       z-index: 2147483647;
@@ -329,8 +340,8 @@ function initContentScript() {
 
     .vibe-group-outline {
       position: fixed;
-      border: 2px dashed #ec4899;
-      background: rgba(236, 72, 153, 0.08);
+      border: 1.5px dashed #000000;
+      background: rgba(0, 0, 0, 0.03);
       border-radius: 4px;
       pointer-events: none;
       z-index: 2147483647;

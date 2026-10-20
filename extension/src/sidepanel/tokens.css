@@ -1,53 +1,53 @@
 /* Vibe Inspector Design Tokens
- * Master CSS Custom Properties for Dark and Light Themes
+ * Master CSS Custom Properties - Minimalist Monochrome (Black & White)
  */
 
 :root {
-  /* Surfaces & Backgrounds (Dark Theme Default) */
-  --vi-surface-base: #131418;
-  --vi-surface-card: #1a1b20;
-  --vi-surface-input: #22242a;
-  --vi-surface-input-hover: #282a32;
-  --vi-surface-elevated: #2d3039;
-  --vi-surface-active: #333642;
+  /* Surfaces & Backgrounds (Pure Minimalist White Base) */
+  --vi-surface-base: #ffffff;
+  --vi-surface-card: #ffffff;
+  --vi-surface-input: #f4f4f5;
+  --vi-surface-input-hover: #eaeaea;
+  --vi-surface-elevated: #ffffff;
+  --vi-surface-active: #000000;
 
-  /* Borders & Dividers */
-  --vi-border-subtle: #262832;
-  --vi-border-input: #323542;
-  --vi-border-focus: #7c8cf8;
+  /* Crisp Borders & Dividers */
+  --vi-border-subtle: #e4e4e7;
+  --vi-border-input: #d4d4d8;
+  --vi-border-focus: #000000;
 
-  /* Text & Labels */
-  --vi-text-primary: #f0f2f8;
-  --vi-text-secondary: #9da2b4;
-  --vi-text-muted: #5e6375;
-  --vi-text-disabled: #434656;
+  /* Pure High-Contrast Monochrome Text */
+  --vi-text-primary: #09090b;
+  --vi-text-secondary: #52525b;
+  --vi-text-muted: #71717a;
+  --vi-text-disabled: #a1a1aa;
   --vi-text-mono: "JetBrains Mono", "SF Mono", "Fira Code", Menlo, Monaco, Consolas, monospace;
 
-  /* Accent (Soft Periwinkle Blue) */
-  --vi-accent-base: #7c8cf8;
-  --vi-accent-hover: #929ff9;
-  --vi-accent-subtle: rgba(124, 140, 248, 0.12);
-  --vi-accent-glow: rgba(124, 140, 248, 0.25);
-  --vi-accent-dot: #818cf8;
+  /* Accent (Solid Minimalist Black & White - Zero Blue) */
+  --vi-accent-base: #000000;
+  --vi-accent-hover: #27272a;
+  --vi-accent-subtle: #f4f4f5;
+  --vi-accent-glow: transparent;
+  --vi-accent-dot: #000000;
 
-  /* Semantic Feedback */
-  --vi-status-success: #34d399;
-  --vi-status-success-bg: rgba(52, 211, 153, 0.12);
-  --vi-status-warning: #fbbf24;
-  --vi-status-warning-bg: rgba(251, 191, 36, 0.12);
-  --vi-status-danger: #f87171;
-  --vi-status-danger-bg: rgba(248, 113, 113, 0.12);
+  /* Semantic Feedback (Crisp & Clean Minimalist) */
+  --vi-status-success: #166534;
+  --vi-status-success-bg: #f0fdf4;
+  --vi-status-warning: #854d0e;
+  --vi-status-warning-bg: #fefce8;
+  --vi-status-danger: #991b1b;
+  --vi-status-danger-bg: #fef2f2;
 
-  /* Radii */
-  --vi-radius-sm: 6px;
-  --vi-radius-md: 8px;
-  --vi-radius-lg: 12px;
-  --vi-radius-pill: 9999px;
+  /* Radii (Clean engineered 4px to 5px across all elements) */
+  --vi-radius-sm: 4px;
+  --vi-radius-md: 4px;
+  --vi-radius-lg: 5px;
+  --vi-radius-pill: 4px;
 
-  /* Shadows */
-  --vi-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --vi-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
-  --vi-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+  /* Zero Shadows & Zero Glow */
+  --vi-shadow-sm: none;
+  --vi-shadow-md: none;
+  --vi-shadow-lg: none;
 
   /* Spacing Scale */
   --vi-space-1: 4px;
@@ -57,38 +57,39 @@
   --vi-space-5: 20px;
   --vi-space-6: 24px;
 
-  /* Motion & Timings */
+  /* Smooth Motion & Timings */
   --vi-duration-fast: 120ms;
-  --vi-duration-normal: 180ms;
-  --vi-duration-slow: 240ms;
+  --vi-duration-normal: 160ms;
+  --vi-duration-slow: 200ms;
   --vi-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Light Theme (Honors prefers-color-scheme or manual toggle) */
-[data-theme="light"] {
-  --vi-surface-base: #f8f9fc;
+/* Explicit Light/Dark aliases ensure uniform black & white consistency */
+[data-theme="light"],
+[data-theme="dark"] {
+  --vi-surface-base: #ffffff;
   --vi-surface-card: #ffffff;
-  --vi-surface-input: #f1f3f7;
-  --vi-surface-input-hover: #e8ecf2;
+  --vi-surface-input: #f4f4f5;
+  --vi-surface-input-hover: #eaeaea;
   --vi-surface-elevated: #ffffff;
-  --vi-surface-active: #e2e6ee;
+  --vi-surface-active: #000000;
 
-  --vi-border-subtle: #e5e8ef;
-  --vi-border-input: #d6dae3;
-  --vi-border-focus: #5d6ff4;
+  --vi-border-subtle: #e4e4e7;
+  --vi-border-input: #d4d4d8;
+  --vi-border-focus: #000000;
 
-  --vi-text-primary: #181a20;
-  --vi-text-secondary: #585e70;
-  --vi-text-muted: #959cb0;
-  --vi-text-disabled: #bcc2d2;
+  --vi-text-primary: #09090b;
+  --vi-text-secondary: #52525b;
+  --vi-text-muted: #71717a;
+  --vi-text-disabled: #a1a1aa;
 
-  --vi-accent-base: #5d6ff4;
-  --vi-accent-hover: #4a5df2;
-  --vi-accent-subtle: rgba(93, 111, 244, 0.10);
-  --vi-accent-glow: rgba(93, 111, 244, 0.20);
-  --vi-accent-dot: #5d6ff4;
+  --vi-accent-base: #000000;
+  --vi-accent-hover: #27272a;
+  --vi-accent-subtle: #f4f4f5;
+  --vi-accent-glow: transparent;
+  --vi-accent-dot: #000000;
 
-  --vi-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --vi-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --vi-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --vi-shadow-sm: none;
+  --vi-shadow-md: none;
+  --vi-shadow-lg: none;
 }

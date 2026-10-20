@@ -113,7 +113,7 @@ export const BridgeWizardModal: FC<BridgeWizardModalProps> = ({
               </div>
               <div className="approval-detail-row">
                 <span className="approval-key">New Value</span>
-                <span className="approval-val font-mono" style={{ color: '#38bdf8' }}>
+                <span className="approval-val font-mono" style={{ color: '#000000' }}>
                   {pendingApproval.value}
                 </span>
               </div>

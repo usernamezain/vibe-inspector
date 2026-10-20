@@ -286,10 +286,10 @@ export default function App() {
           style={{
             margin: '0 var(--panel-padding, 12px) 10px',
             padding: '8px 10px',
-            background: 'rgba(239, 68, 68, 0.12)',
-            border: '1px solid rgba(239, 68, 68, 0.35)',
-            borderRadius: '6px',
-            color: '#f87171',
+            background: '#f4f4f5',
+            border: '1px solid #000000',
+            borderRadius: '4px',
+            color: '#09090b',
             fontSize: '11px',
             lineHeight: 1.4,
             display: 'flex',
@@ -304,7 +304,7 @@ export default function App() {
             style={{
               background: 'transparent',
               border: 'none',
-              color: '#f87171',
+              color: '#09090b',
               cursor: 'pointer',
               padding: '0 2px',
               fontSize: '12px',
