@@ -1,4 +1,4 @@
-import { ElementNameInfo, ElementNameSource, SourceLocation } from './types';
+import { ElementNameInfo, ElementNameSource, SourceLocation } from './types.js';
 
 /**
  * Resolves element naming following the 12-tier priority waterfall:

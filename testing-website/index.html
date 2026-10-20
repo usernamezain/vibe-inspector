@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vibe Inspector — Test Bed Site</title>
+  <style>
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f4f4f5;
+      --text-primary: #09090b;
+      --text-muted: #71717a;
+      --border-color: #e4e4e7;
+      --accent-color: #18181b;
+      --radius-sm: 4px;
+      --radius-md: 6px;
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+      --font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--font-family-base);
+      line-height: 1.6;
+      padding: var(--space-xl);
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: var(--space-lg);
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: var(--space-xl);
+    }
+
+    .brand {
+      font-size: 1.25rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .brand-badge {
+      background: var(--accent-color);
+      color: #ffffff;
+      padding: 2px 8px;
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    nav {
+      display: flex;
+      gap: var(--space-md);
+      align-items: center;
+    }
+
+    nav a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.15s ease;
+    }
+
+    nav a:hover {
+      color: var(--text-primary);
+    }
+
+    .hero {
+      text-align: left;
+      padding: var(--space-xl) 0;
+    }
+
+    .hero h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      line-height: 1.15;
+      margin-bottom: var(--space-md);
+    }
+
+    .hero p {
+      font-size: 1.125rem;
+      color: var(--text-muted);
+      max-width: 640px;
+      margin-bottom: var(--space-lg);
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: var(--space-md);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 18px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      min-width: 44px;
+      min-height: 44px;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--accent-color);
+      color: #ffffff;
+      border: 1px solid var(--accent-color);
+    }
+
+    .btn-primary:hover {
+      background: #27272a;
+      border-color: #27272a;
+    }
+
+    .btn-secondary {
+      background: #ffffff;
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-secondary);
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: var(--space-lg);
+      margin: var(--space-xl) 0;
+    }
+
+    .card {
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: var(--space-lg);
+      background: #ffffff;
+      transition: border-color 0.15s ease;
+    }
+
+    .card:hover {
+      border-color: var(--text-primary);
+    }
+
+    .card h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: var(--space-xs);
+    }
+
+    .card p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    .interactive-section {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: var(--space-lg);
+      margin: var(--space-xl) 0;
+    }
+
+    .interactive-section h2 {
+      font-size: 1.25rem;
+      margin-bottom: var(--space-sm);
+    }
+
+    .form-group {
+      display: flex;
+      gap: var(--space-sm);
+      margin-top: var(--space-md);
+      max-width: 480px;
+    }
+
+    .input-text {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      color: var(--text-primary);
+      background: #ffffff;
+      outline: none;
+    }
+
+    .input-text:focus {
+      border-color: var(--accent-color);
+    }
+
+    footer {
+      border-top: 1px solid var(--border-color);
+      padding-top: var(--space-lg);
+      margin-top: var(--space-xl);
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <header data-source="src/components/Header.tsx:10:3">
+    <div class="brand" id="brand-logo" data-source="src/components/Header.tsx:12:5">
+      <span>Vibe Test Bed</span>
+      <span class="brand-badge" id="badge-version">v2.0</span>
+    </div>
+    <nav data-source="src/components/Navigation.tsx:8:3">
+      <a href="#features" id="nav-features">Features</a>
+      <a href="#test-section" id="nav-test">Inspector</a>
+      <a href="#audit" id="nav-audit">Audit</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" id="hero-section" data-source="src/components/Hero.tsx:15:3">
+      <h1 id="hero-title" data-source="src/components/Hero.tsx:16:5">Local Visual Inspection &amp; Agent Tooling</h1>
+      <p id="hero-subtitle" data-source="src/components/Hero.tsx:17:5">
+        A lightweight, single-page test environment for validating Vibe Inspector Chrome Extension and MCP bridge interactions.
+      </p>
+      <div class="hero-actions" data-source="src/components/Hero.tsx:20:5">
+        <button class="btn btn-primary" id="btn-primary-action" data-source="src/components/Hero.tsx:21:7">
+          Pick Element
+        </button>
+        <button class="btn btn-secondary" id="btn-secondary-action" data-source="src/components/Hero.tsx:24:7">
+          View Diagnostics
+        </button>
+      </div>
+    </section>
+
+    <section class="cards-grid" id="features">
+      <article class="card" id="card-selection" data-source="src/components/FeatureCard.tsx:12:3">
+        <h3>DOM Selection</h3>
+        <p>Validates element bounding rect, box model, CSS tree, and React source locator mapping.</p>
+      </article>
+
+      <article class="card" id="card-qa" data-source="src/components/FeatureCard.tsx:18:3">
+        <h3>WCAG QA</h3>
+        <p>Checks contrast ratios, minimum 44px tap targets, and accessibility tree landmarks.</p>
+      </article>
+
+      <article class="card" id="card-mutation" data-source="src/components/FeatureCard.tsx:24:3">
+        <h3>Live Mutation</h3>
+        <p>Applies style edits, synthesizes Tailwind and React styles, and verifies changes safely.</p>
+      </article>
+    </section>
+
+    <section class="interactive-section" id="test-section" data-source="src/components/InteractiveForm.tsx:14:3">
+      <h2>Interactive Form Inspection</h2>
+      <p>Test input focus states, token violations, and box models.</p>
+      <div class="form-group">
+        <label for="sample-input" class="sr-only" style="display:none;">Test Input</label>
+        <input type="text" id="sample-input" class="input-text" placeholder="Enter sample style value..." value="padding: 16px;">
+        <button class="btn btn-primary" id="btn-submit" type="button">Apply</button>
+      </div>
+    </section>
+  </main>
+
+  <footer id="footer-section" data-source="src/components/Footer.tsx:8:3">
+    <p>&copy; 2026 Vibe Inspector Test Suite. Built for AI Agent Pair Programming.</p>
+  </footer>
+</body>
+</html>

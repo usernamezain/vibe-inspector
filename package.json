@@ -2,6 +2,7 @@
   "name": "vibe-inspector-monorepo",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "description": "Chrome Extension visual element inspector and MCP bridge for AI coding agents",
   "scripts": {
     "build:shared": "pnpm --filter @vibe-inspector/shared build",
@@ -9,6 +10,9 @@
     "build:bridge": "pnpm --filter @vibe-inspector/bridge build",
     "build": "pnpm build:shared && pnpm build:bridge && pnpm build:extension",
     "test": "vitest run",
+    "test:site": "vitest run testing-website/mcp-testbed.test.ts",
+    "test:site:run": "node testing-website/run-test.js",
+    "serve:site": "node testing-website/serve.js",
     "dev:extension": "pnpm --filter @vibe-inspector/extension dev"
   },
   "devDependencies": {
