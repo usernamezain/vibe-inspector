@@ -894,19 +894,24 @@ export const EditTab: FC<EditTabProps> = ({
             <div className="vi-field-row">
               <span className="vi-field-label">Text Align</span>
               <div className="vi-segmented-control">
-                {(['left', 'center', 'right', 'justify'] as const).map((align) => (
-                  <button
-                    key={align}
-                    className={`vi-segmented-btn ${getVal('textAlign') === align ? 'is-active' : ''}`}
-                    onClick={() => handlePropertyChange('text-align', 'textAlign', align)}
-                    title={`Align ${align}`}
-                  >
-                    {align === 'left' && SVG_ICONS.alignLeft}
-                    {align === 'center' && SVG_ICONS.alignCenter}
-                    {align === 'right' && SVG_ICONS.alignRight}
-                    {align === 'justify' && SVG_ICONS.alignJustify}
-                  </button>
-                ))}
+                {(['left', 'center', 'right', 'justify'] as const).map((align) => {
+                  const rawAlign = getVal('textAlign', 'left');
+                  const activeAlign = rawAlign === 'start' ? 'left' : rawAlign === 'end' ? 'right' : rawAlign;
+                  return (
+                    <button
+                      key={align}
+                      type="button"
+                      className={`vi-segmented-btn ${activeAlign === align ? 'is-active' : ''}`}
+                      onClick={() => handlePropertyChange('text-align', 'textAlign', align)}
+                      title={`Align ${align}`}
+                    >
+                      {align === 'left' && SVG_ICONS.alignLeft}
+                      {align === 'center' && SVG_ICONS.alignCenter}
+                      {align === 'right' && SVG_ICONS.alignRight}
+                      {align === 'justify' && SVG_ICONS.alignJustify}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 

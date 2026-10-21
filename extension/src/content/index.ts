@@ -2231,7 +2231,36 @@ function initContentScript() {
             const els = document.querySelectorAll<HTMLElement>(message.selector);
             els.forEach((el) => {
               const prev = el.getAttribute('style') || '';
-              el.style.setProperty(message.property, message.value);
+              if (!message.value) {
+                el.style.removeProperty(message.property);
+              } else {
+                el.style.setProperty(message.property, message.value, 'important');
+              }
+
+              // Special handling for text-align to ensure it visually moves content on any element:
+              if (message.property === 'text-align' && message.value) {
+                const comp = window.getComputedStyle(el);
+                // 1. If inline element (span, a, strong, label), text-align has no width to align within
+                if (comp.display === 'inline') {
+                  el.style.setProperty('display', 'inline-block', 'important');
+                  el.style.setProperty('width', '100%', 'important');
+                }
+                // 2. If flex container, map alignment to justify-content as well
+                if (comp.display === 'flex' || comp.display === 'inline-flex') {
+                  const flexAlignMap: Record<string, string> = {
+                    left: 'flex-start',
+                    start: 'flex-start',
+                    center: 'center',
+                    right: 'flex-end',
+                    end: 'flex-end',
+                    justify: 'space-between',
+                  };
+                  if (flexAlignMap[message.value]) {
+                    el.style.setProperty('justify-content', flexAlignMap[message.value], 'important');
+                  }
+                }
+              }
+
               const next = el.getAttribute('style') || '';
               toolbar?.notifyStyleApplied(el, prev, next, `${message.property}: ${message.value}`);
             });
