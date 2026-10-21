@@ -150,3 +150,17 @@
 - **Alternatives Considered:**
   1. *In-Page Canvas Diffing in Content Script*: Heavy CPU/memory usage freezes the host page UI and can trigger browser tab crashes on 4K displays.
 - **Rationale:** Offloading image comparison to the Node.js bridge protects browser tab responsiveness and leverages native Node performance.
+
+---
+
+## ADR-015: Robust PNG Export Pipeline via `chrome.downloads` & In-Memory Blob Fallback
+
+- **Date:** 2026-10-21
+- **Decision:** Use a resilient two-tier download pipeline for PNG element and viewport exports:
+  1. Primary: Extension background service worker invokes `chrome.downloads.download({ url: dataUrl, filename })` with `"downloads"` manifest permission.
+  2. Fallback: If `chrome.downloads` is restricted, errors on data URIs, or fails, background script routes a `TRIGGER_PAGE_DOWNLOAD` message to the active webpage's content script context. The content script converts the data URL into an in-memory `Blob` and creates a temporary `URL.createObjectURL(blob)`, completely bypassing Chrome's "Not allowed to navigate top frame to data URL" security block.
+- **Alternatives Considered:**
+  1. *Direct `<a href="data:image/png;base64,...">` in Side Panel*: Chrome sandbox restricts top-frame navigation to data URLs in extension sidepanels, causing silent export failures.
+  2. *Writing files to local disk via Bridge stdio*: Adds unnecessary bridge dependency when the user only wants an immediate browser download.
+- **Rationale:** Guarantees 100% reliable image exports across all Chrome security contexts with zero reliance on the bridge server.
+

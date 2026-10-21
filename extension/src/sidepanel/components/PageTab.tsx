@@ -28,9 +28,44 @@ export const PageTab: FC<PageTabProps> = ({
   const [disableAnimationsActive, setDisableAnimationsActive] = useState(false);
   const [colorScheme, setColorScheme] = useState<'system' | 'dark' | 'light'>('system');
 
-  // Responsive Width Presets State
+  // Responsive Viewport Presets State (Feature 10: Device Frame Simulator & Breakpoint Ruler)
   const [activeWidth, setActiveWidth] = useState<number | null>(null);
   const [customWidthInput, setCustomWidthInput] = useState('');
+  const [isLandscape, setIsLandscape] = useState(false);
+  const [activeDevice, setActiveDevice] = useState<string | null>(null);
+
+  const DEVICE_FRAMES = [
+    { id: 'iphone', name: 'iPhone 15', portrait: 393, landscape: 852 },
+    { id: 'ipad', name: 'iPad Mini', portrait: 768, landscape: 1024 },
+    { id: 'laptop', name: 'Laptop', portrait: 1024, landscape: 1280 },
+    { id: 'desktop', name: 'Desktop', portrait: 1440, landscape: 1440 },
+  ];
+
+  const BREAKPOINT_RULER = [
+    { label: 'xs', px: 480 },
+    { label: 'sm', px: 640 },
+    { label: 'md', px: 768 },
+    { label: 'lg', px: 1024 },
+    { label: 'xl', px: 1280 },
+    { label: '2xl', px: 1536 },
+  ];
+
+  const handleSelectDevice = (dev: (typeof DEVICE_FRAMES)[0]) => {
+    setActiveDevice(dev.id);
+    const targetWidth = isLandscape ? dev.landscape : dev.portrait;
+    handleSetWidth(targetWidth);
+  };
+
+  const handleToggleOrientation = () => {
+    const nextLandscape = !isLandscape;
+    setIsLandscape(nextLandscape);
+    if (activeDevice) {
+      const dev = DEVICE_FRAMES.find((d) => d.id === activeDevice);
+      if (dev) {
+        handleSetWidth(nextLandscape ? dev.landscape : dev.portrait);
+      }
+    }
+  };
 
   // Page Design Metrics State
   const [designSummary, setDesignSummary] = useState<PageDesignSummary | null>(null);
@@ -206,10 +241,11 @@ export const PageTab: FC<PageTabProps> = ({
 
   const handleDownloadScreenshot = () => {
     if (!screenshotUrl) return;
-    const a = document.createElement('a');
-    a.href = screenshotUrl;
-    a.download = `vibe-inspector-screenshot-${Date.now()}.png`;
-    a.click();
+    chrome.runtime.sendMessage({
+      type: 'DOWNLOAD_PNG',
+      dataUrl: screenshotUrl,
+      filename: `vibe-inspector-screenshot-${Date.now()}.png`,
+    });
   };
 
   const copyColor = (hex: string) => {
@@ -287,60 +323,80 @@ export const PageTab: FC<PageTabProps> = ({
         </div>
       </div>
 
-      {/* 2. Responsive Viewport Presets */}
+      {/* 2. Device Frame Simulator & Breakpoint Ruler (Feature 10) */}
       <div className="property-group-card">
         <div className="section-header-flex">
-          <div className="group-title">Responsive Preview Presets</div>
-          {activeWidth && (
+          <div className="group-title">Device Simulator & Rulers</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <button
-              className="vi-btn-ghost-sm"
-              onClick={() => handleSetWidth(null)}
-              title="Reset viewport constraint to 100%"
+              type="button"
+              className={`vi-btn-ghost-sm ${isLandscape ? 'is-active' : ''}`}
+              onClick={handleToggleOrientation}
+              title={`Switch orientation (${isLandscape ? 'Landscape' : 'Portrait'})`}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
             >
-              Reset (100%)
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="5" y="2" width="14" height="20" rx="2" ry="2" transform={isLandscape ? 'rotate(90 12 12)' : undefined} />
+                <line x1="12" y1="18" x2="12" y2="18" />
+              </svg>
+              <span>{isLandscape ? 'Landscape' : 'Portrait'}</span>
             </button>
-          )}
+            {activeWidth && (
+              <button
+                type="button"
+                className="vi-btn-ghost-sm"
+                onClick={() => {
+                  setActiveDevice(null);
+                  handleSetWidth(null);
+                }}
+                title="Reset viewport constraint to 100%"
+              >
+                Reset
+              </button>
+            )}
+          </div>
         </div>
+
+        {/* Device Frame Presets */}
         <div className="vi-responsive-grid">
-          <button
-            className={`vi-responsive-btn ${activeWidth === 320 ? 'active' : ''}`}
-            onClick={() => handleSetWidth(activeWidth === 320 ? null : 320)}
-          >
-            <span>Mobile</span>
-            <span className="vi-responsive-sub">320px</span>
-          </button>
+          {DEVICE_FRAMES.map((dev) => {
+            const currentW = isLandscape ? dev.landscape : dev.portrait;
+            const isSelected = activeDevice === dev.id || activeWidth === currentW;
+            return (
+              <button
+                key={dev.id}
+                type="button"
+                className={`vi-responsive-btn ${isSelected ? 'active' : ''}`}
+                onClick={() => handleSelectDevice(dev)}
+                title={`Simulate ${dev.name} (${currentW}px)`}
+              >
+                <span>{dev.name}</span>
+                <span className="vi-responsive-sub">{currentW}px</span>
+              </button>
+            );
+          })}
+        </div>
 
-          <button
-            className={`vi-responsive-btn ${activeWidth === 375 ? 'active' : ''}`}
-            onClick={() => handleSetWidth(activeWidth === 375 ? null : 375)}
-          >
-            <span>iPhone</span>
-            <span className="vi-responsive-sub">375px</span>
-          </button>
-
-          <button
-            className={`vi-responsive-btn ${activeWidth === 768 ? 'active' : ''}`}
-            onClick={() => handleSetWidth(activeWidth === 768 ? null : 768)}
-          >
-            <span>Tablet</span>
-            <span className="vi-responsive-sub">768px</span>
-          </button>
-
-          <button
-            className={`vi-responsive-btn ${activeWidth === 1024 ? 'active' : ''}`}
-            onClick={() => handleSetWidth(activeWidth === 1024 ? null : 1024)}
-          >
-            <span>Laptop</span>
-            <span className="vi-responsive-sub">1024px</span>
-          </button>
-
-          <button
-            className={`vi-responsive-btn ${activeWidth === 1440 ? 'active' : ''}`}
-            onClick={() => handleSetWidth(activeWidth === 1440 ? null : 1440)}
-          >
-            <span>Desktop</span>
-            <span className="vi-responsive-sub">1440px</span>
-          </button>
+        {/* Breakpoint Ruler Strip */}
+        <div className="vi-breakpoint-ruler-wrap" style={{ marginTop: '10px' }}>
+          <span className="vi-field-label" style={{ marginBottom: '4px' }}>Breakpoint Ruler:</span>
+          <div className="vi-breakpoint-chips">
+            {BREAKPOINT_RULER.map((bp) => (
+              <button
+                key={bp.label}
+                type="button"
+                className={`vi-breakpoint-chip ${activeWidth === bp.px ? 'is-active' : ''}`}
+                onClick={() => {
+                  setActiveDevice(null);
+                  handleSetWidth(bp.px);
+                }}
+                title={`Snap to ${bp.label} breakpoint (${bp.px}px)`}
+              >
+                <strong>{bp.label}</strong>
+                <span>{bp.px}</span>
+              </button>
+            ))}
+          </div>
         </div>
 
         <form onSubmit={handleApplyCustomWidth} style={{ display: 'flex', gap: '6px', marginTop: '8px' }}>

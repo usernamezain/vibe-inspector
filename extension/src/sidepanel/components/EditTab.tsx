@@ -4,6 +4,16 @@ import { ScrubbableInput } from './ScrubbableInput';
 import { SpacingBox } from './SpacingBox';
 import { PresetsModal } from './PresetsModal';
 import { FONT_LIBRARY } from '../constants/fontLibrary';
+import { calculateContrastRatio, autoFixColor } from '../utils/contrast';
+import {
+  MICRO_INTERACTIONS,
+  GRADIENT_PRESETS,
+  MULTI_SHADOW_PRESETS,
+  serializeShadowLayers,
+  ShadowLayer,
+  MicroInteractionPreset,
+  DEFAULT_PALETTE,
+} from '../constants/microInteractions';
 
 interface EditTabProps {
   element: ElementInfo;
@@ -179,6 +189,50 @@ const SVG_ICONS = {
       <line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="3" y2="18"/>
     </svg>
   ),
+  vscode: (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M23.15 2.587L18.21.21a1.494 1.494 0 0 0-1.705.29l-9.46 8.63-4.12-3.128a.999.999 0 0 0-1.276.057L.327 7.261A1 1 0 0 0 .32 8.653L4.4 12 .32 15.347a1 1 0 0 0 .007 1.392l1.322 1.202a1 1 0 0 0 1.276.057l4.12-3.128 9.46 8.63a1.492 1.492 0 0 0 1.704.29l4.942-2.377A1.5 1.5 0 0 0 24 20.06V3.939a1.5 1.5 0 0 0-.85-1.352zM18.5 16.5l-8-4.5 8-4.5v9z"/>
+    </svg>
+  ),
+  cursor: (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="3 3 10.07 19.97 12.58 12.58 19.97 10.07 3 3" />
+    </svg>
+  ),
+  bot: (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="11" width="18" height="10" rx="2" />
+      <circle cx="12" cy="5" r="2" />
+      <path d="M12 7v4" />
+      <line x1="8" y1="16" x2="8" y2="16" />
+      <line x1="16" y1="16" x2="16" y2="16" />
+    </svg>
+  ),
+  split: (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="12" y1="3" x2="12" y2="21" />
+      <polyline points="8 8 4 12 8 16" />
+      <polyline points="16 8 20 12 16 16" />
+    </svg>
+  ),
+  contrast: (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 18a6 6 0 0 0 0-12v12z" fill="currentColor" />
+    </svg>
+  ),
+  sparkles: (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+    </svg>
+  ),
+  glass: (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect width="18" height="18" x="3" y="3" rx="2" />
+      <line x1="3" y1="9" x2="21" y2="9" />
+      <line x1="9" y1="21" x2="9" y2="9" />
+    </svg>
+  ),
 };
 
 interface BoxShadowParts {
@@ -274,6 +328,27 @@ export const EditTab: FC<EditTabProps> = ({
   const [gapLinked, setGapLinked] = useState(true);
   const [borderLinked, setBorderLinked] = useState(true);
 
+  // 10 Features Additions
+  const [forcedState, setForcedState] = useState<'none' | 'hover' | 'focus' | 'active'>('none');
+  const [activeMicroInteraction, setActiveMicroInteraction] = useState<string | null>(null);
+  const [isShowingOriginalDiff, setIsShowingOriginalDiff] = useState(false);
+  const [copiedAIPrompt, setCopiedAIPrompt] = useState(false);
+  const [copiedEditorTip, setCopiedEditorTip] = useState(false);
+  const [recentColors, setRecentColors] = useState<string[]>(DEFAULT_PALETTE);
+  const [backgroundMode, setBackgroundMode] = useState<'solid' | 'gradient'>('solid');
+  const [gradientType, setGradientType] = useState<'linear' | 'radial'>('linear');
+  const [gradientAngle, setGradientAngle] = useState(135);
+  const [gradientStop1, setGradientStop1] = useState('#6366f1');
+  const [gradientStop2, setGradientStop2] = useState('#ec4899');
+  const [gradientPos1, setGradientPos1] = useState(0);
+  const [gradientPos2, setGradientPos2] = useState(100);
+  const [shadowMode, setShadowMode] = useState<'simple' | 'multi'>('simple');
+  const [multiShadowLayers, setMultiShadowLayers] = useState<ShadowLayer[]>([
+    { x: 0, y: 4, blur: 12, spread: 0, color: 'rgba(0, 0, 0, 0.15)', inset: false },
+    { x: 0, y: 10, blur: 24, spread: -4, color: 'rgba(99, 102, 241, 0.2)', inset: false },
+  ]);
+  const [isGlassmorphic, setIsGlassmorphic] = useState(false);
+
   // Collapsible Optional Sections
   const [activeSections, setActiveSections] = useState<Record<string, boolean>>({
     image: false,
@@ -295,16 +370,19 @@ export const EditTab: FC<EditTabProps> = ({
     export: false,
   });
 
-  // Load sensitivity and collapsed states from chrome.storage
+  // Load sensitivity, collapsed states, and recent colors from chrome.storage
   useEffect(() => {
     if (typeof chrome !== 'undefined' && chrome.storage?.local) {
-      chrome.storage.local.get(['vibe_sensitivity', 'vibe_sections'], (res) => {
+      chrome.storage.local.get(['vibe_sensitivity', 'vibe_sections', 'vibe_recent_colors'], (res) => {
         if (typeof res?.vibe_sensitivity === 'number') {
           setSensitivity(res.vibe_sensitivity);
         }
         if (res?.vibe_sections) {
           setActiveSections((prev) => ({ ...prev, ...res.vibe_sections.active, boxShadow: true }));
           setCollapsedSections((prev) => ({ ...prev, ...res.vibe_sections.collapsed }));
+        }
+        if (Array.isArray(res?.vibe_recent_colors) && res.vibe_recent_colors.length > 0) {
+          setRecentColors(res.vibe_recent_colors);
         }
       });
     }
@@ -434,36 +512,196 @@ export const EditTab: FC<EditTabProps> = ({
     }
   };
 
+  const addRecentColor = (color: string) => {
+    if (!color || color === 'transparent') return;
+    setRecentColors((prev) => {
+      const next = [color, ...prev.filter((c) => c.toLowerCase() !== color.toLowerCase())].slice(0, 14);
+      if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+        chrome.storage.local.set({ vibe_recent_colors: next });
+      }
+      return next;
+    });
+  };
+
+  const handleSelectBreadcrumb = (selector: string) => {
+    chrome.runtime.sendMessage({ type: 'SELECT_BY_SELECTOR', selector });
+  };
+
+  const handleOpenEditor = (editor: 'vscode' | 'cursor') => {
+    const file = element.sourceLocation?.file;
+    const line = element.sourceLocation?.line || 1;
+    const col = element.sourceLocation?.column || 1;
+    if (file) {
+      window.open(`${editor}://file/${file}:${line}:${col}`);
+    } else {
+      const query = element.elementName?.componentName || element.selector;
+      navigator.clipboard.writeText(query);
+      setCopiedEditorTip(true);
+      setTimeout(() => setCopiedEditorTip(false), 2000);
+    }
+  };
+
+  const handleCopyAIPrompt = () => {
+    const entries = Object.entries(modifiedProps);
+    const fileLocation = element.sourceLocation
+      ? `${element.sourceLocation.file}:${element.sourceLocation.line || 1}`
+      : 'Source Code';
+    const lines = [
+      `### 🎨 Style Update Request for AI Coding Assistant`,
+      `**Target Element:** <${element.tag}> ("${element.elementName?.primary || element.selector}")`,
+      `**CSS Selector:** \`${element.selector}\``,
+      `**Source Location:** \`${fileLocation}\``,
+      '',
+      '#### Modified CSS Properties:',
+      ...entries.map(([k, v]) => `- \`${k}\`: \`${v}\``),
+      '',
+      'Please update the corresponding JSX/TSX/CSS component styles in the project to apply these exact visual refinements.',
+    ];
+    navigator.clipboard.writeText(lines.join('\n'));
+    setCopiedAIPrompt(true);
+    setTimeout(() => setCopiedAIPrompt(false), 2000);
+  };
+
+  const handleToggleDiff = () => {
+    const next = !isShowingOriginalDiff;
+    setIsShowingOriginalDiff(next);
+    chrome.runtime.sendMessage({
+      type: 'TOGGLE_ELEMENT_DIFF',
+      selector: element.selector,
+      showOriginal: next,
+    });
+  };
+
+  const handleForcePseudoState = (state: 'none' | 'hover' | 'focus' | 'active') => {
+    setForcedState(state);
+    chrome.runtime.sendMessage({
+      type: 'FORCE_PSEUDO_STATE',
+      selector: element.selector,
+      state,
+    });
+  };
+
+  const handleApplyMicroInteraction = (preset: MicroInteractionPreset) => {
+    setActiveMicroInteraction(preset.id);
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const tabId = tabs[0]?.id;
+      if (tabId && chrome.scripting?.executeScript) {
+        chrome.scripting.executeScript({
+          target: { tabId },
+          func: (kfs: string, id: string) => {
+            const styleId = `vi-anim-${id}`;
+            if (!document.getElementById(styleId)) {
+              const el = document.createElement('style');
+              el.id = styleId;
+              el.textContent = kfs;
+              document.head.appendChild(el);
+            }
+          },
+          args: [preset.keyframes, preset.id],
+        });
+      }
+    });
+    handlePropertyChange('animation', 'animation', preset.cssAnimation);
+  };
+
+  const handleClearMicroInteraction = () => {
+    setActiveMicroInteraction(null);
+    handleResetProperty('animation');
+  };
+
+  const handleApplyGradient = (
+    type = gradientType,
+    angle = gradientAngle,
+    c1 = gradientStop1,
+    p1 = gradientPos1,
+    c2 = gradientStop2,
+    p2 = gradientPos2
+  ) => {
+    const css =
+      type === 'linear'
+        ? `linear-gradient(${angle}deg, ${c1} ${p1}%, ${c2} ${p2}%)`
+        : `radial-gradient(circle at center, ${c1} ${p1}%, ${c2} ${p2}%)`;
+    handlePropertyChange('background-image', 'backgroundImage', css);
+  };
+
+  const handleApplyGradientPreset = (preset: (typeof GRADIENT_PRESETS)[0]) => {
+    setGradientType(preset.type);
+    setGradientAngle(preset.angle);
+    if (preset.stops[0]) {
+      setGradientStop1(preset.stops[0].color);
+      setGradientPos1(preset.stops[0].offset);
+    }
+    if (preset.stops[1]) {
+      setGradientStop2(preset.stops[1].color);
+      setGradientPos2(preset.stops[1].offset);
+    }
+    handlePropertyChange('background-image', 'backgroundImage', preset.css);
+  };
+
+  const handleToggleGlassmorphism = () => {
+    const next = !isGlassmorphic;
+    setIsGlassmorphic(next);
+    if (next) {
+      handlePropertyChange('backdrop-filter', 'backdropFilter', 'blur(16px)');
+      handlePropertyChange('-webkit-backdrop-filter', 'WebkitBackdropFilter', 'blur(16px)');
+      handlePropertyChange('background', 'background', 'rgba(255, 255, 255, 0.12)');
+      handlePropertyChange('border', 'border', '1px solid rgba(255, 255, 255, 0.25)');
+      handlePropertyChange('box-shadow', 'boxShadow', '0 8px 32px 0 rgba(31, 38, 135, 0.18)');
+    } else {
+      handleResetProperty('backdrop-filter');
+      handleResetProperty('-webkit-backdrop-filter');
+      handleResetProperty('background');
+      handleResetProperty('border');
+      handleResetProperty('box-shadow');
+    }
+  };
+
+  const handleAddShadowLayer = () => {
+    const newLayer: ShadowLayer = { x: 0, y: 8, blur: 16, spread: 0, color: 'rgba(0, 0, 0, 0.2)', inset: false };
+    const next = [...multiShadowLayers, newLayer];
+    setMultiShadowLayers(next);
+    handlePropertyChange('box-shadow', 'boxShadow', serializeShadowLayers(next));
+  };
+
+  const handleRemoveShadowLayer = (index: number) => {
+    const next = multiShadowLayers.filter((_, i) => i !== index);
+    setMultiShadowLayers(next);
+    handlePropertyChange('box-shadow', 'boxShadow', serializeShadowLayers(next));
+  };
+
+  const handleUpdateShadowLayer = (index: number, key: keyof ShadowLayer, value: any) => {
+    const next = multiShadowLayers.map((l, i) => (i === index ? { ...l, [key]: value } : l));
+    setMultiShadowLayers(next);
+    handlePropertyChange('box-shadow', 'boxShadow', serializeShadowLayers(next));
+  };
+
+  const handleApplyShadowPreset = (preset: (typeof MULTI_SHADOW_PRESETS)[0]) => {
+    setMultiShadowLayers(preset.layers);
+    handlePropertyChange('box-shadow', 'boxShadow', serializeShadowLayers(preset.layers));
+  };
+
   // Export element snapshot
   const handleExportElement = () => {
     setIsExportingElement(true);
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      const tabId = tabs[0]?.id;
-      if (tabId) {
-        chrome.tabs.sendMessage(
-          tabId,
-          {
-            type: 'EXPORT_ELEMENT_PNG',
-            selector: element.selector,
-            scale: exportScale,
-            transparent: exportTransparent,
-          },
-          (res) => {
-            setIsExportingElement(false);
-            if (res?.dataUrl) {
-              const a = document.createElement('a');
-              a.href = res.dataUrl;
-              a.download = `element-${element.tag || 'export'}-${Date.now()}.png`;
-              document.body.appendChild(a);
-              a.click();
-              document.body.removeChild(a);
-            }
-          }
-        );
-      } else {
+    chrome.runtime.sendMessage(
+      {
+        type: 'EXPORT_ELEMENT_PNG',
+        selector: element.selector,
+        scale: exportScale,
+        transparent: exportTransparent,
+      },
+      (res) => {
         setIsExportingElement(false);
+        if (res?.dataUrl) {
+          const filename = `element-${(element.tag || 'export').toLowerCase()}-${Date.now()}.png`;
+          chrome.runtime.sendMessage({
+            type: 'DOWNLOAD_PNG',
+            dataUrl: res.dataUrl,
+            filename,
+          });
+        }
       }
-    });
+    );
   };
 
   // Export viewport snapshot
@@ -472,12 +710,12 @@ export const EditTab: FC<EditTabProps> = ({
     chrome.runtime.sendMessage({ type: 'CAPTURE_TAB_PNG' }, (res) => {
       setIsExportingViewport(false);
       if (res?.dataUrl) {
-        const a = document.createElement('a');
-        a.href = res.dataUrl;
-        a.download = `viewport-${Date.now()}.png`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        const filename = `viewport-${Date.now()}.png`;
+        chrome.runtime.sendMessage({
+          type: 'DOWNLOAD_PNG',
+          dataUrl: res.dataUrl,
+          filename,
+        });
       }
     });
   };
@@ -495,6 +733,30 @@ export const EditTab: FC<EditTabProps> = ({
 
   return (
     <div className="vi-edit-tab">
+      {/* Interactive DOM Tree Breadcrumbs (Feature 5) */}
+      {element.parentChain && element.parentChain.length > 0 && (
+        <div className="vi-dom-breadcrumbs-bar" title="DOM Hierarchy - Click ancestor to inspect">
+          <div className="vi-dom-breadcrumbs-scroll">
+            {element.parentChain.map((ancestor, idx) => (
+              <React.Fragment key={idx}>
+                <button
+                  type="button"
+                  className="vi-breadcrumb-chip"
+                  onClick={() => handleSelectBreadcrumb(ancestor)}
+                  title={`Inspect ancestor: ${ancestor}`}
+                >
+                  {ancestor}
+                </button>
+                <span className="vi-breadcrumb-sep">/</span>
+              </React.Fragment>
+            ))}
+            <span className="vi-breadcrumb-chip current" title="Current inspected element">
+              {element.tag}{element.id ? `#${element.id}` : ''}
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* 1. Element Header & Hierarchy Navigator */}
       <div className="vi-element-card">
         <div className="vi-element-card-top">
@@ -549,6 +811,51 @@ export const EditTab: FC<EditTabProps> = ({
             {SVG_ICONS.highlight} <span>Highlight</span>
           </button>
         </div>
+
+        {/* Quick Action Strip: Open in VS Code/Cursor (Feature 4), AI Prompt (Feature 7), Diff Before/After (Feature 8) */}
+        <div className="vi-action-chips-strip">
+          <button
+            type="button"
+            className="vi-action-chip"
+            onClick={() => handleOpenEditor('vscode')}
+            title={element.sourceLocation?.file ? `Open ${element.sourceLocation.file} in VS Code` : 'Copy element location for VS Code'}
+          >
+            {SVG_ICONS.vscode}
+            <span>VS Code</span>
+          </button>
+          <button
+            type="button"
+            className="vi-action-chip"
+            onClick={() => handleOpenEditor('cursor')}
+            title={element.sourceLocation?.file ? `Open ${element.sourceLocation.file} in Cursor` : 'Copy element location for Cursor'}
+          >
+            {SVG_ICONS.cursor}
+            <span>Cursor</span>
+          </button>
+          <button
+            type="button"
+            className={`vi-action-chip ${copiedAIPrompt ? 'is-success' : ''}`}
+            onClick={handleCopyAIPrompt}
+            title="Copy prompt with all modified CSS changes formatted for AI coding agents"
+          >
+            {copiedAIPrompt ? SVG_ICONS.check : SVG_ICONS.bot}
+            <span>{copiedAIPrompt ? 'Prompt Copied!' : 'Prompt AI'}</span>
+          </button>
+          <button
+            type="button"
+            className={`vi-action-chip ${isShowingOriginalDiff ? 'is-active-diff' : ''}`}
+            onClick={handleToggleDiff}
+            title="Temporarily toggle between original styles and live edits to see diff"
+          >
+            {SVG_ICONS.split}
+            <span>{isShowingOriginalDiff ? 'Showing Original' : 'Visual Diff'}</span>
+          </button>
+        </div>
+        {copiedEditorTip && (
+          <div className="vi-toast-banner">
+            Copied component identifier to clipboard! Search in your editor (Ctrl/Cmd+P or Shift+F).
+          </div>
+        )}
       </div>
 
       {/* 2. Sensitivity Slider & Presets Toolbar */}
@@ -583,6 +890,58 @@ export const EditTab: FC<EditTabProps> = ({
           >
             {SVG_ICONS.save}
           </button>
+        </div>
+      </div>
+
+      {/* 3. Forced Pseudo-States (:hover, :focus, :active) & Micro-Interactions (Feature 3) */}
+      <div className="vi-interactions-card">
+        <div className="vi-interactions-row">
+          <div className="vi-interactions-label">
+            <span>State:</span>
+          </div>
+          <div className="vi-segmented-control" style={{ flex: 1 }}>
+            {(['none', 'hover', 'focus', 'active'] as const).map((st) => (
+              <button
+                key={st}
+                type="button"
+                className={`vi-segmented-btn ${forcedState === st ? 'is-active' : ''}`}
+                onClick={() => handleForcePseudoState(st)}
+                title={`Force ${st === 'none' ? 'normal' : `:${st}`} pseudo-state`}
+              >
+                {st === 'none' ? 'Normal' : `:${st}`}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="vi-interactions-row" style={{ marginTop: '8px', alignItems: 'flex-start' }}>
+          <div className="vi-interactions-label" style={{ paddingTop: '4px' }}>
+            {SVG_ICONS.sparkles}
+            <span>FX:</span>
+          </div>
+          <div className="vi-micro-chips-wrap">
+            {MICRO_INTERACTIONS.map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                className={`vi-micro-chip ${activeMicroInteraction === m.id ? 'is-active' : ''}`}
+                onClick={() => handleApplyMicroInteraction(m)}
+                title={m.description}
+              >
+                {m.name}
+              </button>
+            ))}
+            {activeMicroInteraction && (
+              <button
+                type="button"
+                className="vi-micro-chip is-clear"
+                onClick={handleClearMicroInteraction}
+                title="Remove animation"
+              >
+                Reset FX
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -915,7 +1274,7 @@ export const EditTab: FC<EditTabProps> = ({
               </div>
             </div>
 
-            {/* Text Color & EyeDropper */}
+            {/* Text Color, Contrast Checker (Feature 6), & Swatches (Feature 9) */}
             <div className="vi-field-row">
               <span className="vi-field-label">Color</span>
               <div className="vi-color-picker-group">
@@ -923,13 +1282,19 @@ export const EditTab: FC<EditTabProps> = ({
                   type="color"
                   className="vi-color-swatch"
                   value={getVal('color', '#ffffff').slice(0, 7)}
-                  onChange={(e) => handlePropertyChange('color', 'color', e.target.value)}
+                  onChange={(e) => {
+                    handlePropertyChange('color', 'color', e.target.value);
+                    addRecentColor(e.target.value);
+                  }}
                 />
                 <input
                   type="text"
                   className="vi-input-mono"
                   value={getVal('color', '#ffffff')}
-                  onChange={(e) => handlePropertyChange('color', 'color', e.target.value)}
+                  onChange={(e) => {
+                    handlePropertyChange('color', 'color', e.target.value);
+                    addRecentColor(e.target.value);
+                  }}
                 />
                 <button
                   className="vi-eyedropper-btn"
@@ -938,6 +1303,58 @@ export const EditTab: FC<EditTabProps> = ({
                 >
                   {SVG_ICONS.eyedropper}
                 </button>
+              </div>
+            </div>
+
+            {/* WCAG Contrast Ratio Checker & Auto-Fix AA (Feature 6) */}
+            {(() => {
+              const curColor = getVal('color', element.computedStyles.color || 'rgb(0, 0, 0)');
+              const curBg = getVal('backgroundColor', element.computedStyles.backgroundColor || 'rgb(255, 255, 255)');
+              const cResult = calculateContrastRatio(curColor, curBg);
+              return (
+                <div className="vi-contrast-card">
+                  <div className="vi-contrast-left">
+                    <span className="vi-contrast-icon">{SVG_ICONS.contrast}</span>
+                    <span className="vi-contrast-label">Contrast:</span>
+                    <span className={`vi-contrast-badge is-${cResult.badgeLevel}`}>
+                      {cResult.badgeText}
+                    </span>
+                  </div>
+                  {!cResult.aaNormal && (
+                    <button
+                      type="button"
+                      className="vi-btn-autofix"
+                      onClick={() => {
+                        const fixed = autoFixColor(curColor, curBg, 4.5);
+                        handlePropertyChange('color', 'color', fixed);
+                        addRecentColor(fixed);
+                      }}
+                      title="Adjust foreground color lightness to pass WCAG AA (>= 4.5:1 ratio)"
+                    >
+                      Auto-Fix AA
+                    </button>
+                  )}
+                </div>
+              );
+            })()}
+
+            {/* Quick Swatches / Recent Colors (Feature 9) */}
+            <div className="vi-swatches-row">
+              <span className="vi-swatches-label">Palette:</span>
+              <div className="vi-swatches-wrap">
+                {recentColors.map((colorHex, idx) => (
+                  <button
+                    key={`${colorHex}-${idx}`}
+                    type="button"
+                    className="vi-color-circle"
+                    style={{ backgroundColor: colorHex }}
+                    onClick={() => {
+                      handlePropertyChange('color', 'color', colorHex);
+                      addRecentColor(colorHex);
+                    }}
+                    title={`Apply ${colorHex}`}
+                  />
+                ))}
               </div>
             </div>
           </div>
@@ -1024,30 +1441,228 @@ export const EditTab: FC<EditTabProps> = ({
 
         {activeSections.background && !collapsedSections.background && (
           <div className="vi-section-content">
-            <div className="vi-field-row">
-              <span className="vi-field-label">Color</span>
-              <div className="vi-color-picker-group">
-                <input
-                  type="color"
-                  className="vi-color-swatch"
-                  value={getVal('backgroundColor', '#1a1b20').slice(0, 7)}
-                  onChange={(e) => handlePropertyChange('background-color', 'backgroundColor', e.target.value)}
-                />
-                <input
-                  type="text"
-                  className="vi-input-mono"
-                  value={getVal('backgroundColor', '#1a1b20')}
-                  onChange={(e) => handlePropertyChange('background-color', 'backgroundColor', e.target.value)}
-                />
+            {/* Background Mode: Solid Color vs CSS Gradient (Feature 2) */}
+            <div className="vi-field-row" style={{ marginBottom: '8px' }}>
+              <span className="vi-field-label">Type</span>
+              <div className="vi-segmented-control" style={{ flex: 1 }}>
                 <button
-                  className="vi-eyedropper-btn"
-                  onClick={() => handleEyeDropper('background-color', 'backgroundColor')}
-                  title="Sample screen color"
+                  type="button"
+                  className={`vi-segmented-btn ${backgroundMode === 'solid' ? 'is-active' : ''}`}
+                  onClick={() => setBackgroundMode('solid')}
                 >
-                  {SVG_ICONS.eyedropper}
+                  Solid Color
+                </button>
+                <button
+                  type="button"
+                  className={`vi-segmented-btn ${backgroundMode === 'gradient' ? 'is-active' : ''}`}
+                  onClick={() => {
+                    setBackgroundMode('gradient');
+                    handleApplyGradient();
+                  }}
+                >
+                  CSS Gradient
                 </button>
               </div>
             </div>
+
+            {backgroundMode === 'solid' ? (
+              <>
+                <div className="vi-field-row">
+                  <span className="vi-field-label">Color</span>
+                  <div className="vi-color-picker-group">
+                    <input
+                      type="color"
+                      className="vi-color-swatch"
+                      value={getVal('backgroundColor', '#1a1b20').slice(0, 7)}
+                      onChange={(e) => {
+                        handlePropertyChange('background-color', 'backgroundColor', e.target.value);
+                        addRecentColor(e.target.value);
+                      }}
+                    />
+                    <input
+                      type="text"
+                      className="vi-input-mono"
+                      value={getVal('backgroundColor', '#1a1b20')}
+                      onChange={(e) => {
+                        handlePropertyChange('background-color', 'backgroundColor', e.target.value);
+                        addRecentColor(e.target.value);
+                      }}
+                    />
+                    <button
+                      className="vi-eyedropper-btn"
+                      onClick={() => handleEyeDropper('background-color', 'backgroundColor')}
+                      title="Sample screen color"
+                    >
+                      {SVG_ICONS.eyedropper}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Quick Swatches for Background (Feature 9) */}
+                <div className="vi-swatches-row">
+                  <span className="vi-swatches-label">Palette:</span>
+                  <div className="vi-swatches-wrap">
+                    {recentColors.map((colorHex, idx) => (
+                      <button
+                        key={`bg-${colorHex}-${idx}`}
+                        type="button"
+                        className="vi-color-circle"
+                        style={{ backgroundColor: colorHex }}
+                        onClick={() => {
+                          handlePropertyChange('background-color', 'backgroundColor', colorHex);
+                          addRecentColor(colorHex);
+                        }}
+                        title={`Apply ${colorHex}`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </>
+            ) : (
+              /* Visual CSS Gradient Generator (Feature 2) */
+              <div className="vi-gradient-generator-card">
+                <div className="vi-field-row">
+                  <span className="vi-field-label">Style</span>
+                  <div className="vi-segmented-control" style={{ flex: 1 }}>
+                    <button
+                      type="button"
+                      className={`vi-segmented-btn ${gradientType === 'linear' ? 'is-active' : ''}`}
+                      onClick={() => {
+                        setGradientType('linear');
+                        handleApplyGradient('linear', gradientAngle, gradientStop1, gradientPos1, gradientStop2, gradientPos2);
+                      }}
+                    >
+                      Linear
+                    </button>
+                    <button
+                      type="button"
+                      className={`vi-segmented-btn ${gradientType === 'radial' ? 'is-active' : ''}`}
+                      onClick={() => {
+                        setGradientType('radial');
+                        handleApplyGradient('radial', gradientAngle, gradientStop1, gradientPos1, gradientStop2, gradientPos2);
+                      }}
+                    >
+                      Radial
+                    </button>
+                  </div>
+                </div>
+
+                {gradientType === 'linear' && (
+                  <div className="vi-field-row" style={{ marginTop: '6px' }}>
+                    <span className="vi-field-label">Angle: {gradientAngle}°</span>
+                    <input
+                      type="range"
+                      min="0"
+                      max="360"
+                      value={gradientAngle}
+                      onChange={(e) => {
+                        const deg = Number(e.target.value);
+                        setGradientAngle(deg);
+                        handleApplyGradient(gradientType, deg, gradientStop1, gradientPos1, gradientStop2, gradientPos2);
+                      }}
+                      className="vi-slider"
+                      style={{ flex: 1 }}
+                    />
+                  </div>
+                )}
+
+                {/* Color Stops */}
+                <div className="vi-grid-2" style={{ marginTop: '6px' }}>
+                  <div className="vi-field-col">
+                    <span className="vi-field-label">Stop 1 ({gradientPos1}%)</span>
+                    <div className="vi-color-picker-group">
+                      <input
+                        type="color"
+                        className="vi-color-swatch"
+                        value={gradientStop1.slice(0, 7)}
+                        onChange={(e) => {
+                          setGradientStop1(e.target.value);
+                          handleApplyGradient(gradientType, gradientAngle, e.target.value, gradientPos1, gradientStop2, gradientPos2);
+                        }}
+                      />
+                      <input
+                        type="text"
+                        className="vi-input-mono"
+                        value={gradientStop1}
+                        onChange={(e) => {
+                          setGradientStop1(e.target.value);
+                          handleApplyGradient(gradientType, gradientAngle, e.target.value, gradientPos1, gradientStop2, gradientPos2);
+                        }}
+                      />
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={gradientPos1}
+                      onChange={(e) => {
+                        const pos = Number(e.target.value);
+                        setGradientPos1(pos);
+                        handleApplyGradient(gradientType, gradientAngle, gradientStop1, pos, gradientStop2, gradientPos2);
+                      }}
+                      className="vi-slider"
+                      style={{ marginTop: '4px' }}
+                    />
+                  </div>
+
+                  <div className="vi-field-col">
+                    <span className="vi-field-label">Stop 2 ({gradientPos2}%)</span>
+                    <div className="vi-color-picker-group">
+                      <input
+                        type="color"
+                        className="vi-color-swatch"
+                        value={gradientStop2.slice(0, 7)}
+                        onChange={(e) => {
+                          setGradientStop2(e.target.value);
+                          handleApplyGradient(gradientType, gradientAngle, gradientStop1, gradientPos1, e.target.value, gradientPos2);
+                        }}
+                      />
+                      <input
+                        type="text"
+                        className="vi-input-mono"
+                        value={gradientStop2}
+                        onChange={(e) => {
+                          setGradientStop2(e.target.value);
+                          handleApplyGradient(gradientType, gradientAngle, gradientStop1, gradientPos1, e.target.value, gradientPos2);
+                        }}
+                      />
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={gradientPos2}
+                      onChange={(e) => {
+                        const pos = Number(e.target.value);
+                        setGradientPos2(pos);
+                        handleApplyGradient(gradientType, gradientAngle, gradientStop1, gradientPos1, gradientStop2, pos);
+                      }}
+                      className="vi-slider"
+                      style={{ marginTop: '4px' }}
+                    />
+                  </div>
+                </div>
+
+                {/* Gradient Presets */}
+                <div className="vi-gradient-presets-wrap" style={{ marginTop: '8px' }}>
+                  <span className="vi-field-label" style={{ marginBottom: '4px' }}>Aesthetic Presets:</span>
+                  <div className="vi-gradient-chips">
+                    {GRADIENT_PRESETS.map((gp) => (
+                      <button
+                        key={gp.id}
+                        type="button"
+                        className="vi-gradient-chip"
+                        style={{ background: gp.css }}
+                        onClick={() => handleApplyGradientPreset(gp)}
+                        title={gp.name}
+                      >
+                        <span>{gp.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
 
             <ScrubbableInput
               label="Backdrop Blur"
@@ -1225,91 +1840,235 @@ export const EditTab: FC<EditTabProps> = ({
 
         {activeSections.boxShadow && !collapsedSections.boxShadow && (
           <div className="vi-section-content">
-            <div className="vi-corner-header" style={{ marginBottom: 6 }}>
-              <span className="vi-field-label">Box Shadow (Drag Up/Down to scrub)</span>
+            {/* 1-Click Glassmorphism & Multi-Layer Shadow Switch (Feature 1) */}
+            <div className="vi-shadow-mode-bar" style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '10px' }}>
               <button
-                className={`vi-link-btn ${boxShadowParts.inset ? 'is-linked' : ''}`}
-                onClick={() => updateBoxShadowPart('inset', !boxShadowParts.inset)}
-                title={boxShadowParts.inset ? 'Inset Shadow active' : 'Drop Shadow active'}
+                type="button"
+                className={`vi-glass-toggle-btn ${isGlassmorphic ? 'is-active' : ''}`}
+                onClick={handleToggleGlassmorphism}
+                title="1-Click Glassmorphism: frosted backdrop blur, translucent white surface, border glow, elevation shadow"
               >
-                {boxShadowParts.inset ? 'Inner Shadow' : 'Drop Shadow'}
+                {SVG_ICONS.glass}
+                <span>{isGlassmorphic ? 'Glassmorphism Active (Click to Revert)' : '1-Click Frosted Glassmorphism'}</span>
               </button>
-            </div>
 
-            <div className="vi-grid-2">
-              <ScrubbableInput
-                label="Offset X"
-                value={boxShadowParts.x}
-                onChange={(v) => updateBoxShadowPart('x', v)}
-                onReset={() => updateBoxShadowPart('x', '0px')}
-                units={['px', 'rem']}
-                min={-200}
-                max={200}
-                step={1}
-                tooltip="Horizontal shadow displacement (drag up/down)"
-              />
-              <ScrubbableInput
-                label="Offset Y"
-                value={boxShadowParts.y}
-                onChange={(v) => updateBoxShadowPart('y', v)}
-                onReset={() => updateBoxShadowPart('y', '0px')}
-                units={['px', 'rem']}
-                min={-200}
-                max={200}
-                step={1}
-                tooltip="Vertical shadow displacement (drag up/down)"
-              />
-            </div>
-
-            <div className="vi-grid-2" style={{ marginTop: 6 }}>
-              <ScrubbableInput
-                label="Blur"
-                value={boxShadowParts.blur}
-                onChange={(v) => updateBoxShadowPart('blur', v)}
-                onReset={() => updateBoxShadowPart('blur', '0px')}
-                units={['px', 'rem']}
-                min={0}
-                max={200}
-                step={1}
-                tooltip="Shadow blur softening (drag up/down)"
-              />
-              <ScrubbableInput
-                label="Spread"
-                value={boxShadowParts.spread}
-                onChange={(v) => updateBoxShadowPart('spread', v)}
-                onReset={() => updateBoxShadowPart('spread', '0px')}
-                units={['px', 'rem']}
-                min={-100}
-                max={200}
-                step={1}
-                tooltip="Shadow expansion/shrink (drag up/down)"
-              />
-            </div>
-
-            <div className="vi-field-row" style={{ marginTop: 6 }}>
-              <span className="vi-field-label">Shadow Color</span>
-              <div className="vi-color-picker-group">
-                <input
-                  type="color"
-                  className="vi-color-swatch"
-                  value={boxShadowParts.color.startsWith('#') && boxShadowParts.color.length >= 7 ? boxShadowParts.color.slice(0, 7) : '#000000'}
-                  onChange={(e) => updateBoxShadowPart('color', e.target.value)}
-                />
-                <input
-                  type="text"
-                  className="vi-input-mono"
-                  value={boxShadowParts.color}
-                  onChange={(e) => updateBoxShadowPart('color', e.target.value)}
-                />
+              <div className="vi-segmented-control" style={{ width: '100%' }}>
                 <button
-                  className="vi-eyedropper-btn"
-                  onClick={() => handleEyeDropper('box-shadow', 'boxShadow')}
-                  title="Pick color"
+                  type="button"
+                  className={`vi-segmented-btn ${shadowMode === 'simple' ? 'is-active' : ''}`}
+                  onClick={() => setShadowMode('simple')}
                 >
-                  {SVG_ICONS.eyedropper}
+                  Single Shadow
+                </button>
+                <button
+                  type="button"
+                  className={`vi-segmented-btn ${shadowMode === 'multi' ? 'is-active' : ''}`}
+                  onClick={() => {
+                    setShadowMode('multi');
+                    handlePropertyChange('box-shadow', 'boxShadow', serializeShadowLayers(multiShadowLayers));
+                  }}
+                >
+                  Multi-Layer Shadow Stack
                 </button>
               </div>
             </div>
+
+            {shadowMode === 'simple' ? (
+              <>
+                <div className="vi-corner-header" style={{ marginBottom: 6 }}>
+                  <span className="vi-field-label">Box Shadow (Drag Up/Down to scrub)</span>
+                  <button
+                    className={`vi-link-btn ${boxShadowParts.inset ? 'is-linked' : ''}`}
+                    onClick={() => updateBoxShadowPart('inset', !boxShadowParts.inset)}
+                    title={boxShadowParts.inset ? 'Inset Shadow active' : 'Drop Shadow active'}
+                  >
+                    {boxShadowParts.inset ? 'Inner Shadow' : 'Drop Shadow'}
+                  </button>
+                </div>
+
+                <div className="vi-grid-2">
+                  <ScrubbableInput
+                    label="Offset X"
+                    value={boxShadowParts.x}
+                    onChange={(v) => updateBoxShadowPart('x', v)}
+                    onReset={() => updateBoxShadowPart('x', '0px')}
+                    units={['px', 'rem']}
+                    min={-200}
+                    max={200}
+                    step={1}
+                    tooltip="Horizontal shadow displacement (drag up/down)"
+                  />
+                  <ScrubbableInput
+                    label="Offset Y"
+                    value={boxShadowParts.y}
+                    onChange={(v) => updateBoxShadowPart('y', v)}
+                    onReset={() => updateBoxShadowPart('y', '0px')}
+                    units={['px', 'rem']}
+                    min={-200}
+                    max={200}
+                    step={1}
+                    tooltip="Vertical shadow displacement (drag up/down)"
+                  />
+                </div>
+
+                <div className="vi-grid-2" style={{ marginTop: 6 }}>
+                  <ScrubbableInput
+                    label="Blur"
+                    value={boxShadowParts.blur}
+                    onChange={(v) => updateBoxShadowPart('blur', v)}
+                    onReset={() => updateBoxShadowPart('blur', '0px')}
+                    units={['px', 'rem']}
+                    min={0}
+                    max={200}
+                    step={1}
+                    tooltip="Shadow blur softening (drag up/down)"
+                  />
+                  <ScrubbableInput
+                    label="Spread"
+                    value={boxShadowParts.spread}
+                    onChange={(v) => updateBoxShadowPart('spread', v)}
+                    onReset={() => updateBoxShadowPart('spread', '0px')}
+                    units={['px', 'rem']}
+                    min={-100}
+                    max={200}
+                    step={1}
+                    tooltip="Shadow expansion/shrink (drag up/down)"
+                  />
+                </div>
+
+                <div className="vi-field-row" style={{ marginTop: 6 }}>
+                  <span className="vi-field-label">Shadow Color</span>
+                  <div className="vi-color-picker-group">
+                    <input
+                      type="color"
+                      className="vi-color-swatch"
+                      value={boxShadowParts.color.startsWith('#') && boxShadowParts.color.length >= 7 ? boxShadowParts.color.slice(0, 7) : '#000000'}
+                      onChange={(e) => updateBoxShadowPart('color', e.target.value)}
+                    />
+                    <input
+                      type="text"
+                      className="vi-input-mono"
+                      value={boxShadowParts.color}
+                      onChange={(e) => updateBoxShadowPart('color', e.target.value)}
+                    />
+                    <button
+                      className="vi-eyedropper-btn"
+                      onClick={() => handleEyeDropper('box-shadow', 'boxShadow')}
+                      title="Pick color"
+                    >
+                      {SVG_ICONS.eyedropper}
+                    </button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              /* Multi-Layer Box Shadow Stacker (Feature 1) */
+              <div className="vi-multi-shadow-container">
+                <div className="vi-shadow-presets-wrap" style={{ marginBottom: '8px' }}>
+                  <span className="vi-field-label" style={{ marginBottom: '4px' }}>Multi-Layer Presets:</span>
+                  <div className="vi-shadow-chips">
+                    {MULTI_SHADOW_PRESETS.map((sp) => (
+                      <button
+                        key={sp.id}
+                        type="button"
+                        className="vi-shadow-preset-chip"
+                        onClick={() => handleApplyShadowPreset(sp)}
+                        title={`Apply ${sp.name}`}
+                      >
+                        {sp.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="vi-shadow-layers-list">
+                  {multiShadowLayers.map((layer, idx) => (
+                    <div key={idx} className="vi-shadow-layer-item">
+                      <div className="vi-shadow-layer-header">
+                        <span className="vi-layer-title">Layer {idx + 1}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <button
+                            type="button"
+                            className={`vi-link-btn ${layer.inset ? 'is-linked' : ''}`}
+                            onClick={() => handleUpdateShadowLayer(idx, 'inset', !layer.inset)}
+                            title={layer.inset ? 'Inner Shadow' : 'Drop Shadow'}
+                          >
+                            {layer.inset ? 'Inset' : 'Drop'}
+                          </button>
+                          {multiShadowLayers.length > 1 && (
+                            <button
+                              type="button"
+                              className="vi-layer-del-btn"
+                              onClick={() => handleRemoveShadowLayer(idx)}
+                              title="Delete layer"
+                            >
+                              ✕
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="vi-grid-2" style={{ marginTop: '4px' }}>
+                        <ScrubbableInput
+                          label="X"
+                          value={`${layer.x}px`}
+                          onChange={(v) => handleUpdateShadowLayer(idx, 'x', parseFloat(v) || 0)}
+                          units={['px']}
+                        />
+                        <ScrubbableInput
+                          label="Y"
+                          value={`${layer.y}px`}
+                          onChange={(v) => handleUpdateShadowLayer(idx, 'y', parseFloat(v) || 0)}
+                          units={['px']}
+                        />
+                      </div>
+
+                      <div className="vi-grid-2" style={{ marginTop: '4px' }}>
+                        <ScrubbableInput
+                          label="Blur"
+                          value={`${layer.blur}px`}
+                          onChange={(v) => handleUpdateShadowLayer(idx, 'blur', Math.max(0, parseFloat(v) || 0))}
+                          units={['px']}
+                        />
+                        <ScrubbableInput
+                          label="Spread"
+                          value={`${layer.spread}px`}
+                          onChange={(v) => handleUpdateShadowLayer(idx, 'spread', parseFloat(v) || 0)}
+                          units={['px']}
+                        />
+                      </div>
+
+                      <div className="vi-field-row" style={{ marginTop: '4px' }}>
+                        <span className="vi-field-label">Color</span>
+                        <div className="vi-color-picker-group">
+                          <input
+                            type="color"
+                            className="vi-color-swatch"
+                            value={layer.color.startsWith('#') && layer.color.length >= 7 ? layer.color.slice(0, 7) : '#000000'}
+                            onChange={(e) => handleUpdateShadowLayer(idx, 'color', e.target.value)}
+                          />
+                          <input
+                            type="text"
+                            className="vi-input-mono"
+                            value={layer.color}
+                            onChange={(e) => handleUpdateShadowLayer(idx, 'color', e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  className="vi-btn-add-layer"
+                  onClick={handleAddShadowLayer}
+                  style={{ marginTop: '8px' }}
+                >
+                  {SVG_ICONS.plus} <span>Add Shadow Layer</span>
+                </button>
+              </div>
+            )}
 
             <div style={{ height: '1px', background: 'var(--vi-border-subtle)', margin: '10px 0 6px' }} />
 

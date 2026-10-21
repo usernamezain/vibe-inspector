@@ -9,10 +9,22 @@ chrome.runtime.onInstalled.addListener(() => {
   }
 });
 
-// Helper to get the current active tab
+// Helper to get the current active tab reliably from side panel or background
 async function getActiveTab(): Promise<chrome.tabs.Tab | null> {
-  const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-  return tabs[0] || null;
+  try {
+    const lastFocused = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+    if (lastFocused[0]) return lastFocused[0];
+  } catch {}
+  try {
+    const current = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (current[0]) return current[0];
+  } catch {}
+  try {
+    const all = await chrome.tabs.query({ active: true });
+    return all[0] || null;
+  } catch {
+    return null;
+  }
 }
 
 // Check if a URL is an internal or restricted browser page
@@ -133,14 +145,23 @@ chrome.runtime.onMessage.addListener((message: ExtensionMessage, _sender, sendRe
 
       case 'CLEAR_SELECTION':
       case 'RESET_LIVE_STYLES':
-      case 'APPLY_LIVE_STYLE': {
+      case 'APPLY_LIVE_STYLE':
+      case 'SELECT_BY_SELECTOR':
+      case 'FORCE_PSEUDO_STATE':
+      case 'TOGGLE_ELEMENT_DIFF':
+      case 'EXPORT_ELEMENT_PNG': {
         const tab = await getActiveTab();
         if (tab?.id) {
-          chrome.tabs.sendMessage(tab.id, message).catch(() => {});
-          sendResponse({ success: true });
-          return;
+          try {
+            const res = await chrome.tabs.sendMessage(tab.id, message);
+            sendResponse(res || { success: true });
+            return;
+          } catch (err: any) {
+            sendResponse({ success: false, error: err?.message || 'Message dispatch failed' });
+            return;
+          }
         }
-        sendResponse({ success: false });
+        sendResponse({ success: false, error: 'No active tab found' });
         break;
       }
 
@@ -162,17 +183,65 @@ chrome.runtime.onMessage.addListener((message: ExtensionMessage, _sender, sendRe
       case 'CAPTURE_TAB_PNG':
       case 'CAPTURE_SCREENSHOT': {
         const tab = await getActiveTab();
-        if (tab?.windowId) {
+        const winId = tab?.windowId;
+        try {
+          const dataUrl = winId
+            ? await chrome.tabs.captureVisibleTab(winId, { format: 'png' })
+            : await chrome.tabs.captureVisibleTab({ format: 'png' });
+          sendResponse({ success: true, dataUrl });
+          return;
+        } catch (err) {
           try {
-            const dataUrl = await chrome.tabs.captureVisibleTab(tab.windowId, { format: 'png' });
+            const dataUrl = await chrome.tabs.captureVisibleTab({ format: 'png' });
             sendResponse({ success: true, dataUrl });
             return;
-          } catch (err) {
-            sendResponse({ success: false, error: String(err) });
+          } catch (fallbackErr) {
+            sendResponse({ success: false, error: String(fallbackErr || err) });
             return;
           }
         }
-        sendResponse({ success: false, error: 'No active window found' });
+      }
+
+      case 'DOWNLOAD_PNG': {
+        const { dataUrl, filename } = message as any;
+        if (!dataUrl) {
+          sendResponse({ success: false, error: 'No dataUrl provided' });
+          return;
+        }
+        const name = filename || `snapshot-${Date.now()}.png`;
+
+        if (chrome.downloads?.download) {
+          chrome.downloads.download(
+            {
+              url: dataUrl,
+              filename: name,
+              saveAs: false,
+            },
+            (downloadId) => {
+              if (chrome.runtime.lastError) {
+                // If native downloads had an error, fallback to page DOM trigger
+                getActiveTab().then((tab) => {
+                  if (tab?.id) {
+                    chrome.tabs.sendMessage(tab.id, { type: 'TRIGGER_PAGE_DOWNLOAD', dataUrl, filename: name }, sendResponse);
+                  } else {
+                    sendResponse({ success: false, error: chrome.runtime.lastError?.message });
+                  }
+                });
+              } else {
+                sendResponse({ success: true, downloadId });
+              }
+            }
+          );
+          return;
+        }
+
+        // Fallback: send message to content script
+        const tab = await getActiveTab();
+        if (tab?.id) {
+          chrome.tabs.sendMessage(tab.id, { type: 'TRIGGER_PAGE_DOWNLOAD', dataUrl, filename: name }, sendResponse);
+          return;
+        }
+        sendResponse({ success: false, error: 'No active tab found for download' });
         break;
       }
 

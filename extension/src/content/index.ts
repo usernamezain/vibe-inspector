@@ -1977,7 +1977,14 @@ function initContentScript() {
       }
 
       case 'EXPORT_ELEMENT_PNG': {
-        const target = message.selector ? (document.querySelector<HTMLElement>(message.selector) || selectedElement) : selectedElement;
+        let target: HTMLElement | null = selectedElement;
+        if (message.selector) {
+          try {
+            target = document.querySelector<HTMLElement>(message.selector) || selectedElement;
+          } catch {
+            target = selectedElement;
+          }
+        }
         if (!target) {
           sendResponse({ success: false, error: 'Target element not found' });
           return true;
@@ -1998,7 +2005,7 @@ function initContentScript() {
         };
 
         try {
-          target.scrollIntoView({ behavior: 'instant' as any, block: 'center', inline: 'center' });
+          target.scrollIntoView({ behavior: 'instant' as any, block: 'nearest', inline: 'nearest' });
         } catch {}
 
         setTimeout(() => {
@@ -2008,35 +2015,125 @@ function initContentScript() {
               sendResponse({ success: false, error: res?.error || 'Failed to capture tab' });
               return;
             }
-            const rect = target.getBoundingClientRect();
-            const img = new Image();
-            img.onload = () => {
-              const scale = Math.max(1, message.scale || 2);
-              const devicePixelRatio = window.devicePixelRatio || 1;
-              const canvas = document.createElement('canvas');
-              const targetWidth = Math.max(1, Math.round(rect.width * scale));
-              const targetHeight = Math.max(1, Math.round(rect.height * scale));
-              canvas.width = targetWidth;
-              canvas.height = targetHeight;
-              const ctx = canvas.getContext('2d');
-              if (!ctx) {
-                sendResponse({ success: false, error: 'Canvas context failed' });
-                return;
-              }
-              const sx = Math.max(0, rect.left * devicePixelRatio);
-              const sy = Math.max(0, rect.top * devicePixelRatio);
-              const sWidth = Math.min(img.width - sx, rect.width * devicePixelRatio);
-              const sHeight = Math.min(img.height - sy, rect.height * devicePixelRatio);
-              ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, targetWidth, targetHeight);
-              sendResponse({ success: true, dataUrl: canvas.toDataURL('image/png') });
-            };
-            img.onerror = () => {
-              sendResponse({ success: false, error: 'Failed to process snapshot image' });
-            };
-            img.src = res.dataUrl;
+            try {
+              const rect = target!.getBoundingClientRect();
+              const img = new Image();
+              img.onload = () => {
+                try {
+                  const scale = Math.max(1, message.scale || 2);
+                  const dpr = window.devicePixelRatio || 1;
+                  const elW = Math.max(1, rect.width || target!.offsetWidth || 100);
+                  const elH = Math.max(1, rect.height || target!.offsetHeight || 40);
+                  const targetWidth = Math.max(1, Math.round(elW * scale));
+                  const targetHeight = Math.max(1, Math.round(elH * scale));
+
+                  const canvas = document.createElement('canvas');
+                  canvas.width = targetWidth;
+                  canvas.height = targetHeight;
+                  const ctx = canvas.getContext('2d');
+                  if (!ctx) {
+                    sendResponse({ success: false, error: 'Canvas 2D context unavailable' });
+                    return;
+                  }
+
+                  const sx = Math.max(0, rect.left * dpr);
+                  const sy = Math.max(0, rect.top * dpr);
+                  const sWidth = Math.min(img.width - sx, elW * dpr);
+                  const sHeight = Math.min(img.height - sy, elH * dpr);
+
+                  if (sWidth > 0 && sHeight > 0) {
+                    ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, targetWidth, targetHeight);
+                  }
+                  sendResponse({ success: true, dataUrl: canvas.toDataURL('image/png') });
+                } catch (drawErr: any) {
+                  sendResponse({ success: false, error: drawErr?.message || 'Failed to render snapshot to canvas' });
+                }
+              };
+              img.onerror = () => {
+                sendResponse({ success: false, error: 'Failed to decode captured tab image' });
+              };
+              img.src = res.dataUrl;
+            } catch (err: any) {
+              sendResponse({ success: false, error: err?.message || 'Snapshot processing failed' });
+            }
           });
         }, 120);
         return true;
+      }
+
+      case 'TRIGGER_PAGE_DOWNLOAD': {
+        try {
+          const rawUrl = (message as any).dataUrl;
+          const filename = (message as any).filename || `snapshot-${Date.now()}.png`;
+
+          let downloadHref = rawUrl;
+          let blobUrlToRevoke: string | null = null;
+
+          if (typeof rawUrl === 'string' && rawUrl.startsWith('data:')) {
+            try {
+              const parts = rawUrl.split(',');
+              const mime = parts[0].match(/:(.*?);/)?.[1] || 'image/png';
+              const bstr = atob(parts[1]);
+              let n = bstr.length;
+              const u8arr = new Uint8Array(n);
+              while (n--) {
+                u8arr[n] = bstr.charCodeAt(n);
+              }
+              const blob = new Blob([u8arr], { type: mime });
+              downloadHref = URL.createObjectURL(blob);
+              blobUrlToRevoke = downloadHref;
+            } catch {
+              downloadHref = rawUrl;
+            }
+          }
+
+          const a = document.createElement('a');
+          a.href = downloadHref;
+          a.download = filename;
+          a.style.display = 'none';
+          document.documentElement.appendChild(a);
+          a.click();
+
+          setTimeout(() => {
+            try { a.remove(); } catch {}
+            if (blobUrlToRevoke) {
+              try { URL.revokeObjectURL(blobUrlToRevoke); } catch {}
+            }
+          }, 2000);
+          sendResponse({ success: true });
+        } catch (err: any) {
+          sendResponse({ success: false, error: String(err?.message || err) });
+        }
+        break;
+      }
+
+      case 'TOGGLE_ELEMENT_DIFF': {
+        const target = message.selector
+          ? (document.querySelector<HTMLElement>(message.selector) || selectedElement)
+          : selectedElement;
+        if (!target) {
+          sendResponse({ success: false, error: 'Element not found' });
+          break;
+        }
+
+        const showOriginal = Boolean(message.showOriginal);
+        if (showOriginal) {
+          // Backup currently modified inline styles
+          if (target.getAttribute('style') !== null) {
+            target.dataset.viDiffBackup = target.getAttribute('style') || '';
+          }
+          // Temporarily disable the inline modifications
+          target.removeAttribute('style');
+        } else {
+          // Restore modified inline styles
+          if (target.dataset.viDiffBackup !== undefined) {
+            target.setAttribute('style', target.dataset.viDiffBackup);
+            delete target.dataset.viDiffBackup;
+          }
+        }
+        updatePositions();
+        sendResponse({ success: true, showingOriginal: showOriginal });
+        break;
       }
 
       case 'GET_PAGE_DESIGN_DATA': {

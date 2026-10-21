@@ -154,7 +154,10 @@ export type ExtensionMessage =
   | { type: 'FORCE_PSEUDO_STATE'; selector?: string; state: 'hover' | 'focus' | 'active' }
   | { type: 'ASSERT_STYLE'; selector?: string; expected: Record<string, string> }
   | { type: 'CHECK_CONTRAST'; selector?: string }
-  | { type: 'CHECK_TAP_TARGETS' };
+  | { type: 'CHECK_TAP_TARGETS' }
+  | { type: 'DOWNLOAD_PNG'; dataUrl: string; filename: string }
+  | { type: 'TRIGGER_PAGE_DOWNLOAD'; dataUrl: string; filename: string }
+  | { type: 'TOGGLE_ELEMENT_DIFF'; selector?: string; showOriginal: boolean };
 
 /**
  * Phase 6: Accessibility Audit types

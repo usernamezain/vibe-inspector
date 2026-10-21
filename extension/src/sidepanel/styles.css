@@ -2647,3 +2647,487 @@ kbd {
   gap: 6px;
   margin-top: 6px;
 }
+
+/* ============================================================
+   10 ADVANCED EXTENSION FEATURES STYLES (Phase 7 Modernized)
+   ============================================================ */
+
+/* Feature 5: Interactive DOM Tree Breadcrumbs */
+.vi-dom-breadcrumbs-bar {
+  background: var(--vi-surface-card);
+  border: 1px solid var(--vi-border-subtle);
+  border-radius: 5px;
+  padding: 4px 6px;
+  overflow: hidden;
+}
+
+.vi-dom-breadcrumbs-scroll {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: thin;
+}
+
+.vi-dom-breadcrumbs-scroll::-webkit-scrollbar {
+  height: 3px;
+}
+
+.vi-breadcrumb-chip {
+  background: transparent;
+  border: none;
+  color: var(--vi-text-secondary);
+  font-size: 10.5px;
+  font-family: var(--vi-font-mono, monospace);
+  padding: 2px 4px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.vi-breadcrumb-chip:hover {
+  background: var(--vi-surface-hover);
+  color: var(--vi-accent-base);
+}
+
+.vi-breadcrumb-chip.current {
+  color: var(--vi-text-primary);
+  font-weight: 600;
+  cursor: default;
+}
+
+.vi-breadcrumb-sep {
+  color: var(--vi-text-muted);
+  font-size: 10px;
+}
+
+/* Feature 4, 7, 8: Action Chips Strip */
+.vi-action-chips-strip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+  border-top: 1px solid var(--vi-border-subtle);
+}
+
+.vi-action-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--vi-surface-input);
+  border: 1px solid var(--vi-border-input);
+  color: var(--vi-text-secondary);
+  font-size: 10.5px;
+  font-weight: 500;
+  padding: 3px 7px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.vi-action-chip:hover {
+  background: var(--vi-surface-hover);
+  border-color: var(--vi-border-color);
+  color: var(--vi-text-primary);
+}
+
+.vi-action-chip.is-success {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: #10b981;
+  color: #10b981;
+}
+
+.vi-action-chip.is-active-diff {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: #f59e0b;
+  color: #f59e0b;
+}
+
+.vi-toast-banner {
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid var(--vi-accent-base);
+  color: var(--vi-text-primary);
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-top: 4px;
+  animation: vi-pop 0.3s ease;
+}
+
+/* Feature 3: Forced Pseudo-States & Micro-Interactions */
+.vi-interactions-card {
+  background: var(--vi-surface-card);
+  border: 1px solid var(--vi-border-subtle);
+  border-radius: 5px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.vi-interactions-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vi-interactions-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--vi-text-secondary);
+  min-width: 44px;
+}
+
+.vi-micro-chips-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.vi-micro-chip {
+  background: var(--vi-surface-input);
+  border: 1px solid var(--vi-border-input);
+  color: var(--vi-text-secondary);
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.vi-micro-chip:hover {
+  background: var(--vi-surface-hover);
+  color: var(--vi-text-primary);
+}
+
+.vi-micro-chip.is-active {
+  background: var(--vi-accent-base);
+  border-color: var(--vi-accent-base);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.vi-micro-chip.is-clear {
+  color: var(--vi-status-danger);
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.vi-micro-chip.is-clear:hover {
+  background: rgba(239, 68, 68, 0.15);
+}
+
+/* Feature 6: Smart Contrast Checker & Auto-Fix */
+.vi-contrast-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--vi-surface-input);
+  border: 1px solid var(--vi-border-input);
+  border-radius: 4px;
+  padding: 5px 8px;
+  margin-top: 6px;
+}
+
+.vi-contrast-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+}
+
+.vi-contrast-icon {
+  display: flex;
+  align-items: center;
+  color: var(--vi-accent-base);
+}
+
+.vi-contrast-label {
+  color: var(--vi-text-secondary);
+  font-weight: 500;
+}
+
+.vi-contrast-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+
+.vi-contrast-badge.is-pass {
+  background: rgba(16, 185, 129, 0.18);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.vi-contrast-badge.is-warning {
+  background: rgba(245, 158, 11, 0.18);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+.vi-contrast-badge.is-fail {
+  background: rgba(239, 68, 68, 0.18);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+.vi-btn-autofix {
+  background: var(--vi-accent-base);
+  border: none;
+  color: #ffffff;
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.vi-btn-autofix:hover {
+  background: var(--vi-accent-hover);
+  transform: translateY(-1px);
+}
+
+/* Feature 9: Color Swatches & Recent Colors */
+.vi-swatches-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.vi-swatches-label {
+  font-size: 10px;
+  color: var(--vi-text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.vi-swatches-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.vi-color-circle {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: transform 0.1s ease;
+  padding: 0;
+}
+
+.vi-color-circle:hover {
+  transform: scale(1.3);
+  box-shadow: 0 0 6px rgba(99, 102, 241, 0.6);
+}
+
+/* Feature 2: Visual CSS Gradient Generator */
+.vi-gradient-generator-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--vi-surface-input);
+  border: 1px solid var(--vi-border-input);
+  border-radius: 5px;
+  padding: 8px;
+  margin-bottom: 8px;
+}
+
+.vi-gradient-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.vi-gradient-chip {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  padding: 3px 7px;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 600;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  transition: all 0.15s ease;
+}
+
+.vi-gradient-chip:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Feature 1: Glassmorphism & Multi-Layer Shadow */
+.vi-glass-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  color: var(--vi-text-primary);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.vi-glass-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.vi-glass-toggle-btn.is-active {
+  background: rgba(99, 102, 241, 0.25);
+  border-color: var(--vi-accent-base);
+  color: var(--vi-accent-base);
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.35);
+}
+
+.vi-multi-shadow-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vi-shadow-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.vi-shadow-preset-chip {
+  background: var(--vi-surface-input);
+  border: 1px solid var(--vi-border-input);
+  color: var(--vi-text-secondary);
+  font-size: 10px;
+  padding: 3px 6px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.vi-shadow-preset-chip:hover {
+  background: var(--vi-surface-hover);
+  color: var(--vi-text-primary);
+}
+
+.vi-shadow-layers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vi-shadow-layer-item {
+  background: var(--vi-surface-card);
+  border: 1px solid var(--vi-border-subtle);
+  border-radius: 4px;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+}
+
+.vi-shadow-layer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.vi-layer-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--vi-text-secondary);
+}
+
+.vi-layer-del-btn {
+  background: transparent;
+  border: none;
+  color: var(--vi-text-muted);
+  cursor: pointer;
+  font-size: 10px;
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+.vi-layer-del-btn:hover {
+  color: var(--vi-status-danger);
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.vi-btn-add-layer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  background: var(--vi-surface-input);
+  border: 1px dashed var(--vi-border-input);
+  color: var(--vi-text-secondary);
+  font-size: 11px;
+  padding: 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.vi-btn-add-layer:hover {
+  border-color: var(--vi-accent-base);
+  color: var(--vi-accent-base);
+  background: var(--vi-surface-hover);
+}
+
+/* Feature 10: Breakpoint Ruler & Simulator in PageTab */
+.vi-breakpoint-chips {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 3px;
+}
+
+.vi-breakpoint-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--vi-surface-input);
+  border: 1px solid var(--vi-border-input);
+  color: var(--vi-text-secondary);
+  font-size: 9px;
+  padding: 3px 2px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.vi-breakpoint-chip strong {
+  font-size: 10px;
+  color: var(--vi-text-primary);
+}
+
+.vi-breakpoint-chip:hover {
+  background: var(--vi-surface-hover);
+  border-color: var(--vi-accent-base);
+}
+
+.vi-breakpoint-chip.is-active {
+  background: var(--vi-accent-base);
+  border-color: var(--vi-accent-base);
+  color: #ffffff;
+}
+
+.vi-breakpoint-chip.is-active strong {
+  color: #ffffff;
+}
+
