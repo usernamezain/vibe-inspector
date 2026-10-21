@@ -1,4 +1,4 @@
-import React, { useState, useRef, FC } from 'react';
+import React, { useState, useRef, useEffect, FC } from 'react';
 import { parseUnitValue, formatUnitValue, stepValue, isPropertyModified } from '@vibe-inspector/shared';
 
 export interface ScrubbableInputProps {
@@ -45,6 +45,20 @@ export const ScrubbableInput: FC<ScrubbableInputProps> = ({
   const startY = useRef(0);
   const startNum = useRef<number>(0);
   const [isScrubbing, setIsScrubbing] = useState(false);
+  const [scrubValue, setScrubValue] = useState<number | null>(null);
+
+  // Sync localText when value prop updates from outside (while not actively typing/scrubbing)
+  useEffect(() => {
+    if (!isFocused && !isScrubbing) {
+      if (parsed.isUnset || value === '-' || value === '') {
+        setLocalText('');
+      } else if (parsed.num !== null) {
+        setLocalText(String(parsed.num));
+      } else {
+        setLocalText(parsed.raw || '');
+      }
+    }
+  }, [value, isFocused, isScrubbing, parsed.num, parsed.raw, parsed.isUnset]);
 
   // Pointer scrub handlers (After Effects style: drag horizontal or vertical)
   const handlePointerDown = (e: React.PointerEvent<HTMLElement>) => {
@@ -55,7 +69,10 @@ export const ScrubbableInput: FC<ScrubbableInputProps> = ({
     startX.current = e.clientX;
     startY.current = e.clientY;
     // Default to 0 if unset or null
-    startNum.current = parsed.num ?? 0;
+    const base = parsed.num ?? 0;
+    startNum.current = base;
+    setScrubValue(base);
+    setLocalText(String(base));
     setIsScrubbing(true);
   };
 
@@ -75,6 +92,8 @@ export const ScrubbableInput: FC<ScrubbableInputProps> = ({
     if (min !== undefined) next = Math.max(min, next);
     if (max !== undefined) next = Math.min(max, next);
 
+    setScrubValue(next);
+    setLocalText(String(next));
     const formatted = formatUnitValue(next, parsed.unit || 'px');
     onChange(formatted);
   };
@@ -83,6 +102,7 @@ export const ScrubbableInput: FC<ScrubbableInputProps> = ({
     if (isDragging.current) {
       isDragging.current = false;
       setIsScrubbing(false);
+      setScrubValue(null);
       try {
         e.currentTarget.releasePointerCapture(e.pointerId);
       } catch {}
@@ -100,6 +120,7 @@ export const ScrubbableInput: FC<ScrubbableInputProps> = ({
     });
     if (min !== undefined) next = Math.max(min, next);
     if (max !== undefined) next = Math.min(max, next);
+    setLocalText(String(next));
     onChange(formatUnitValue(next, parsed.unit || 'px'));
   };
 
@@ -121,6 +142,15 @@ export const ScrubbableInput: FC<ScrubbableInputProps> = ({
       setLocalText(String(next));
       onChange(formatted);
     } else if (e.key === 'Enter') {
+      const trimmed = localText.trim();
+      if (trimmed !== '' && trimmed !== '-') {
+        const newParsed = parseUnitValue(trimmed);
+        if (newParsed.num !== null) {
+          const formatted = formatUnitValue(newParsed.num, newParsed.unit || parsed.unit || 'px');
+          setLocalText(String(newParsed.num));
+          onChange(formatted);
+        }
+      }
       (e.target as HTMLInputElement).blur();
     }
   };
@@ -168,6 +198,9 @@ export const ScrubbableInput: FC<ScrubbableInputProps> = ({
       const formatted = formatUnitValue(newParsed.num, newParsed.unit || parsed.unit || 'px');
       setLocalText(String(newParsed.num));
       onChange(formatted);
+    } else {
+      setLocalText(trimmed);
+      onChange(trimmed);
     }
   };
 
@@ -182,8 +215,10 @@ export const ScrubbableInput: FC<ScrubbableInputProps> = ({
     }
   };
 
-  // Determine display value: while focused, user has 100% control over localText
-  const displayValue = isFocused
+  // Determine display value: while scrubbing or focused, live state displays immediately
+  const displayValue = (isScrubbing && scrubValue !== null)
+    ? String(scrubValue)
+    : isFocused
     ? localText
     : mixed
     ? 'Mixed'

@@ -3,6 +3,7 @@ import { ElementInfo } from '@vibe-inspector/shared';
 import { ScrubbableInput } from './ScrubbableInput';
 import { SpacingBox } from './SpacingBox';
 import { PresetsModal } from './PresetsModal';
+import { FONT_LIBRARY } from '../constants/fontLibrary';
 
 interface EditTabProps {
   element: ElementInfo;
@@ -47,16 +48,7 @@ const FONT_WEIGHTS = [
   { label: '900 - Black', value: '900' },
 ];
 
-const COMMON_FONTS = [
-  'Inter',
-  '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-  'system-ui',
-  'ui-sans-serif',
-  'ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace',
-  'Georgia, serif',
-  '"Times New Roman", Times, serif',
-  'Arial, Helvetica, sans-serif',
-];
+
 
 const SVG_ICONS = {
   up: (
@@ -269,6 +261,13 @@ export const EditTab: FC<EditTabProps> = ({
   const [isPresetsOpen, setIsPresetsOpen] = useState(false);
   const [exportScale, setExportScale] = useState<1 | 2 | 3>(2);
   const [exportTransparent, setExportTransparent] = useState(true);
+  const [isExportingElement, setIsExportingElement] = useState(false);
+  const [isExportingViewport, setIsExportingViewport] = useState(false);
+
+  // Searchable 80+ Font Picker State
+  const [fontSearch, setFontSearch] = useState('');
+  const [fontCategory, setFontCategory] = useState<string>('All');
+  const [isFontPickerOpen, setIsFontPickerOpen] = useState(false);
 
   // Link Toggles for Grouped Properties
   const [radiusLinked, setRadiusLinked] = useState(true);
@@ -345,9 +344,22 @@ export const EditTab: FC<EditTabProps> = ({
     });
   };
 
-  // Helper to read effective property value (check modified first, then computed)
+  const camelToKebab = (s: string) => s.replace(/([A-Z])/g, '-$1').toLowerCase();
+  const kebabToCamel = (s: string) => s.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+
+  // Helper to read effective property value (check modified first with dual casing, then computed)
   const getVal = (prop: string, fallback = '') => {
-    return modifiedProps[prop] ?? element.computedStyles[prop] ?? fallback;
+    const kebab = camelToKebab(prop);
+    const camel = kebabToCamel(prop);
+    return (
+      modifiedProps[prop] ??
+      modifiedProps[kebab] ??
+      modifiedProps[camel] ??
+      element.computedStyles[prop] ??
+      element.computedStyles[camel] ??
+      element.computedStyles[kebab] ??
+      fallback
+    );
   };
 
   // Shadow helpers for real-time dragging & updating
@@ -424,6 +436,7 @@ export const EditTab: FC<EditTabProps> = ({
 
   // Export element snapshot
   const handleExportElement = () => {
+    setIsExportingElement(true);
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       const tabId = tabs[0]?.id;
       if (tabId) {
@@ -436,26 +449,35 @@ export const EditTab: FC<EditTabProps> = ({
             transparent: exportTransparent,
           },
           (res) => {
+            setIsExportingElement(false);
             if (res?.dataUrl) {
               const a = document.createElement('a');
               a.href = res.dataUrl;
-              a.download = `element-${element.tag}-${Date.now()}.png`;
+              a.download = `element-${element.tag || 'export'}-${Date.now()}.png`;
+              document.body.appendChild(a);
               a.click();
+              document.body.removeChild(a);
             }
           }
         );
+      } else {
+        setIsExportingElement(false);
       }
     });
   };
 
   // Export viewport snapshot
   const handleExportViewport = () => {
-    chrome.tabs.captureVisibleTab({ format: 'png' }, (dataUrl) => {
-      if (dataUrl) {
+    setIsExportingViewport(true);
+    chrome.runtime.sendMessage({ type: 'CAPTURE_TAB_PNG' }, (res) => {
+      setIsExportingViewport(false);
+      if (res?.dataUrl) {
         const a = document.createElement('a');
-        a.href = dataUrl;
+        a.href = res.dataUrl;
         a.download = `viewport-${Date.now()}.png`;
+        document.body.appendChild(a);
         a.click();
+        document.body.removeChild(a);
       }
     });
   };
@@ -646,40 +668,58 @@ export const EditTab: FC<EditTabProps> = ({
                 </button>
               </div>
 
-              <div className="vi-corners-grid">
+              {radiusLinked ? (
                 <ScrubbableInput
-                  label="TL"
-                  value={getVal('borderTopLeftRadius', '0px')}
-                  computedValue={element.computedStyles.borderTopLeftRadius}
-                  onChange={(v) => handleRadiusCornerChange('border-top-left-radius', 'borderTopLeftRadius', v)}
-                  onReset={() => handleResetProperty('border-top-left-radius')}
+                  label="All Corners"
+                  value={getVal('borderRadius', getVal('borderTopLeftRadius', '0px'))}
+                  computedValue={element.computedStyles.borderRadius || element.computedStyles.borderTopLeftRadius}
+                  onChange={(v) => handleRadiusCornerChange('border-radius', 'borderRadius', v)}
+                  onReset={() => {
+                    handleResetProperty('border-radius');
+                    handleResetProperty('border-top-left-radius');
+                    handleResetProperty('border-top-right-radius');
+                    handleResetProperty('border-bottom-right-radius');
+                    handleResetProperty('border-bottom-left-radius');
+                  }}
                   units={['px', '%', 'rem']}
+                  tooltip="Border radius applied uniformly to all corners"
                 />
-                <ScrubbableInput
-                  label="TR"
-                  value={getVal('borderTopRightRadius', '0px')}
-                  computedValue={element.computedStyles.borderTopRightRadius}
-                  onChange={(v) => handleRadiusCornerChange('border-top-right-radius', 'borderTopRightRadius', v)}
-                  onReset={() => handleResetProperty('border-top-right-radius')}
-                  units={['px', '%', 'rem']}
-                />
-                <ScrubbableInput
-                  label="BL"
-                  value={getVal('borderBottomLeftRadius', '0px')}
-                  computedValue={element.computedStyles.borderBottomLeftRadius}
-                  onChange={(v) => handleRadiusCornerChange('border-bottom-left-radius', 'borderBottomLeftRadius', v)}
-                  onReset={() => handleResetProperty('border-bottom-left-radius')}
-                  units={['px', '%', 'rem']}
-                />
-                <ScrubbableInput
-                  label="BR"
-                  value={getVal('borderBottomRightRadius', '0px')}
-                  computedValue={element.computedStyles.borderBottomRightRadius}
-                  onChange={(v) => handleRadiusCornerChange('border-bottom-right-radius', 'borderBottomRightRadius', v)}
-                  onReset={() => handleResetProperty('border-bottom-right-radius')}
-                  units={['px', '%', 'rem']}
-                />
-              </div>
+              ) : (
+                <div className="vi-corners-grid">
+                  <ScrubbableInput
+                    label="TL"
+                    value={getVal('borderTopLeftRadius', '0px')}
+                    computedValue={element.computedStyles.borderTopLeftRadius}
+                    onChange={(v) => handleRadiusCornerChange('border-top-left-radius', 'borderTopLeftRadius', v)}
+                    onReset={() => handleResetProperty('border-top-left-radius')}
+                    units={['px', '%', 'rem']}
+                  />
+                  <ScrubbableInput
+                    label="TR"
+                    value={getVal('borderTopRightRadius', '0px')}
+                    computedValue={element.computedStyles.borderTopRightRadius}
+                    onChange={(v) => handleRadiusCornerChange('border-top-right-radius', 'borderTopRightRadius', v)}
+                    onReset={() => handleResetProperty('border-top-right-radius')}
+                    units={['px', '%', 'rem']}
+                  />
+                  <ScrubbableInput
+                    label="BL"
+                    value={getVal('borderBottomLeftRadius', '0px')}
+                    computedValue={element.computedStyles.borderBottomLeftRadius}
+                    onChange={(v) => handleRadiusCornerChange('border-bottom-left-radius', 'borderBottomLeftRadius', v)}
+                    onReset={() => handleResetProperty('border-bottom-left-radius')}
+                    units={['px', '%', 'rem']}
+                  />
+                  <ScrubbableInput
+                    label="BR"
+                    value={getVal('borderBottomRightRadius', '0px')}
+                    computedValue={element.computedStyles.borderBottomRightRadius}
+                    onChange={(v) => handleRadiusCornerChange('border-bottom-right-radius', 'borderBottomRightRadius', v)}
+                    onReset={() => handleResetProperty('border-bottom-right-radius')}
+                    units={['px', '%', 'rem']}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Blend Mode */}
@@ -712,9 +752,25 @@ export const EditTab: FC<EditTabProps> = ({
 
         {!collapsedSections.typography && (
           <div className="vi-section-content">
-            {/* Typeface Autocomplete */}
-            <div className="vi-field-row">
-              <span className="vi-field-label">Font Family</span>
+            {/* Typeface Autocomplete & Searchable 80+ Font Picker */}
+            <div className="vi-field-row" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '6px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span className="vi-field-label">Font Family</span>
+                <button
+                  type="button"
+                  className={`vi-link-btn ${isFontPickerOpen ? 'is-linked' : ''}`}
+                  onClick={() => setIsFontPickerOpen(!isFontPickerOpen)}
+                  title="Toggle searchable 80+ fonts library"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px' }}
+                >
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  </svg>
+                  <span>{isFontPickerOpen ? 'Close' : 'Browse 80+ Fonts'}</span>
+                </button>
+              </div>
+
               <input
                 type="text"
                 className="vi-input"
@@ -724,10 +780,67 @@ export const EditTab: FC<EditTabProps> = ({
                 onChange={(e) => handlePropertyChange('font-family', 'fontFamily', e.target.value)}
               />
               <datalist id="vi-font-list">
-                {COMMON_FONTS.map((f) => (
-                  <option key={f} value={f} />
+                {FONT_LIBRARY.map((f) => (
+                  <option key={f.name} value={f.family}>
+                    {f.name} ({f.category})
+                  </option>
                 ))}
               </datalist>
+
+              {isFontPickerOpen && (
+                <div className="vi-font-picker-panel">
+                  <input
+                    type="text"
+                    className="vi-input"
+                    placeholder="Search 80+ fonts (e.g. Inter, Playfair, Mono)..."
+                    value={fontSearch}
+                    onChange={(e) => setFontSearch(e.target.value)}
+                    autoFocus
+                  />
+                  <div className="vi-font-category-bar">
+                    {['All', 'Sans-Serif', 'Serif', 'Monospace', 'Display', 'Handwriting'].map((cat) => (
+                      <button
+                        key={cat}
+                        type="button"
+                        className={`vi-font-category-btn ${fontCategory === cat ? 'is-active' : ''}`}
+                        onClick={() => setFontCategory(cat)}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="vi-font-list-scroll">
+                    {FONT_LIBRARY.filter((f) => {
+                      const matchesCat = fontCategory === 'All' || f.category === fontCategory;
+                      const matchesSearch =
+                        !fontSearch.trim() ||
+                        f.name.toLowerCase().includes(fontSearch.toLowerCase().trim()) ||
+                        f.category.toLowerCase().includes(fontSearch.toLowerCase().trim());
+                      return matchesCat && matchesSearch;
+                    }).map((f) => {
+                      const currentVal = getVal('fontFamily', '').toLowerCase();
+                      const isSelected = currentVal.includes(f.name.toLowerCase());
+                      return (
+                        <button
+                          key={f.name}
+                          type="button"
+                          className={`vi-font-option-item ${isSelected ? 'is-selected' : ''}`}
+                          onClick={() => {
+                            handlePropertyChange('font-family', 'fontFamily', f.family);
+                            setIsFontPickerOpen(false);
+                          }}
+                        >
+                          <span className="vi-font-option-name" style={{ fontFamily: f.family }}>
+                            {f.name}
+                          </span>
+                          <span className="vi-font-option-badge">{f.category}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Weight Dropdown & Font Size */}
@@ -1448,11 +1561,31 @@ export const EditTab: FC<EditTabProps> = ({
             </div>
 
             <div className="vi-export-buttons-row">
-              <button className="vi-btn-accent" onClick={handleExportElement}>
-                Export Element as PNG
+              <button
+                className="vi-btn-accent"
+                onClick={handleExportElement}
+                disabled={isExportingElement}
+                style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                <span>{isExportingElement ? 'Exporting Element...' : 'Export Element as PNG'}</span>
               </button>
-              <button className="vi-btn-secondary" onClick={handleExportViewport}>
-                Export Viewport as PNG
+              <button
+                className="vi-btn-secondary"
+                onClick={handleExportViewport}
+                disabled={isExportingViewport}
+                style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                  <circle cx="8.5" cy="8.5" r="1.5" />
+                  <polyline points="21 15 16 10 5 21" />
+                </svg>
+                <span>{isExportingViewport ? 'Capturing Viewport...' : 'Export Viewport as PNG'}</span>
               </button>
             </div>
           </div>

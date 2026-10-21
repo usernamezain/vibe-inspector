@@ -32,7 +32,10 @@ export function useLiveStyles() {
     });
     setHistoryIndex((prev) => prev + 1);
 
-    // Update modifiedStyles map
+    const kebab = property.replace(/([A-Z])/g, '-$1').toLowerCase();
+    const camel = property.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+
+    // Update modifiedStyles map with dual keying (kebab + camel)
     setModifiedStyles((prev) => {
       const currentProps = prev[selector] || {};
       return {
@@ -40,6 +43,8 @@ export function useLiveStyles() {
         [selector]: {
           ...currentProps,
           [property]: value,
+          [kebab]: value,
+          [camel]: value,
         },
       };
     });
@@ -57,12 +62,19 @@ export function useLiveStyles() {
       value: delta.oldValue,
     });
 
+    const kebab = delta.property.replace(/([A-Z])/g, '-$1').toLowerCase();
+    const camel = delta.property.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+
     setModifiedStyles((prev) => {
       const currentProps = { ...(prev[delta.selector] || {}) };
       if (delta.oldValue) {
         currentProps[delta.property] = delta.oldValue;
+        currentProps[kebab] = delta.oldValue;
+        currentProps[camel] = delta.oldValue;
       } else {
         delete currentProps[delta.property];
+        delete currentProps[kebab];
+        delete currentProps[camel];
       }
       return {
         ...prev,
@@ -86,9 +98,14 @@ export function useLiveStyles() {
       value: delta.newValue,
     });
 
+    const kebab = delta.property.replace(/([A-Z])/g, '-$1').toLowerCase();
+    const camel = delta.property.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+
     setModifiedStyles((prev) => {
       const currentProps = { ...(prev[delta.selector] || {}) };
       currentProps[delta.property] = delta.newValue;
+      currentProps[kebab] = delta.newValue;
+      currentProps[camel] = delta.newValue;
       return {
         ...prev,
         [delta.selector]: currentProps,

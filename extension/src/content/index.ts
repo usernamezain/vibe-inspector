@@ -1977,38 +1977,65 @@ function initContentScript() {
       }
 
       case 'EXPORT_ELEMENT_PNG': {
-        chrome.runtime.sendMessage({ type: 'CAPTURE_TAB_PNG' }, (res) => {
-          if (!res?.dataUrl) {
-            sendResponse({ success: false, error: 'Failed to capture tab' });
-            return;
-          }
-          const target = message.selector ? document.querySelector<HTMLElement>(message.selector) : selectedElement;
-          if (!target) {
-            sendResponse({ success: false, error: 'Target element not found' });
-            return;
-          }
-          const rect = target.getBoundingClientRect();
-          const img = new Image();
-          img.onload = () => {
-            const scale = message.scale || 2;
-            const canvas = document.createElement('canvas');
-            canvas.width = rect.width * scale;
-            canvas.height = rect.height * scale;
-            const ctx = canvas.getContext('2d');
-            if (!ctx) {
-              sendResponse({ success: false, error: 'Canvas context failed' });
+        const target = message.selector ? (document.querySelector<HTMLElement>(message.selector) || selectedElement) : selectedElement;
+        if (!target) {
+          sendResponse({ success: false, error: 'Target element not found' });
+          return true;
+        }
+
+        // Hide overlays while capturing tab
+        const prevSelectedDisplay = selectedBox.style.display;
+        const prevHoverDisplay = hoverBox.style.display;
+        const prevPinsDisplay = pinsContainer.style.display;
+        selectedBox.style.display = 'none';
+        hoverBox.style.display = 'none';
+        pinsContainer.style.display = 'none';
+
+        const restoreOverlays = () => {
+          selectedBox.style.display = prevSelectedDisplay;
+          hoverBox.style.display = prevHoverDisplay;
+          pinsContainer.style.display = prevPinsDisplay;
+        };
+
+        try {
+          target.scrollIntoView({ behavior: 'instant' as any, block: 'center', inline: 'center' });
+        } catch {}
+
+        setTimeout(() => {
+          chrome.runtime.sendMessage({ type: 'CAPTURE_TAB_PNG' }, (res) => {
+            restoreOverlays();
+            if (!res?.dataUrl) {
+              sendResponse({ success: false, error: res?.error || 'Failed to capture tab' });
               return;
             }
-            const devicePixelRatio = window.devicePixelRatio || 1;
-            const sx = rect.left * devicePixelRatio;
-            const sy = rect.top * devicePixelRatio;
-            const sWidth = rect.width * devicePixelRatio;
-            const sHeight = rect.height * devicePixelRatio;
-            ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, canvas.width, canvas.height);
-            sendResponse({ success: true, dataUrl: canvas.toDataURL('image/png') });
-          };
-          img.src = res.dataUrl;
-        });
+            const rect = target.getBoundingClientRect();
+            const img = new Image();
+            img.onload = () => {
+              const scale = Math.max(1, message.scale || 2);
+              const devicePixelRatio = window.devicePixelRatio || 1;
+              const canvas = document.createElement('canvas');
+              const targetWidth = Math.max(1, Math.round(rect.width * scale));
+              const targetHeight = Math.max(1, Math.round(rect.height * scale));
+              canvas.width = targetWidth;
+              canvas.height = targetHeight;
+              const ctx = canvas.getContext('2d');
+              if (!ctx) {
+                sendResponse({ success: false, error: 'Canvas context failed' });
+                return;
+              }
+              const sx = Math.max(0, rect.left * devicePixelRatio);
+              const sy = Math.max(0, rect.top * devicePixelRatio);
+              const sWidth = Math.min(img.width - sx, rect.width * devicePixelRatio);
+              const sHeight = Math.min(img.height - sy, rect.height * devicePixelRatio);
+              ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, targetWidth, targetHeight);
+              sendResponse({ success: true, dataUrl: canvas.toDataURL('image/png') });
+            };
+            img.onerror = () => {
+              sendResponse({ success: false, error: 'Failed to process snapshot image' });
+            };
+            img.src = res.dataUrl;
+          });
+        }, 120);
         return true;
       }
 
@@ -2172,9 +2199,35 @@ function initContentScript() {
         break;
       }
 
+  function loadGoogleFont(fontFamily: string) {
+    try {
+      if (!fontFamily) return;
+      const cleanFont = fontFamily.split(',')[0].replace(/['"]/g, '').trim();
+      if (!cleanFont) return;
+      const systemFonts = [
+        'inherit', 'initial', 'unset', 'sans-serif', 'serif', 'monospace', 'cursive', 'fantasy',
+        'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Arial',
+        'Helvetica', 'Times New Roman', 'Times', 'Georgia', 'Courier New', 'Consolas', 'Verdana', 'Menlo'
+      ];
+      if (systemFonts.some((s) => s.toLowerCase() === cleanFont.toLowerCase())) return;
+
+      const fontId = `vi-font-${cleanFont.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
+      if (!document.getElementById(fontId)) {
+        const link = document.createElement('link');
+        link.id = fontId;
+        link.rel = 'stylesheet';
+        link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(cleanFont).replace(/%20/g, '+')}:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&display=swap`;
+        document.head.appendChild(link);
+      }
+    } catch {}
+  }
+
       case 'APPLY_LIVE_STYLE': {
         if (message.selector && message.property && message.value !== undefined) {
           try {
+            if (message.property === 'font-family' || message.property === 'fontFamily') {
+              loadGoogleFont(message.value);
+            }
             const els = document.querySelectorAll<HTMLElement>(message.selector);
             els.forEach((el) => {
               const prev = el.getAttribute('style') || '';
