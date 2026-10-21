@@ -396,7 +396,7 @@ function initContentScript() {
       justify-content: center;
       width: 32px;
       height: 32px;
-      border-radius: 9999px;
+      border-radius: 7px;
       background: transparent;
       border: none;
       color: #a1a1aa;
@@ -416,7 +416,7 @@ function initContentScript() {
     }
 
     .vi-pill-btn.pill-primary {
-      border-radius: 8px;
+      border-radius: 7px;
       padding: 4px;
     }
 
@@ -427,8 +427,10 @@ function initContentScript() {
     }
 
     .vi-pill-btn.active:not(.pill-primary) {
-      background: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.16);
       color: #ffffff;
+      border-radius: 7px;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2), 0 2px 6px rgba(0, 0, 0, 0.25);
     }
 
     .vi-pill-btn.disabled {
@@ -461,18 +463,19 @@ function initContentScript() {
     .vi-panel {
       display: none;
       flex-direction: column;
-      background: rgba(24, 24, 27, 0.96);
+      background: rgba(18, 18, 22, 0.95);
       color: #fafafa;
-      border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 24px 56px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
       width: 580px;
       max-width: 94vw;
       padding: 14px 16px;
       gap: 12px;
       animation: vi-panel-pop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      box-sizing: border-box;
     }
 
     @keyframes vi-panel-pop {
@@ -484,8 +487,45 @@ function initContentScript() {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 10px;
+    }
+
+    .vi-panel-title-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .vi-panel-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #93c5fd;
+      flex-shrink: 0;
+    }
+
+    .vi-panel-title-text {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .vi-panel-heading {
+      font-size: 13px;
+      font-weight: 700;
+      color: #f8fafc;
+      letter-spacing: -0.01em;
+    }
+
+    .vi-panel-subheading {
+      font-size: 11px;
+      color: #71717a;
     }
 
     .vi-panel-title {
@@ -517,7 +557,7 @@ function initContentScript() {
       align-items: center;
       justify-content: center;
       padding: 4px;
-      border-radius: 4px;
+      border-radius: 6px;
       transition: all 0.15s ease;
     }
 
@@ -585,107 +625,278 @@ function initContentScript() {
       color: #71717a;
     }
 
-    /* Presets Panel */
+    /* Presets Panel - Luxury Design System */
+    .vi-presets-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .vi-presets-search-box {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 0 10px;
+      box-sizing: border-box;
+      transition: all 0.15s ease;
+    }
+
+    .vi-presets-search-box:focus-within {
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    .vi-search-icon {
+      display: flex;
+      align-items: center;
+      color: #71717a;
+      margin-right: 8px;
+      flex-shrink: 0;
+    }
+
+    .vi-search-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #f8fafc;
+      font-size: 12px;
+      padding: 7px 0;
+      font-family: inherit;
+    }
+
+    .vi-search-input::placeholder {
+      color: #71717a;
+    }
+
+    .vi-search-clear {
+      background: transparent;
+      border: none;
+      color: #71717a;
+      cursor: pointer;
+      padding: 2px;
+      display: flex;
+      align-items: center;
+      border-radius: 4px;
+    }
+
+    .vi-search-clear:hover {
+      color: #f1f5f9;
+    }
+
     .vi-presets-categories {
       display: flex;
       gap: 6px;
       overflow-x: auto;
-      padding-bottom: 4px;
+      padding: 2px 0 4px 0;
+      white-space: nowrap;
+      -webkit-overflow-scrolling: touch;
     }
 
     .vi-cat-chip {
-      background: #27272a;
+      background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.08);
       color: #a1a1aa;
       font-size: 11px;
-      font-weight: 600;
-      padding: 4px 10px;
+      font-weight: 500;
+      padding: 4px 11px;
       border-radius: 9999px;
       cursor: pointer;
       white-space: nowrap;
       transition: all 0.15s ease;
+      user-select: none;
     }
 
     .vi-cat-chip:hover {
       color: #ffffff;
-      background: #3f3f46;
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.16);
     }
 
     .vi-cat-chip.active {
-      background: #f97316;
-      color: #ffffff;
-      border-color: #f97316;
+      background: #ffffff;
+      color: #09090b;
+      font-weight: 600;
+      border-color: #ffffff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Hide native scrollbars universally */
+    .vi-presets-categories::-webkit-scrollbar,
+    .vi-presets-grid-wrapper::-webkit-scrollbar,
+    .vi-presets-grid::-webkit-scrollbar,
+    .vi-scrubber-grid::-webkit-scrollbar,
+    .vi-panel::-webkit-scrollbar {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
+
+    .vi-presets-categories,
+    .vi-presets-grid-wrapper,
+    .vi-presets-grid,
+    .vi-scrubber-grid,
+    .vi-panel {
+      scrollbar-width: none !important;
+      -ms-overflow-style: none !important;
+    }
+
+    .vi-presets-grid-wrapper {
+      max-height: 330px;
+      overflow-y: auto;
+      padding-right: 2px;
     }
 
     .vi-presets-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-      max-height: 300px;
-      overflow-y: auto;
-      padding-right: 4px;
+      gap: 10px;
     }
 
     .vi-preset-card {
-      background: #27272a;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 8px;
+      position: relative;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 10px;
       padding: 10px 12px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      transition: border-color 0.15s ease;
+      gap: 8px;
+      cursor: pointer;
+      transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1),
+                  border-color 0.16s ease,
+                  background 0.16s ease,
+                  box-shadow 0.16s ease;
+      user-select: none;
+      overflow: hidden;
+      box-sizing: border-box;
     }
 
     .vi-preset-card:hover {
-      border-color: #f97316;
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.22);
+      box-shadow: 0 10px 24px -6px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08);
     }
 
-    .vi-preset-card-header {
+    .vi-preset-card:active {
+      transform: translateY(0) scale(0.99);
+    }
+
+    .vi-preset-card.just-applied {
+      border-color: #38bdf8 !important;
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.4) !important;
+    }
+
+    .vi-preset-card-top {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 6px;
     }
 
     .vi-preset-name {
-      font-size: 12px;
-      font-weight: 700;
+      font-size: 12.5px;
+      font-weight: 600;
       color: #f4f4f5;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .vi-preset-cat {
+    .vi-preset-pill {
       font-size: 9px;
+      font-weight: 600;
       text-transform: uppercase;
+      letter-spacing: 0.04em;
       color: #a1a1aa;
-      background: #18181b;
+      background: rgba(255, 255, 255, 0.06);
       padding: 2px 6px;
       border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .vi-preset-preview-stage {
+      height: 44px;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      padding: 4px;
+      pointer-events: none;
+    }
+
+    .vi-preset-sample {
+      font-size: 13px;
+      font-weight: 700;
+      max-width: 92%;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding: 2px 8px;
+    }
+
+    .vi-preset-footer {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 8px;
     }
 
     .vi-preset-desc {
-      font-size: 11px;
+      font-size: 10.5px;
       color: #a1a1aa;
-      line-height: 1.3;
+      line-height: 1.35;
       margin: 0;
+      flex: 1;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
-    .vi-preset-apply-btn {
-      margin-top: 4px;
-      background: #18181b;
-      color: #f4f4f5;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 4px;
-      padding: 6px 10px;
-      font-size: 11px;
+    .vi-preset-apply-hint {
+      font-size: 10px;
       font-weight: 600;
-      cursor: pointer;
+      color: #71717a;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 4px;
+      padding: 3px 7px;
+      white-space: nowrap;
       transition: all 0.15s ease;
+      opacity: 0.6;
     }
 
-    .vi-preset-apply-btn:hover {
-      background: #f97316;
-      color: #ffffff;
-      border-color: #f97316;
+    .vi-preset-card:hover .vi-preset-apply-hint {
+      opacity: 1;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.12);
+      border-color: rgba(56, 189, 248, 0.3);
+    }
+
+    .vi-presets-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 40px 16px;
+      color: #a1a1aa;
+      font-size: 12px;
+      text-align: center;
     }
 
     /* Minimized Launcher */

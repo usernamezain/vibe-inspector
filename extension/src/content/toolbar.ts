@@ -36,6 +36,9 @@ const SVG_ICONS = {
   dock: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 15 12 20 17 15"/><polyline points="7 9 12 4 17 9"/></svg>`,
   power: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>`,
   close: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+  search: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>`,
+  sparkles: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3z"/></svg>`,
+  check: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
 };
 
 export function createFloatingToolbar(options: FloatingToolbarOptions) {
@@ -623,56 +626,181 @@ export function createFloatingToolbar(options: FloatingToolbarOptions) {
     });
   }
 
-  // 5. Render the 20+ Visual Presets Library
+  // 5. Render the 36+ Visual Presets Library with Real-time Search & Live Swatches
   let selectedCategory = 'All';
-  function renderPresets() {
-    const categories = ['All', 'Text Animations', 'Gradients & Text', 'Glass & Shadows', 'Cyber & Glow', 'Borders & Shape', 'Animations'];
+  let searchQuery = '';
 
-    const filtered = selectedCategory === 'All'
-      ? VISUAL_PRESETS
-      : VISUAL_PRESETS.filter((p) => p.category === selectedCategory);
+  function renderPresets() {
+    const categories = [
+      'All',
+      'Text Animations',
+      'Gradients & Text',
+      'Glass & Shadows',
+      'Cyber & Glow',
+      'Borders & Shape',
+      'Animations',
+    ];
+
+    const q = searchQuery.trim().toLowerCase();
+    const filtered = VISUAL_PRESETS.filter((preset) => {
+      const matchCat = selectedCategory === 'All' || preset.category === selectedCategory;
+      if (!matchCat) return false;
+      if (!q) return true;
+      return (
+        preset.name.toLowerCase().includes(q) ||
+        preset.category.toLowerCase().includes(q) ||
+        preset.description.toLowerCase().includes(q)
+      );
+    });
+
+    // Populate all keyframes into shadow style so preview badges animate live
+    if (keyframesEl) {
+      const allKeyframes = VISUAL_PRESETS
+        .filter((p) => p.keyframes)
+        .map((p) => p.keyframes)
+        .join('\n');
+      if (!keyframesEl.textContent?.includes('vi-glitch-text')) {
+        keyframesEl.textContent += '\n' + allKeyframes;
+      }
+    }
 
     presetsPanel.innerHTML = `
       <div class="vi-panel-header">
-        <span class="vi-panel-title">${SVG_ICONS.presets} 24+ Instant Visual Effects</span>
-        <button class="vi-panel-close" id="vi-presets-close">${SVG_ICONS.close}</button>
-      </div>
-      <div class="vi-presets-categories">
-        ${categories.map((cat) => `
-          <button class="vi-cat-chip ${cat === selectedCategory ? 'active' : ''}" data-cat="${cat}">${cat}</button>
-        `).join('')}
-      </div>
-      <div class="vi-presets-grid">
-        ${filtered.map((preset) => `
-          <div class="vi-preset-card" data-preset-id="${preset.id}">
-            <div class="vi-preset-card-header">
-              <span class="vi-preset-name">${preset.name}</span>
-              <span class="vi-preset-cat">${preset.category}</span>
-            </div>
-            <p class="vi-preset-desc">${preset.description}</p>
-            <button class="vi-preset-apply-btn" data-preset-apply="${preset.id}">Apply Preset</button>
+        <div class="vi-panel-title-group">
+          <div class="vi-panel-icon">${SVG_ICONS.sparkles}</div>
+          <div class="vi-panel-title-text">
+            <span class="vi-panel-heading">Visual Presets & FX</span>
+            <span class="vi-panel-subheading">${filtered.length} curated style effects</span>
           </div>
-        `).join('')}
+        </div>
+        <button class="vi-panel-close" id="vi-presets-close" title="Close Presets">${SVG_ICONS.close}</button>
+      </div>
+
+      <div class="vi-presets-controls">
+        <div class="vi-presets-search-box">
+          <span class="vi-search-icon">${SVG_ICONS.search}</span>
+          <input
+            type="text"
+            class="vi-search-input"
+            id="vi-presets-search"
+            placeholder="Search effects (e.g. glitch, neon, gold, blur)..."
+            value="${searchQuery.replace(/"/g, '&quot;')}"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          ${searchQuery ? `<button class="vi-search-clear" id="vi-presets-search-clear" title="Clear search">${SVG_ICONS.close}</button>` : ''}
+        </div>
+
+        <div class="vi-presets-categories" id="vi-presets-cat-bar">
+          ${categories.map((cat) => `
+            <button class="vi-cat-chip ${cat === selectedCategory ? 'active' : ''}" data-cat="${cat}">${cat}</button>
+          `).join('')}
+        </div>
+      </div>
+
+      <div class="vi-presets-grid-wrapper">
+        ${filtered.length === 0 ? `
+          <div class="vi-presets-empty">
+            <p>No presets found matching "<strong>${searchQuery.replace(/</g, '&lt;')}</strong>"</p>
+            <button class="vi-cat-chip" id="vi-clear-filter-btn">Reset Filters</button>
+          </div>
+        ` : `
+          <div class="vi-presets-grid">
+            ${filtered.map((preset) => {
+              const previewStyles = Object.entries(preset.styles)
+                .map(([prop, val]) => {
+                  const cssProp = prop.replace(/([A-Z])/g, '-$1').toLowerCase();
+                  return `${cssProp}:${val};`;
+                })
+                .join('');
+              
+              const isTextAnim = preset.category === 'Text Animations' || preset.category === 'Gradients & Text';
+              const sampleText = isTextAnim ? 'Aa Vibe' : 'Aa FX';
+
+              return `
+                <div class="vi-preset-card" data-preset-id="${preset.id}" role="button" tabindex="0" title="Click to apply ${preset.name}">
+                  <div class="vi-preset-card-top">
+                    <span class="vi-preset-name">${preset.name}</span>
+                    <span class="vi-preset-pill">${preset.category}</span>
+                  </div>
+
+                  <div class="vi-preset-preview-stage">
+                    <div class="vi-preset-sample" style="${previewStyles}">
+                      ${sampleText}
+                    </div>
+                  </div>
+
+                  <div class="vi-preset-footer">
+                    <p class="vi-preset-desc">${preset.description}</p>
+                    <span class="vi-preset-apply-hint">Apply</span>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `}
       </div>
     `;
 
+    // Close button
     presetsPanel.querySelector('#vi-presets-close')?.addEventListener('click', () => {
       isPresetsOpen = false;
       renderToolbarState();
     });
 
-    // Category filtering
-    presetsPanel.querySelectorAll('.vi-cat-chip').forEach((btn) => {
+    // Search input
+    const searchInput = presetsPanel.querySelector('#vi-presets-search') as HTMLInputElement | null;
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        searchQuery = (e.target as HTMLInputElement).value;
+        renderPresets();
+        const updatedInput = presetsPanel.querySelector('#vi-presets-search') as HTMLInputElement | null;
+        if (updatedInput) {
+          updatedInput.focus();
+          const len = updatedInput.value.length;
+          updatedInput.setSelectionRange(len, len);
+        }
+      });
+    }
+
+    // Clear search
+    presetsPanel.querySelector('#vi-presets-search-clear')?.addEventListener('click', () => {
+      searchQuery = '';
+      renderPresets();
+      const updatedInput = presetsPanel.querySelector('#vi-presets-search') as HTMLInputElement | null;
+      updatedInput?.focus();
+    });
+
+    // Reset filters button
+    presetsPanel.querySelector('#vi-clear-filter-btn')?.addEventListener('click', () => {
+      selectedCategory = 'All';
+      searchQuery = '';
+      renderPresets();
+    });
+
+    // Category chips
+    presetsPanel.querySelectorAll('.vi-cat-chip[data-cat]').forEach((btn) => {
       btn.addEventListener('click', (e) => {
         selectedCategory = (e.currentTarget as HTMLElement).getAttribute('data-cat') || 'All';
         renderPresets();
       });
     });
 
-    // Apply Preset button
-    presetsPanel.querySelectorAll('[data-preset-apply]').forEach((btn) => {
-      btn.addEventListener('click', (e) => {
-        const id = (e.currentTarget as HTMLElement).getAttribute('data-preset-apply');
+    // Horizontal wheel scrolling for categories row
+    const catBar = presetsPanel.querySelector('#vi-presets-cat-bar');
+    if (catBar) {
+      catBar.addEventListener('wheel', (e: any) => {
+        if (e.deltaY !== 0) {
+          catBar.scrollLeft += e.deltaY;
+          e.preventDefault();
+        }
+      }, { passive: false });
+    }
+
+    // Click on Preset Card to apply
+    presetsPanel.querySelectorAll('.vi-preset-card').forEach((card) => {
+      card.addEventListener('click', (e) => {
+        const id = (e.currentTarget as HTMLElement).getAttribute('data-preset-id');
         const preset = VISUAL_PRESETS.find((p) => p.id === id);
         if (!preset) return;
 
@@ -682,7 +810,18 @@ export function createFloatingToolbar(options: FloatingToolbarOptions) {
           return;
         }
 
-        // Inject keyframes if needed
+        // Injected keyframes for main document
+        let docKeyframes = document.getElementById('vi-presets-document-keyframes') as HTMLStyleElement | null;
+        if (!docKeyframes) {
+          docKeyframes = document.createElement('style');
+          docKeyframes.id = 'vi-presets-document-keyframes';
+          document.head.appendChild(docKeyframes);
+        }
+        if (preset.keyframes && !docKeyframes.textContent?.includes(preset.id)) {
+          docKeyframes.textContent += '\n' + preset.keyframes;
+        }
+
+        // Injected keyframes for shadow host
         if (preset.keyframes && keyframesEl && !keyframesEl.textContent?.includes(preset.id)) {
           keyframesEl.textContent += '\n' + preset.keyframes;
         }
@@ -702,6 +841,10 @@ export function createFloatingToolbar(options: FloatingToolbarOptions) {
           newStyle,
           type: 'style',
         });
+
+        // Flash applied animation on card
+        card.classList.add('just-applied');
+        setTimeout(() => card.classList.remove('just-applied'), 800);
 
         onUpdatePositions();
         renderScrubbers();
