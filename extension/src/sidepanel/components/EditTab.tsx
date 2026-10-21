@@ -58,6 +58,151 @@ const COMMON_FONTS = [
   'Arial, Helvetica, sans-serif',
 ];
 
+const SVG_ICONS = {
+  up: (
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="18 15 12 9 6 15" />
+    </svg>
+  ),
+  down: (
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="6 9 12 15 18 9" />
+    </svg>
+  ),
+  left: (
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="15 18 9 12 15 6" />
+    </svg>
+  ),
+  right: (
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="9 18 15 12 9 6" />
+    </svg>
+  ),
+  highlight: (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <line x1="22" y1="12" x2="18" y2="12" />
+      <line x1="6" y1="12" x2="2" y2="12" />
+      <line x1="12" y1="6" x2="12" y2="2" />
+      <line x1="12" y1="22" x2="12" y2="18" />
+    </svg>
+  ),
+  presets: (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+    </svg>
+  ),
+  save: (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+      <polyline points="17 21 17 13 7 13 7 21" />
+      <polyline points="7 3 7 8 15 8" />
+    </svg>
+  ),
+  undo: (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 7v6h6" />
+      <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13" />
+    </svg>
+  ),
+  redo: (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 7v6h-6" />
+      <path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13" />
+    </svg>
+  ),
+  link: (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+    </svg>
+  ),
+  unlink: (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18.84 12.25l1.72-1.71a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+      <path d="M5.16 11.75l-1.72 1.71a5 5 0 0 0 7.07 7.07l1.72-1.71" />
+      <line x1="2" y1="2" x2="22" y2="22" />
+    </svg>
+  ),
+  eyedropper: (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m14 2 4 4L7 17H3v-4L14 2z" />
+      <path d="m13 7 4 4" />
+    </svg>
+  ),
+  shadow: (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect width="18" height="18" x="3" y="3" rx="2" />
+      <path d="M8 8l8 8" />
+      <path d="M16 8l-8 8" />
+    </svg>
+  ),
+};
+
+interface BoxShadowParts {
+  x: string;
+  y: string;
+  blur: string;
+  spread: string;
+  color: string;
+  inset: boolean;
+}
+
+function parseBoxShadow(raw: string): BoxShadowParts {
+  if (!raw || raw === 'none') {
+    return { x: '0px', y: '4px', blur: '12px', spread: '0px', color: '#00000026', inset: false };
+  }
+  const inset = raw.includes('inset');
+  let clean = raw.replace('inset', '').trim();
+  let color = '#00000026';
+
+  const colorMatch = clean.match(/(rgba?\([^)]+\)|hsla?\([^)]+\)|#[0-9a-fA-F]{3,8}|[a-z]+$)/i);
+  if (colorMatch) {
+    color = colorMatch[0];
+    clean = clean.replace(color, '').trim();
+  }
+
+  const parts = clean.split(/\s+/).filter(Boolean);
+  return {
+    x: parts[0] || '0px',
+    y: parts[1] || '4px',
+    blur: parts[2] || '12px',
+    spread: parts[3] || '0px',
+    color,
+    inset,
+  };
+}
+
+interface TextShadowParts {
+  x: string;
+  y: string;
+  blur: string;
+  color: string;
+}
+
+function parseTextShadow(raw: string): TextShadowParts {
+  if (!raw || raw === 'none') {
+    return { x: '0px', y: '2px', blur: '4px', color: '#00000040' };
+  }
+  let clean = raw.trim();
+  let color = '#00000040';
+
+  const colorMatch = clean.match(/(rgba?\([^)]+\)|hsla?\([^)]+\)|#[0-9a-fA-F]{3,8}|[a-z]+$)/i);
+  if (colorMatch) {
+    color = colorMatch[0];
+    clean = clean.replace(color, '').trim();
+  }
+
+  const parts = clean.split(/\s+/).filter(Boolean);
+  return {
+    x: parts[0] || '0px',
+    y: parts[1] || '2px',
+    blur: parts[2] || '4px',
+    color,
+  };
+}
+
 export const EditTab: FC<EditTabProps> = ({
   element,
   modifiedProps,
@@ -87,7 +232,7 @@ export const EditTab: FC<EditTabProps> = ({
     background: true,
     spacing: true,
     border: true,
-    boxShadow: false,
+    boxShadow: true,
   });
 
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({
@@ -110,7 +255,7 @@ export const EditTab: FC<EditTabProps> = ({
           setSensitivity(res.vibe_sensitivity);
         }
         if (res?.vibe_sections) {
-          setActiveSections((prev) => ({ ...prev, ...res.vibe_sections.active }));
+          setActiveSections((prev) => ({ ...prev, ...res.vibe_sections.active, boxShadow: true }));
           setCollapsedSections((prev) => ({ ...prev, ...res.vibe_sections.collapsed }));
         }
       });
@@ -154,6 +299,26 @@ export const EditTab: FC<EditTabProps> = ({
   // Helper to read effective property value (check modified first, then computed)
   const getVal = (prop: string, fallback = '') => {
     return modifiedProps[prop] ?? element.computedStyles[prop] ?? fallback;
+  };
+
+  // Shadow helpers for real-time dragging & updating
+  const currentBoxShadow = getVal('boxShadow', element.computedStyles.boxShadow || 'none');
+  const boxShadowParts = parseBoxShadow(currentBoxShadow);
+
+  const updateBoxShadowPart = (key: keyof BoxShadowParts, val: any) => {
+    const next = { ...boxShadowParts, [key]: val };
+    const insetStr = next.inset ? 'inset ' : '';
+    const combined = `${insetStr}${next.x} ${next.y} ${next.blur} ${next.spread} ${next.color}`.trim();
+    handlePropertyChange('box-shadow', 'boxShadow', combined);
+  };
+
+  const currentTextShadow = getVal('textShadow', element.computedStyles.textShadow || 'none');
+  const textShadowParts = parseTextShadow(currentTextShadow);
+
+  const updateTextShadowPart = (key: keyof TextShadowParts, val: any) => {
+    const next = { ...textShadowParts, [key]: val };
+    const combined = `${next.x} ${next.y} ${next.blur} ${next.color}`.trim();
+    handlePropertyChange('text-shadow', 'textShadow', combined);
   };
 
   const handlePropertyChange = (cssProp: string, jsProp: string, val: string) => {
@@ -275,30 +440,30 @@ export const EditTab: FC<EditTabProps> = ({
             <button
               className="vi-nav-btn"
               onClick={() => handleRelativeSelect('parent')}
-              title="Select Parent Element (▲)"
+              title="Select Parent Element"
             >
-              ▲
+              {SVG_ICONS.up}
             </button>
             <button
               className="vi-nav-btn"
               onClick={() => handleRelativeSelect('child')}
-              title="Select First Child (▼)"
+              title="Select First Child"
             >
-              ▼
+              {SVG_ICONS.down}
             </button>
             <button
               className="vi-nav-btn"
               onClick={() => handleRelativeSelect('prev')}
-              title="Select Previous Sibling (◀)"
+              title="Select Previous Sibling"
             >
-              ◀
+              {SVG_ICONS.left}
             </button>
             <button
               className="vi-nav-btn"
               onClick={() => handleRelativeSelect('next')}
-              title="Select Next Sibling (▶)"
+              title="Select Next Sibling"
             >
-              ▶
+              {SVG_ICONS.right}
             </button>
           </div>
         </div>
@@ -310,7 +475,7 @@ export const EditTab: FC<EditTabProps> = ({
           </span>
           <span className="vi-term-pill">{element.uiTerm}</span>
           <button className="vi-btn-highlight-sm" onClick={onHighlight} title="Flash element in page">
-            📍 Highlight
+            {SVG_ICONS.highlight} <span>Highlight</span>
           </button>
         </div>
       </div>
@@ -337,7 +502,7 @@ export const EditTab: FC<EditTabProps> = ({
             onClick={() => setIsPresetsOpen(true)}
             title="Browse built-in and saved presets"
           >
-            ⚡ Browse Presets...
+            {SVG_ICONS.presets} <span>Browse Presets</span>
           </button>
           <button
             className="vi-btn-icon-save"
@@ -345,7 +510,7 @@ export const EditTab: FC<EditTabProps> = ({
             title="Save current modifications as preset"
             disabled={!hasModifications}
           >
-            💾
+            {SVG_ICONS.save}
           </button>
         </div>
       </div>
@@ -359,7 +524,7 @@ export const EditTab: FC<EditTabProps> = ({
             disabled={!canUndo}
             title="Undo edit (Ctrl+Z)"
           >
-            ↩ Undo
+            {SVG_ICONS.undo} <span>Undo</span>
           </button>
           <button
             className="vi-btn-history"
@@ -367,7 +532,7 @@ export const EditTab: FC<EditTabProps> = ({
             disabled={!canRedo}
             title="Redo edit (Shift+Ctrl+Z)"
           >
-            ↪ Redo
+            {SVG_ICONS.redo} <span>Redo</span>
           </button>
         </div>
         {hasModifications && (
@@ -420,7 +585,15 @@ export const EditTab: FC<EditTabProps> = ({
                   onClick={() => setRadiusLinked(!radiusLinked)}
                   title={radiusLinked ? 'Corners linked (editing one sets all)' : 'Corners unlinked'}
                 >
-                  {radiusLinked ? '🔗 Linked' : '🔓 Unlinked'}
+                  {radiusLinked ? (
+                    <>
+                      {SVG_ICONS.link} <span>Linked</span>
+                    </>
+                  ) : (
+                    <>
+                      {SVG_ICONS.unlink} <span>Unlinked</span>
+                    </>
+                  )}
                 </button>
               </div>
 
@@ -800,7 +973,15 @@ export const EditTab: FC<EditTabProps> = ({
                 onClick={() => setBorderLinked(!borderLinked)}
                 title={borderLinked ? 'All sides linked' : 'Sides unlinked'}
               >
-                {borderLinked ? '🔗 All sides' : '🔓 Independent'}
+                {borderLinked ? (
+                  <>
+                    {SVG_ICONS.link} <span>All sides</span>
+                  </>
+                ) : (
+                  <>
+                    {SVG_ICONS.unlink} <span>Independent</span>
+                  </>
+                )}
               </button>
             </div>
             <div className="vi-grid-2">
@@ -846,10 +1027,176 @@ export const EditTab: FC<EditTabProps> = ({
                 <button
                   className="vi-eyedropper-btn"
                   onClick={() => handleEyeDropper('border-color', 'borderColor')}
+                  title="Pick border color"
                 >
-                  💧
+                  {SVG_ICONS.eyedropper}
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Shadow & Glow Section (With Upward/Downward Drag Scrubbers) */}
+      <div className="vi-section">
+        <div className="vi-section-header">
+          <div className="vi-section-title" onClick={() => toggleSection('boxShadow')}>
+            <span className="vi-section-arrow">{collapsedSections.boxShadow ? '▶' : '▼'}</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              {SVG_ICONS.shadow} Shadow & Effects
+            </span>
+          </div>
+          <button
+            className="vi-section-toggle-btn"
+            onClick={() => toggleOptionalSection('boxShadow')}
+            title={activeSections.boxShadow ? 'Remove Shadow controls' : 'Add Shadow controls'}
+          >
+            {activeSections.boxShadow ? '−' : '+'}
+          </button>
+        </div>
+
+        {activeSections.boxShadow && !collapsedSections.boxShadow && (
+          <div className="vi-section-content">
+            <div className="vi-corner-header" style={{ marginBottom: 6 }}>
+              <span className="vi-field-label">Box Shadow (Drag Up/Down to scrub)</span>
+              <button
+                className={`vi-link-btn ${boxShadowParts.inset ? 'is-linked' : ''}`}
+                onClick={() => updateBoxShadowPart('inset', !boxShadowParts.inset)}
+                title={boxShadowParts.inset ? 'Inset Shadow active' : 'Drop Shadow active'}
+              >
+                {boxShadowParts.inset ? 'Inner Shadow' : 'Drop Shadow'}
+              </button>
+            </div>
+
+            <div className="vi-grid-2">
+              <ScrubbableInput
+                label="Offset X"
+                value={boxShadowParts.x}
+                onChange={(v) => updateBoxShadowPart('x', v)}
+                onReset={() => updateBoxShadowPart('x', '0px')}
+                units={['px', 'rem']}
+                min={-200}
+                max={200}
+                step={1}
+                tooltip="Horizontal shadow displacement (drag up/down)"
+              />
+              <ScrubbableInput
+                label="Offset Y"
+                value={boxShadowParts.y}
+                onChange={(v) => updateBoxShadowPart('y', v)}
+                onReset={() => updateBoxShadowPart('y', '0px')}
+                units={['px', 'rem']}
+                min={-200}
+                max={200}
+                step={1}
+                tooltip="Vertical shadow displacement (drag up/down)"
+              />
+            </div>
+
+            <div className="vi-grid-2" style={{ marginTop: 6 }}>
+              <ScrubbableInput
+                label="Blur"
+                value={boxShadowParts.blur}
+                onChange={(v) => updateBoxShadowPart('blur', v)}
+                onReset={() => updateBoxShadowPart('blur', '0px')}
+                units={['px', 'rem']}
+                min={0}
+                max={200}
+                step={1}
+                tooltip="Shadow blur softening (drag up/down)"
+              />
+              <ScrubbableInput
+                label="Spread"
+                value={boxShadowParts.spread}
+                onChange={(v) => updateBoxShadowPart('spread', v)}
+                onReset={() => updateBoxShadowPart('spread', '0px')}
+                units={['px', 'rem']}
+                min={-100}
+                max={200}
+                step={1}
+                tooltip="Shadow expansion/shrink (drag up/down)"
+              />
+            </div>
+
+            <div className="vi-field-row" style={{ marginTop: 6 }}>
+              <span className="vi-field-label">Shadow Color</span>
+              <div className="vi-color-picker-group">
+                <input
+                  type="color"
+                  className="vi-color-swatch"
+                  value={boxShadowParts.color.startsWith('#') && boxShadowParts.color.length >= 7 ? boxShadowParts.color.slice(0, 7) : '#000000'}
+                  onChange={(e) => updateBoxShadowPart('color', e.target.value)}
+                />
+                <input
+                  type="text"
+                  className="vi-input-mono"
+                  value={boxShadowParts.color}
+                  onChange={(e) => updateBoxShadowPart('color', e.target.value)}
+                />
+                <button
+                  className="vi-eyedropper-btn"
+                  onClick={() => handleEyeDropper('box-shadow', 'boxShadow')}
+                  title="Pick color"
+                >
+                  {SVG_ICONS.eyedropper}
+                </button>
+              </div>
+            </div>
+
+            <div style={{ height: '1px', background: 'var(--vi-border-subtle)', margin: '10px 0 6px' }} />
+
+            <div className="vi-corner-header" style={{ marginBottom: 6 }}>
+              <span className="vi-field-label">Text Shadow</span>
+            </div>
+
+            <div className="vi-grid-2">
+              <ScrubbableInput
+                label="Text X"
+                value={textShadowParts.x}
+                onChange={(v) => updateTextShadowPart('x', v)}
+                onReset={() => updateTextShadowPart('x', '0px')}
+                units={['px']}
+                min={-100}
+                max={100}
+                step={1}
+                tooltip="Text shadow X displacement (drag up/down)"
+              />
+              <ScrubbableInput
+                label="Text Y"
+                value={textShadowParts.y}
+                onChange={(v) => updateTextShadowPart('y', v)}
+                onReset={() => updateTextShadowPart('y', '0px')}
+                units={['px']}
+                min={-100}
+                max={100}
+                step={1}
+                tooltip="Text shadow Y displacement (drag up/down)"
+              />
+            </div>
+
+            <div className="vi-grid-2" style={{ marginTop: 6 }}>
+              <ScrubbableInput
+                label="Text Blur"
+                value={textShadowParts.blur}
+                onChange={(v) => updateTextShadowPart('blur', v)}
+                onReset={() => updateTextShadowPart('blur', '0px')}
+                units={['px']}
+                min={0}
+                max={100}
+                step={1}
+                tooltip="Text shadow blur (drag up/down)"
+              />
+              <ScrubbableInput
+                label="Filter Blur"
+                value={getVal('filter', 'none').includes('blur') ? getVal('filter', 'none').replace(/[^0-9.]/g, '') + 'px' : '0px'}
+                onChange={(v) => handlePropertyChange('filter', 'filter', `blur(${v})`)}
+                onReset={() => handlePropertyChange('filter', 'filter', 'none')}
+                units={['px']}
+                min={0}
+                max={100}
+                step={0.5}
+                tooltip="Overall optical blur filter (drag up/down)"
+              />
             </div>
           </div>
         )}

@@ -887,6 +887,139 @@ function initContentScript() {
       border-color: rgba(56, 189, 248, 0.3);
     }
 
+    .vi-preset-card.is-selected {
+      border-color: #38bdf8 !important;
+      background: rgba(56, 189, 248, 0.08) !important;
+      box-shadow: 0 0 0 1px #38bdf8, 0 8px 24px -4px rgba(56, 189, 248, 0.25) !important;
+    }
+
+    .vi-preset-card.is-applied {
+      border-color: #22c55e !important;
+      background: rgba(34, 197, 94, 0.06) !important;
+    }
+
+    .vi-preset-apply-hint.selected {
+      opacity: 1 !important;
+      color: #38bdf8 !important;
+      background: rgba(56, 189, 248, 0.16) !important;
+      border-color: #38bdf8 !important;
+      font-weight: 700 !important;
+    }
+
+    /* Pinned Bottom Action Bar */
+    .vi-presets-action-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 14px;
+      background: rgba(15, 15, 20, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+      margin-top: 4px;
+      animation: vi-action-bar-in 0.15s ease-out;
+    }
+
+    @keyframes vi-action-bar-in {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .vi-action-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: #f1f5f9;
+    }
+
+    .vi-action-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #71717a;
+    }
+
+    .vi-action-dot.selected {
+      background: #38bdf8;
+      box-shadow: 0 0 8px #38bdf8;
+    }
+
+    .vi-action-dot.applied {
+      background: #22c55e;
+      box-shadow: 0 0 8px #22c55e;
+    }
+
+    .vi-text-dim {
+      color: #71717a;
+    }
+
+    .vi-action-buttons {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .vi-btn-cancel-effect {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #cbd5e1;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .vi-btn-cancel-effect:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .vi-btn-remove-effect {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      color: #f87171;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .vi-btn-remove-effect:hover {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+      border-color: #ef4444;
+    }
+
+    .vi-btn-apply-effect {
+      background: #38bdf8;
+      border: 1px solid #38bdf8;
+      color: #09090b;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      box-shadow: 0 2px 10px rgba(56, 189, 248, 0.35);
+    }
+
+    .vi-btn-apply-effect:hover {
+      background: #7dd3fc;
+      border-color: #7dd3fc;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(56, 189, 248, 0.5);
+    }
+
     .vi-presets-empty {
       display: flex;
       flex-direction: column;

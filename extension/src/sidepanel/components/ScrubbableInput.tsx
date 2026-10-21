@@ -38,16 +38,18 @@ export const ScrubbableInput: FC<ScrubbableInputProps> = ({
   // Track dragging state for pointer scrub
   const isDragging = useRef(false);
   const startX = useRef(0);
+  const startY = useRef(0);
   const startNum = useRef<number>(0);
   const [isScrubbing, setIsScrubbing] = useState(false);
 
   // Pointer scrub handlers
   const handlePointerDown = (e: React.PointerEvent<HTMLSpanElement>) => {
-    if (mixed || parsed.num === null && parsed.raw !== '-') return;
+    if (mixed || (parsed.num === null && parsed.raw !== '-')) return;
     e.preventDefault();
     e.currentTarget.setPointerCapture(e.pointerId);
     isDragging.current = true;
     startX.current = e.clientX;
+    startY.current = e.clientY;
     startNum.current = parsed.num ?? 0;
     setIsScrubbing(true);
   };
@@ -55,9 +57,12 @@ export const ScrubbableInput: FC<ScrubbableInputProps> = ({
   const handlePointerMove = (e: React.PointerEvent<HTMLSpanElement>) => {
     if (!isDragging.current) return;
     const deltaX = e.clientX - startX.current;
-    if (Math.abs(deltaX) < 1) return;
+    // Upward drag is negative clientY, so invert to make dragging upward increase the value
+    const deltaY = -(e.clientY - startY.current);
+    const effectiveDelta = Math.abs(deltaY) >= Math.abs(deltaX) ? deltaY : deltaX;
+    if (Math.abs(effectiveDelta) < 1) return;
 
-    let next = stepValue(startNum.current, deltaX * step, {
+    let next = stepValue(startNum.current, effectiveDelta * step, {
       shift: e.shiftKey,
       alt: e.altKey,
     });
@@ -77,6 +82,20 @@ export const ScrubbableInput: FC<ScrubbableInputProps> = ({
         e.currentTarget.releasePointerCapture(e.pointerId);
       } catch {}
     }
+  };
+
+  const handleWheel = (e: React.WheelEvent<HTMLElement>) => {
+    if (mixed || (parsed.num === null && parsed.raw !== '-')) return;
+    e.preventDefault();
+    const dir = e.deltaY < 0 ? 1 : -1;
+    const currentNum = parsed.num ?? 0;
+    let next = stepValue(currentNum, dir * step, {
+      shift: e.shiftKey,
+      alt: e.altKey,
+    });
+    if (min !== undefined) next = Math.max(min, next);
+    if (max !== undefined) next = Math.min(max, next);
+    onChange(formatUnitValue(next, parsed.unit));
   };
 
   // Keyboard stepping on input field
@@ -123,7 +142,11 @@ export const ScrubbableInput: FC<ScrubbableInputProps> = ({
   };
 
   return (
-    <div className={`vi-scrub-field ${className} ${isScrubbing ? 'is-scrubbing' : ''}`} title={tooltip}>
+    <div
+      className={`vi-scrub-field ${className} ${isScrubbing ? 'is-scrubbing' : ''}`}
+      title={tooltip}
+      onWheel={handleWheel}
+    >
       <div className="vi-field-header">
         <span
           className="vi-scrub-label"
@@ -132,7 +155,7 @@ export const ScrubbableInput: FC<ScrubbableInputProps> = ({
           onPointerUp={handlePointerUp}
           onPointerCancel={handlePointerUp}
           onDoubleClick={onReset}
-          title={`${tooltip || label} (Drag to scrub, double click to reset)`}
+          title={`${tooltip || label} (Drag Up/Down or Left/Right, or Scroll Wheel)`}
         >
           {label}
           {isModified && <span className="vi-modified-dot" title="Modified by user" />}

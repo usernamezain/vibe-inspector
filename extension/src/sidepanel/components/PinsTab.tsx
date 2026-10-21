@@ -79,7 +79,10 @@ export function PinsTab({
       <div className="section-card" style={{ padding: '10px 12px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ fontSize: '13px' }}>📌</span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
             <span style={{ fontWeight: 600, fontSize: '12px', color: '#09090b' }}>Page Annotations</span>
             <span className="tab-badge">{openPins.length} open</span>
           </div>
@@ -87,8 +90,9 @@ export function PinsTab({
             className={`btn-action ${isMarqueeActive ? 'active' : ''}`}
             onClick={onToggleMarquee}
             style={{
-              padding: '4px 8px',
+              padding: '6px 10px',
               fontSize: '11px',
+              fontWeight: 500,
               background: isMarqueeActive ? '#000000' : '#ffffff',
               color: isMarqueeActive ? '#ffffff' : '#09090b',
               border: '1px solid #000000',
@@ -108,8 +112,10 @@ export function PinsTab({
             onClick={() => setFilter('all')}
             style={{
               flex: 1,
-              padding: '4px 6px',
+              padding: '6px 8px',
+              minHeight: '26px',
               fontSize: '10px',
+              fontWeight: 500,
               background: filter === 'all' ? '#000000' : '#ffffff',
               color: filter === 'all' ? '#ffffff' : '#09090b',
               border: '1px solid ' + (filter === 'all' ? '#000000' : '#e4e4e7'),
@@ -124,8 +130,10 @@ export function PinsTab({
             onClick={() => setFilter('open')}
             style={{
               flex: 1,
-              padding: '4px 6px',
+              padding: '6px 8px',
+              minHeight: '26px',
               fontSize: '10px',
+              fontWeight: 500,
               background: filter === 'open' ? '#000000' : '#ffffff',
               color: filter === 'open' ? '#ffffff' : '#09090b',
               border: '1px solid ' + (filter === 'open' ? '#000000' : '#e4e4e7'),
@@ -140,8 +148,10 @@ export function PinsTab({
             onClick={() => setFilter('resolved')}
             style={{
               flex: 1,
-              padding: '4px 6px',
+              padding: '6px 8px',
+              minHeight: '26px',
               fontSize: '10px',
+              fontWeight: 500,
               background: filter === 'resolved' ? '#000000' : '#ffffff',
               color: filter === 'resolved' ? '#ffffff' : '#09090b',
               border: '1px solid ' + (filter === 'resolved' ? '#000000' : '#e4e4e7'),
@@ -166,8 +176,15 @@ export function PinsTab({
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-            <span style={{ fontWeight: 600, fontSize: '12px', color: '#09090b' }}>
-              🎯 {selectedGroup.name}
+            <span style={{ fontWeight: 600, fontSize: '12px', color: '#09090b', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="22" y1="12" x2="18" y2="12"/>
+                <line x1="6" y1="12" x2="2" y2="12"/>
+                <line x1="12" y1="6" x2="12" y2="2"/>
+                <line x1="12" y1="22" x2="12" y2="18"/>
+              </svg>
+              <span>{selectedGroup.name}</span>
             </span>
             <button
               onClick={onClearGroup}
@@ -177,6 +194,7 @@ export function PinsTab({
                 color: '#71717a',
                 cursor: 'pointer',
                 fontSize: '11px',
+                padding: '2px 6px',
               }}
             >
               Clear
@@ -200,7 +218,13 @@ export function PinsTab({
       {/* Drop Pin Section */}
       <div className="section-card" style={{ padding: '12px' }}>
         <div className="section-title" style={{ marginBottom: '8px' }}>
-          <span style={{ fontWeight: 600, fontSize: '12px', color: '#09090b' }}>📍 Drop New Pin</span>
+          <span style={{ fontWeight: 600, fontSize: '12px', color: '#09090b', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+            <span>Drop New Pin</span>
+          </span>
         </div>
 
         {element ? (
@@ -398,17 +422,30 @@ export function PinsTab({
                   onClick={() => onHighlight(pin.selector, `Pin #${pin.index}`)}
                   style={{
                     flex: 1,
-                    padding: '5px 8px',
+                    padding: '6px 10px',
+                    minHeight: '28px',
                     fontSize: '11px',
+                    fontWeight: 500,
                     background: '#ffffff',
                     border: '1px solid #d4d4d8',
                     color: '#09090b',
                     borderRadius: '4px',
                     cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '5px',
                   }}
                   title="Flash highlight this element on the page"
                 >
-                  🎯 Highlight
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="22" y1="12" x2="18" y2="12"/>
+                    <line x1="6" y1="12" x2="2" y2="12"/>
+                    <line x1="12" y1="6" x2="12" y2="2"/>
+                    <line x1="12" y1="22" x2="12" y2="18"/>
+                  </svg>
+                  <span>Highlight</span>
                 </button>
                 {pin.status === 'open' ? (
                   <button
@@ -419,16 +456,25 @@ export function PinsTab({
                     }}
                     style={{
                       flex: 1,
-                      padding: '5px 8px',
+                      padding: '6px 10px',
+                      minHeight: '28px',
                       fontSize: '11px',
+                      fontWeight: 500,
                       color: '#09090b',
                       background: '#f4f4f5',
                       border: '1px solid #d4d4d8',
                       borderRadius: '4px',
                       cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '5px',
                     }}
                   >
-                    ✓ Resolve
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    <span>Resolve</span>
                   </button>
                 ) : (
                   <button
@@ -436,33 +482,50 @@ export function PinsTab({
                     onClick={() => onReopenAnnotation(pin.id)}
                     style={{
                       flex: 1,
-                      padding: '5px 8px',
+                      padding: '6px 10px',
+                      minHeight: '28px',
                       fontSize: '11px',
+                      fontWeight: 500,
                       color: '#09090b',
                       background: '#f4f4f5',
                       border: '1px solid #d4d4d8',
                       borderRadius: '4px',
                       cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '5px',
                     }}
                   >
-                    ↺ Reopen
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="1 4 1 10 7 10"/>
+                      <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+                    </svg>
+                    <span>Reopen</span>
                   </button>
                 )}
                 <button
                   className="btn-action"
                   onClick={() => onDeleteAnnotation(pin.id)}
                   style={{
-                    padding: '5px 8px',
+                    padding: '6px 10px',
+                    minHeight: '28px',
                     fontSize: '11px',
                     color: '#09090b',
                     background: '#ffffff',
                     border: '1px solid #d4d4d8',
                     borderRadius: '4px',
                     cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                   }}
                   title="Delete pin"
                 >
-                  ✕
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
                 </button>
               </div>
             </div>
@@ -477,21 +540,26 @@ export function PinsTab({
           onClick={handleCopyPrompt}
           style={{
             width: '100%',
-            padding: '8px',
+            padding: '9px 14px',
+            minHeight: '36px',
             background: copiedPrompt ? '#f4f4f5' : '#000000',
             color: copiedPrompt ? '#09090b' : '#ffffff',
             fontWeight: 600,
+            fontSize: '12px',
             border: '1px solid #000000',
-            borderRadius: '4px',
+            borderRadius: '5px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '6px',
+            gap: '8px',
             cursor: 'pointer',
           }}
         >
-          <span>📋</span>
-          <span>{copiedPrompt ? '✓ Copied Prompt to Clipboard!' : 'Copy Annotations Prompt for AI'}</span>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+          <span>{copiedPrompt ? 'Copied Prompt to Clipboard!' : 'Copy Annotations Prompt for AI'}</span>
         </button>
 
         {annotations.length > 0 && (

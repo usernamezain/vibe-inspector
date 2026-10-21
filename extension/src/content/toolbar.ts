@@ -369,25 +369,13 @@ export function createFloatingToolbar(options: FloatingToolbarOptions) {
 
     pillBar.appendChild(createDivider());
 
-    // Group 4: Scrubber & Presets Panels
-    const scrubberBtn = createButton({
-      icon: SVG_ICONS.scrubbers,
-      tooltip: 'After Effects Style Value Scrubbers',
-      active: isScrubberOpen,
-      onClick: () => {
-        isScrubberOpen = !isScrubberOpen;
-        if (isScrubberOpen) isPresetsOpen = false;
-        renderToolbarState();
-      },
-    });
-
+    // Group 4: Presets Panel & Dock
     const presetsBtn = createButton({
       icon: SVG_ICONS.presets,
-      tooltip: '20+ Instant Visual Effects & Presets',
+      tooltip: '36+ Instant Visual Effects & Presets',
       active: isPresetsOpen,
       onClick: () => {
         isPresetsOpen = !isPresetsOpen;
-        if (isPresetsOpen) isScrubberOpen = false;
         renderToolbarState();
       },
     });
@@ -403,7 +391,6 @@ export function createFloatingToolbar(options: FloatingToolbarOptions) {
       },
     });
 
-    pillBar.appendChild(scrubberBtn);
     pillBar.appendChild(presetsBtn);
     pillBar.appendChild(dockBtn);
 
@@ -629,6 +616,9 @@ export function createFloatingToolbar(options: FloatingToolbarOptions) {
   // 5. Render the 36+ Visual Presets Library with Real-time Search & Live Swatches
   let selectedCategory = 'All';
   let searchQuery = '';
+  let selectedPresetId: string | null = null;
+  let activeAppliedPreset: any = null;
+  let originalElementStyle: string | null = null;
 
   function renderPresets() {
     const categories = [
@@ -652,6 +642,10 @@ export function createFloatingToolbar(options: FloatingToolbarOptions) {
         preset.description.toLowerCase().includes(q)
       );
     });
+
+    const selectedPreset = selectedPresetId
+      ? VISUAL_PRESETS.find((p) => p.id === selectedPresetId)
+      : null;
 
     // Populate all keyframes into shadow style so preview badges animate live
     if (keyframesEl) {
@@ -716,12 +710,14 @@ export function createFloatingToolbar(options: FloatingToolbarOptions) {
               
               const isTextAnim = preset.category === 'Text Animations' || preset.category === 'Gradients & Text';
               const sampleText = isTextAnim ? 'Aa Vibe' : 'Aa FX';
+              const isSelected = preset.id === selectedPresetId;
+              const isApplied = activeAppliedPreset?.id === preset.id;
 
               return `
-                <div class="vi-preset-card" data-preset-id="${preset.id}" role="button" tabindex="0" title="Click to apply ${preset.name}">
+                <div class="vi-preset-card ${isSelected ? 'is-selected' : ''} ${isApplied ? 'is-applied' : ''}" data-preset-id="${preset.id}" role="button" tabindex="0" title="Click to select ${preset.name}">
                   <div class="vi-preset-card-top">
                     <span class="vi-preset-name">${preset.name}</span>
-                    <span class="vi-preset-pill">${preset.category}</span>
+                    <span class="vi-preset-pill">${isApplied ? 'ACTIVE' : preset.category}</span>
                   </div>
 
                   <div class="vi-preset-preview-stage">
@@ -732,13 +728,46 @@ export function createFloatingToolbar(options: FloatingToolbarOptions) {
 
                   <div class="vi-preset-footer">
                     <p class="vi-preset-desc">${preset.description}</p>
-                    <span class="vi-preset-apply-hint">Apply</span>
+                    <span class="vi-preset-apply-hint ${isSelected ? 'selected' : ''}">
+                      ${isSelected ? `${SVG_ICONS.check} Selected` : isApplied ? 'Applied' : 'Select'}
+                    </span>
                   </div>
                 </div>
               `;
             }).join('')}
           </div>
         `}
+      </div>
+
+      <div class="vi-presets-action-bar" id="vi-presets-action-bar">
+        <div class="vi-action-info">
+          ${selectedPreset ? `
+            <span class="vi-action-dot selected"></span>
+            <span class="vi-action-text">Selected: <strong>${selectedPreset.name}</strong></span>
+          ` : activeAppliedPreset ? `
+            <span class="vi-action-dot applied"></span>
+            <span class="vi-action-text">Active: <strong>${activeAppliedPreset.name}</strong></span>
+          ` : `
+            <span class="vi-action-text vi-text-dim">Select one effect to preview & apply</span>
+          `}
+        </div>
+
+        <div class="vi-action-buttons">
+          ${activeAppliedPreset ? `
+            <button class="vi-btn-remove-effect" id="vi-btn-remove-preset" title="Remove applied preset from element">
+              Remove Effect
+            </button>
+          ` : ''}
+
+          ${selectedPreset ? `
+            <button class="vi-btn-cancel-effect" id="vi-btn-cancel-preset" title="Cancel selection">
+              Cancel
+            </button>
+            <button class="vi-btn-apply-effect" id="vi-btn-apply-preset" title="Apply selected effect to element">
+              ${SVG_ICONS.check} Apply Effect
+            </button>
+          ` : ''}
+        </div>
       </div>
     `;
 
@@ -797,59 +826,105 @@ export function createFloatingToolbar(options: FloatingToolbarOptions) {
       }, { passive: false });
     }
 
-    // Click on Preset Card to apply
+    // Click on Preset Card to select (only one selected at a time)
     presetsPanel.querySelectorAll('.vi-preset-card').forEach((card) => {
       card.addEventListener('click', (e) => {
         const id = (e.currentTarget as HTMLElement).getAttribute('data-preset-id');
-        const preset = VISUAL_PRESETS.find((p) => p.id === id);
-        if (!preset) return;
+        if (!id) return;
+        selectedPresetId = selectedPresetId === id ? null : id;
+        renderPresets();
+      });
+    });
 
-        const el = getSelectedElement();
-        if (!el) {
-          showToast('Select an element first to apply preset');
-          return;
-        }
+    // Apply Button Click
+    presetsPanel.querySelector('#vi-btn-apply-preset')?.addEventListener('click', () => {
+      const preset = VISUAL_PRESETS.find((p) => p.id === selectedPresetId);
+      if (!preset) return;
 
-        // Injected keyframes for main document
-        let docKeyframes = document.getElementById('vi-presets-document-keyframes') as HTMLStyleElement | null;
-        if (!docKeyframes) {
-          docKeyframes = document.createElement('style');
-          docKeyframes.id = 'vi-presets-document-keyframes';
-          document.head.appendChild(docKeyframes);
-        }
-        if (preset.keyframes && !docKeyframes.textContent?.includes(preset.id)) {
-          docKeyframes.textContent += '\n' + preset.keyframes;
-        }
+      const el = getSelectedElement();
+      if (!el) {
+        showToast('Select an element first to apply preset');
+        return;
+      }
 
-        // Injected keyframes for shadow host
-        if (preset.keyframes && keyframesEl && !keyframesEl.textContent?.includes(preset.id)) {
-          keyframesEl.textContent += '\n' + preset.keyframes;
-        }
+      if (originalElementStyle === null) {
+        originalElementStyle = el.getAttribute('style') || '';
+      }
 
-        const prevStyle = el.getAttribute('style') || '';
-
-        // Apply styles
-        Object.entries(preset.styles).forEach(([prop, val]) => {
-          (el.style as any)[prop] = val;
+      // If an effect was already applied, clean its properties first to avoid conflicts/shattering
+      if (activeAppliedPreset) {
+        Object.keys(activeAppliedPreset.styles).forEach((prop) => {
+          const cssProp = prop.replace(/([A-Z])/g, '-$1').toLowerCase();
+          el.style.removeProperty(cssProp);
         });
+      }
 
-        const newStyle = el.getAttribute('style') || '';
+      // Injected keyframes for main document
+      let docKeyframes = document.getElementById('vi-presets-document-keyframes') as HTMLStyleElement | null;
+      if (!docKeyframes) {
+        docKeyframes = document.createElement('style');
+        docKeyframes.id = 'vi-presets-document-keyframes';
+        document.head.appendChild(docKeyframes);
+      }
+      if (preset.keyframes && !docKeyframes.textContent?.includes(preset.id)) {
+        docKeyframes.textContent += '\n' + preset.keyframes;
+      }
+
+      // Apply new styles cleanly
+      Object.entries(preset.styles).forEach(([prop, val]) => {
+        (el.style as any)[prop] = val;
+      });
+
+      const newStyle = el.getAttribute('style') || '';
+      pushHistory({
+        description: `Preset: ${preset.name}`,
+        element: el,
+        prevStyle: originalElementStyle,
+        newStyle,
+        type: 'style',
+      });
+
+      activeAppliedPreset = preset;
+      selectedPresetId = null;
+      onUpdatePositions();
+      renderPresets();
+      showToast(`Applied ${preset.name}!`);
+    });
+
+    // Cancel Button Click
+    presetsPanel.querySelector('#vi-btn-cancel-preset')?.addEventListener('click', () => {
+      selectedPresetId = null;
+      renderPresets();
+      showToast('Selection cancelled');
+    });
+
+    // Remove Effect Button Click
+    presetsPanel.querySelector('#vi-btn-remove-preset')?.addEventListener('click', () => {
+      const el = getSelectedElement();
+      if (el) {
+        if (originalElementStyle !== null) {
+          el.setAttribute('style', originalElementStyle);
+        } else if (activeAppliedPreset) {
+          Object.keys(activeAppliedPreset.styles).forEach((prop) => {
+            const cssProp = prop.replace(/([A-Z])/g, '-$1').toLowerCase();
+            el.style.removeProperty(cssProp);
+          });
+        }
         pushHistory({
-          description: `Preset: ${preset.name}`,
+          description: 'Remove Preset Effect',
           element: el,
-          prevStyle,
-          newStyle,
+          prevStyle: el.getAttribute('style') || '',
+          newStyle: originalElementStyle || '',
           type: 'style',
         });
+      }
 
-        // Flash applied animation on card
-        card.classList.add('just-applied');
-        setTimeout(() => card.classList.remove('just-applied'), 800);
-
-        onUpdatePositions();
-        renderScrubbers();
-        showToast(`Applied ${preset.name}!`);
-      });
+      activeAppliedPreset = null;
+      selectedPresetId = null;
+      originalElementStyle = null;
+      onUpdatePositions();
+      renderPresets();
+      showToast('Effect removed');
     });
   }
 

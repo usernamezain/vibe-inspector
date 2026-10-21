@@ -90,14 +90,15 @@ body {
 .bridge-status-pill {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   font-size: 11px;
   font-weight: 500;
   color: var(--text-secondary);
   background: var(--bg-primary);
   border: 1px solid var(--border-color);
-  padding: 3px 8px;
-  border-radius: 4px;
+  padding: 5px 10px;
+  min-height: 28px;
+  border-radius: 5px;
   transition: all 0.15s ease;
 }
 
@@ -108,14 +109,30 @@ body {
 }
 
 .bridge-dot {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  background: var(--text-muted);
+  background: #ef4444; /* Red dot when disconnected */
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
+  flex-shrink: 0;
+  transition: all 0.2s ease;
 }
 
 .bridge-dot.connected {
-  background: #000000;
+  background: #22c55e; /* Green dot when connected */
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.85);
+  animation: vi-status-pulse 2s infinite ease-in-out;
+}
+
+@keyframes vi-status-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 6px rgba(34, 197, 94, 0.6);
+  }
+  50% {
+    transform: scale(1.25);
+    box-shadow: 0 0 10px rgba(34, 197, 94, 0.95);
+  }
 }
 
 /* Picker Action Bar */
@@ -129,13 +146,14 @@ body {
 
 .btn-inspect {
   flex: 1;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 8px 14px;
+  padding: 9px 16px;
+  min-height: 36px;
   border: 1px solid #000000;
-  border-radius: 4px;
+  border-radius: 5px;
   background: #000000;
   color: #ffffff;
   font-size: 12px;
@@ -158,10 +176,15 @@ body {
 }
 
 .btn-clear {
-  padding: 8px 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 14px;
+  min-height: 36px;
   background: var(--bg-primary);
   border: 1px solid var(--border-color);
-  border-radius: 4px;
+  border-radius: 5px;
   color: var(--text-primary);
   font-size: 12px;
   font-weight: 500;
@@ -521,11 +544,12 @@ kbd {
 
 .tab-nav-btn {
   flex: 1;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 9px 6px;
+  gap: 7px;
+  padding: 10px 10px;
+  min-height: 38px;
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
@@ -534,7 +558,7 @@ kbd {
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s ease;
-  border-radius: 4px 4px 0 0;
+  border-radius: 5px 5px 0 0;
 }
 
 .tab-nav-btn:hover {
@@ -552,9 +576,9 @@ kbd {
 .tab-badge {
   background: #000000;
   color: #ffffff;
-  padding: 1px 5px;
+  padding: 2px 6px;
   border-radius: 4px;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
 }
 
@@ -571,8 +595,8 @@ kbd {
   justify-content: space-between;
   background: var(--bg-primary);
   border: 1px solid var(--border-color);
-  border-radius: 4px;
-  padding: 8px 10px;
+  border-radius: 5px;
+  padding: 8px 12px;
 }
 
 .history-buttons {
@@ -581,14 +605,16 @@ kbd {
 }
 
 .btn-history {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
+  gap: 6px;
   background: var(--bg-tertiary);
   border: 1px solid var(--border-color);
   border-radius: 4px;
   color: var(--text-primary);
-  padding: 4px 10px;
+  padding: 6px 12px;
+  min-height: 28px;
   font-size: 11px;
   font-weight: 500;
   cursor: pointer;
@@ -606,14 +632,16 @@ kbd {
 }
 
 .btn-reset-element {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
+  gap: 6px;
   background: var(--bg-primary);
   border: 1px solid var(--border-color);
   border-radius: 4px;
   color: var(--text-primary);
-  padding: 4px 10px;
+  padding: 6px 12px;
+  min-height: 28px;
   font-size: 11px;
   font-weight: 500;
   cursor: pointer;
@@ -1441,10 +1469,10 @@ kbd {
 
 .vi-nav-group {
   display: flex;
-  gap: 2px;
+  gap: 3px;
   background: var(--vi-surface-input);
-  padding: 2px;
-  border-radius: 4px;
+  padding: 3px;
+  border-radius: 5px;
   border: 1px solid var(--vi-border-input);
 }
 
@@ -1452,9 +1480,14 @@ kbd {
   background: transparent;
   border: none;
   color: var(--vi-text-secondary);
-  font-size: 10px;
-  padding: 4px 6px;
-  border-radius: 3px;
+  font-size: 11px;
+  padding: 5px 8px;
+  min-width: 26px;
+  min-height: 26px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   transition: all var(--vi-duration-fast);
 }
@@ -1474,7 +1507,7 @@ kbd {
 .vi-term-pill {
   font-size: 10px;
   font-family: var(--vi-text-mono);
-  padding: 2px 6px;
+  padding: 3px 8px;
   border-radius: 4px;
   background: var(--vi-surface-input);
   color: var(--vi-text-secondary);
@@ -1496,8 +1529,12 @@ kbd {
   color: var(--vi-text-primary);
   font-size: 10px;
   font-weight: 500;
-  padding: 2px 8px;
+  padding: 4px 10px;
+  min-height: 26px;
   border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   cursor: pointer;
   transition: all var(--vi-duration-fast);
 }
@@ -1571,9 +1608,13 @@ kbd {
   border: 1px solid var(--vi-border-input);
   color: var(--vi-text-primary);
   font-size: 11px;
-  font-weight: 500;
-  padding: 5px 10px;
+  font-weight: 600;
+  padding: 6px 12px;
+  min-height: 30px;
   border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   cursor: pointer;
   transition: all var(--vi-duration-fast);
 }
@@ -1588,8 +1629,12 @@ kbd {
   border: 1px solid var(--vi-border-input);
   color: var(--vi-text-primary);
   font-size: 12px;
-  padding: 4px 7px;
+  padding: 6px 10px;
+  min-height: 30px;
   border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   transition: all var(--vi-duration-fast);
 }
@@ -1621,8 +1666,13 @@ kbd {
   border: 1px solid var(--vi-border-subtle);
   color: var(--vi-text-primary);
   font-size: 11px;
-  padding: 4px 8px;
+  font-weight: 500;
+  padding: 6px 12px;
+  min-height: 28px;
   border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   cursor: pointer;
   transition: all var(--vi-duration-fast);
 }
@@ -1643,8 +1693,12 @@ kbd {
   color: var(--vi-text-primary);
   font-size: 11px;
   font-weight: 500;
-  padding: 4px 8px;
+  padding: 6px 12px;
+  min-height: 28px;
   border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   cursor: pointer;
   transition: all var(--vi-duration-fast);
 }
@@ -1788,17 +1842,32 @@ kbd {
 .vi-scrub-label {
   font-size: 10px;
   color: var(--vi-text-secondary);
-  font-weight: 500;
-  cursor: col-resize;
+  font-weight: 600;
+  cursor: ns-resize;
   user-select: none;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 4px;
-  transition: color var(--vi-duration-fast);
+  padding: 2px 4px;
+  border-radius: 3px;
+  transition: all var(--vi-duration-fast);
 }
 
 .vi-scrub-label:hover {
   color: #000000;
+  background: var(--vi-surface-input);
+}
+
+.vi-scrub-field.is-scrubbing .vi-scrub-label {
+  color: #000000;
+  background: var(--vi-surface-input-hover);
+  cursor: ns-resize;
+}
+
+.vi-scrub-field.is-scrubbing .vi-field-input-box {
+  border-color: #000000;
+  outline: 1px solid #000000;
+  outline-offset: -1px;
 }
 
 .vi-modified-dot {
