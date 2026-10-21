@@ -503,7 +503,12 @@ export const PageTab: FC<PageTabProps> = ({
       {/* 5. Core Web Vitals Card */}
       <div className="property-group-card">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-          <div className="group-title" style={{ marginBottom: 0 }}>⚡ Web Vitals & Performance</div>
+          <div className="group-title" style={{ marginBottom: 0, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+            </svg>
+            <span>Web Vitals & Performance</span>
+          </div>
           <button
             onClick={fetchWebVitals}
             className="btn-action-small"
@@ -552,7 +557,17 @@ export const PageTab: FC<PageTabProps> = ({
       {/* 6. Accessibility & Contrast Audit (axe-core) Card */}
       <div className="property-group-card">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-          <div className="group-title" style={{ marginBottom: 0 }}>♿ Accessibility Audit (axe-core)</div>
+          <div className="group-title" style={{ marginBottom: 0, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="m4.93 4.93 4.24 4.24"/>
+              <path d="m14.83 9.17 4.24-4.24"/>
+              <path d="m14.83 14.83 4.24 4.24"/>
+              <path d="m9.17 14.83-4.24 4.24"/>
+              <circle cx="12" cy="12" r="4"/>
+            </svg>
+            <span>Accessibility Audit (axe-core)</span>
+          </div>
           <button
             onClick={handleRunA11yAudit}
             className="btn-action-small"
@@ -610,13 +625,19 @@ export const PageTab: FC<PageTabProps> = ({
                   fontSize: '11px',
                 }}
               >
-                {copiedA11y ? '✓ Copied!' : 'Copy Report'}
+                {copiedA11y ? (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Copied!</span>
+                  </span>
+                ) : 'Copy Report'}
               </button>
             </div>
 
             {a11yResult.violations.length === 0 ? (
-              <div style={{ fontSize: '12px', color: 'var(--vi-status-success)', textAlign: 'center', padding: '12px 0' }}>
-                ✓ No WCAG 2.1 AA violations detected on page!
+              <div style={{ fontSize: '12px', color: 'var(--vi-status-success)', textAlign: 'center', padding: '12px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>No WCAG 2.1 AA violations detected on page!</span>
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '200px', overflowY: 'auto' }}>
@@ -663,12 +684,26 @@ export const PageTab: FC<PageTabProps> = ({
       {/* 7. BYOK Quick Assistant Configuration */}
       <div className="property-group-card">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-          <div className="group-title" style={{ marginBottom: 0 }}>🤖 Bring-Your-Own-Key Assistant</div>
+          <div className="group-title" style={{ marginBottom: 0, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="11" width="18" height="10" rx="2"/>
+              <circle cx="12" cy="5" r="2"/>
+              <path d="M12 7v4"/>
+              <line x1="8" y1="16" x2="8.01" y2="16"/>
+              <line x1="16" y1="16" x2="16.01" y2="16"/>
+            </svg>
+            <span>Bring-Your-Own-Key Assistant</span>
+          </div>
           <button
             onClick={() => setShowKeySettings(!showKeySettings)}
-            style={{ background: 'transparent', border: 'none', color: 'var(--vi-text-secondary)', cursor: 'pointer', fontSize: '11px' }}
+            style={{ background: 'transparent', border: 'none', color: 'var(--vi-text-secondary)', cursor: 'pointer', fontSize: '11px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
           >
-            {showKeySettings ? 'Hide' : isApiKeySaved ? 'Configured ✓' : 'Configure'}
+            {showKeySettings ? 'Hide' : isApiKeySaved ? (
+              <>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Configured</span>
+              </>
+            ) : 'Configure'}
           </button>
         </div>
 
@@ -763,7 +798,10 @@ export const PageTab: FC<PageTabProps> = ({
                     onClick={() => onResetElement(sel)}
                     title="Reset element styles"
                   >
-                    ✕
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="18" y1="6" x2="6" y2="18"/>
+                      <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
                   </button>
                 </div>
               );

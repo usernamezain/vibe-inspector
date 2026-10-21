@@ -1843,7 +1843,7 @@ kbd {
   font-size: 10px;
   color: var(--vi-text-secondary);
   font-weight: 600;
-  cursor: ns-resize;
+  cursor: ew-resize;
   user-select: none;
   display: inline-flex;
   align-items: center;
@@ -1853,15 +1853,35 @@ kbd {
   transition: all var(--vi-duration-fast);
 }
 
+.vi-scrub-handle {
+  display: inline-flex;
+  align-items: center;
+  color: var(--vi-text-muted);
+  cursor: ew-resize;
+  transition: color var(--vi-duration-fast), transform var(--vi-duration-fast);
+  opacity: 0.7;
+}
+
 .vi-scrub-label:hover {
   color: #000000;
   background: var(--vi-surface-input);
 }
 
+.vi-scrub-label:hover .vi-scrub-handle {
+  color: #000000;
+  opacity: 1;
+  transform: scale(1.1);
+}
+
 .vi-scrub-field.is-scrubbing .vi-scrub-label {
   color: #000000;
   background: var(--vi-surface-input-hover);
-  cursor: ns-resize;
+  cursor: ew-resize;
+}
+
+.vi-scrub-field.is-scrubbing .vi-scrub-handle {
+  color: #000000;
+  opacity: 1;
 }
 
 .vi-scrub-field.is-scrubbing .vi-field-input-box {

@@ -161,11 +161,18 @@ export const PresetsModal: FC<PresetsModalProps> = ({
       <div className="vi-modal-container" onClick={(e) => e.stopPropagation()}>
         <div className="vi-modal-header">
           <div className="vi-modal-title">
-            <span className="vi-modal-icon">⚡</span>
+            <span className="vi-modal-icon" style={{ display: 'inline-flex', alignItems: 'center' }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+              </svg>
+            </span>
             <span>Style Presets</span>
           </div>
-          <button className="vi-modal-close" onClick={onClose}>
-            ✕
+          <button className="vi-modal-close" onClick={onClose} title="Close modal">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
           </button>
         </div>
 
@@ -221,11 +228,21 @@ export const PresetsModal: FC<PresetsModalProps> = ({
             <div className="vi-presets-group-label">
               <span>Your Presets ({userPresets.length})</span>
               <div className="vi-preset-actions">
-                <button className="vi-btn-ghost-sm" onClick={handleExportJSON} title="Export JSON">
-                  ⇥ Export
+                <button className="vi-btn-ghost-sm" onClick={handleExportJSON} title="Export JSON" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                  <span>Export</span>
                 </button>
-                <label className="vi-btn-ghost-sm" style={{ cursor: 'pointer' }} title="Import JSON">
-                  ⇤ Import
+                <label className="vi-btn-ghost-sm" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }} title="Import JSON">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                  <span>Import</span>
                   <input type="file" accept=".json" onChange={handleImportJSON} style={{ display: 'none' }} />
                 </label>
               </div>
@@ -253,7 +270,10 @@ export const PresetsModal: FC<PresetsModalProps> = ({
                         onClick={(e) => handleDeleteUserPreset(preset.id, e)}
                         title="Delete preset"
                       >
-                        ✕
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                          <line x1="18" y1="6" x2="6" y2="18"/>
+                          <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
                       </button>
                     </div>
                     <div className="vi-preset-props-count">

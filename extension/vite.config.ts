@@ -11,15 +11,35 @@ export default defineConfig({
       name: 'copy-extension-manifest-and-assets',
       closeBundle() {
         const distDir = resolve(__dirname, 'dist');
+        const extDir = resolve(__dirname);
         if (!fs.existsSync(distDir)) {
           fs.mkdirSync(distDir, { recursive: true });
         }
 
         // Copy manifest.json
         fs.copyFileSync(
-          resolve(__dirname, 'manifest.json'),
+          resolve(extDir, 'manifest.json'),
           resolve(distDir, 'manifest.json')
         );
+
+        // Copy built sidepanel.src.html to sidepanel.html in dist and extDir
+        const builtSrcHtml = resolve(distDir, 'sidepanel.src.html');
+        if (fs.existsSync(builtSrcHtml)) {
+          fs.copyFileSync(builtSrcHtml, resolve(distDir, 'sidepanel.html'));
+          fs.copyFileSync(builtSrcHtml, resolve(extDir, 'sidepanel.html'));
+        }
+
+        // Copy dist/assets/* to extension/assets/*
+        const distAssets = resolve(distDir, 'assets');
+        const extAssets = resolve(extDir, 'assets');
+        if (fs.existsSync(distAssets)) {
+          if (!fs.existsSync(extAssets)) {
+            fs.mkdirSync(extAssets, { recursive: true });
+          }
+          for (const file of fs.readdirSync(distAssets)) {
+            fs.copyFileSync(resolve(distAssets, file), resolve(extAssets, file));
+          }
+        }
 
         // Copy icons if present
         const iconsSrc = resolve(__dirname, 'public/icons');
@@ -40,7 +60,7 @@ export default defineConfig({
     emptyOutDir: true,
     rollupOptions: {
       input: {
-        sidepanel: resolve(__dirname, 'sidepanel.html'),
+        sidepanel: resolve(__dirname, 'sidepanel.src.html'),
         background: resolve(__dirname, 'src/background/index.ts'),
       },
       output: {

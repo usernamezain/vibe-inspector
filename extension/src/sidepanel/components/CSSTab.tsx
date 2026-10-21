@@ -162,27 +162,47 @@ Ensure changes match the project's styling system (Tailwind classes or CSS/SCSS 
             className={`btn-copy-code ${copiedCSS ? 'copied' : ''}`}
             onClick={handleCopyCSS}
           >
-            {copiedCSS ? '✓ CSS Copied' : 'Copy CSS'}
+            {copiedCSS ? (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>CSS Copied</span>
+              </span>
+            ) : 'Copy CSS'}
           </button>
           <button
             className={`btn-copy-code ${copiedTailwind ? 'copied' : ''}`}
             onClick={handleCopyTailwind}
             disabled={!tailwindClasses}
           >
-            {copiedTailwind ? '✓ Tailwind Copied' : 'Copy Tailwind'}
+            {copiedTailwind ? (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Tailwind Copied</span>
+              </span>
+            ) : 'Copy Tailwind'}
           </button>
           <button
             className={`btn-copy-code ${copiedReactStyle ? 'copied' : ''}`}
             onClick={handleCopyReactStyle}
             disabled={Object.keys(currentProps).length === 0}
           >
-            {copiedReactStyle ? '✓ React Copied' : 'Copy React Style'}
+            {copiedReactStyle ? (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>React Copied</span>
+              </span>
+            ) : 'Copy React Style'}
           </button>
           <button
             className={`btn-copy-code ${copiedPrompt ? 'copied' : ''}`}
             onClick={handleCopyPrompt}
           >
-            {copiedPrompt ? '✓ Prompt Copied' : 'Copy Agent Prompt'}
+            {copiedPrompt ? (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Prompt Copied</span>
+              </span>
+            ) : 'Copy Agent Prompt'}
           </button>
         </div>
       </div>
@@ -388,7 +408,10 @@ Ensure changes match the project's styling system (Tailwind classes or CSS/SCSS 
                     onClick={() => handleDeletePreset(preset.id)}
                     title="Delete preset"
                   >
-                    ✕
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="18" y1="6" x2="6" y2="18"/>
+                      <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
                   </button>
                 </div>
               </div>

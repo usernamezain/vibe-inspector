@@ -138,6 +138,55 @@ const SVG_ICONS = {
       <path d="M16 8l-8 8" />
     </svg>
   ),
+  check: (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  ),
+  copy: (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+      <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+    </svg>
+  ),
+  plus: (
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  ),
+  minus: (
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  ),
+  upload: (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="17 8 12 3 7 8" />
+      <line x1="12" y1="3" x2="12" y2="15" />
+    </svg>
+  ),
+  alignLeft: (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/>
+    </svg>
+  ),
+  alignCenter: (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" y1="10" x2="6" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="18" y1="18" x2="6" y2="18"/>
+    </svg>
+  ),
+  alignRight: (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="21" y1="10" x2="7" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="7" y2="18"/>
+    </svg>
+  ),
+  alignJustify: (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="3" y2="18"/>
+    </svg>
+  ),
 };
 
 interface BoxShadowParts {
@@ -433,7 +482,7 @@ export const EditTab: FC<EditTabProps> = ({
             title={`${element.selector} (Click to copy)`}
           >
             <span className="vi-selector-text">{element.selector}</span>
-            <span className="vi-chip-copy-icon">{copiedSelector ? '✓' : '⧉'}</span>
+            <span className="vi-chip-copy-icon">{copiedSelector ? SVG_ICONS.check : SVG_ICONS.copy}</span>
           </div>
 
           <div className="vi-nav-group">
@@ -546,7 +595,7 @@ export const EditTab: FC<EditTabProps> = ({
       <div className="vi-section">
         <div className="vi-section-header" onClick={() => toggleSection('appearance')}>
           <div className="vi-section-title">
-            <span className="vi-section-arrow">{collapsedSections.appearance ? '▶' : '▼'}</span>
+            <span className="vi-section-arrow">{collapsedSections.appearance ? SVG_ICONS.right : SVG_ICONS.down}</span>
             <span>Appearance</span>
           </div>
         </div>
@@ -656,7 +705,7 @@ export const EditTab: FC<EditTabProps> = ({
       <div className="vi-section">
         <div className="vi-section-header" onClick={() => toggleSection('typography')}>
           <div className="vi-section-title">
-            <span className="vi-section-arrow">{collapsedSections.typography ? '▶' : '▼'}</span>
+            <span className="vi-section-arrow">{collapsedSections.typography ? SVG_ICONS.right : SVG_ICONS.down}</span>
             <span>Typography</span>
           </div>
         </div>
@@ -739,10 +788,10 @@ export const EditTab: FC<EditTabProps> = ({
                     onClick={() => handlePropertyChange('text-align', 'textAlign', align)}
                     title={`Align ${align}`}
                   >
-                    {align === 'left' && '⫷'}
-                    {align === 'center' && '≡'}
-                    {align === 'right' && '⫸'}
-                    {align === 'justify' && '≣'}
+                    {align === 'left' && SVG_ICONS.alignLeft}
+                    {align === 'center' && SVG_ICONS.alignCenter}
+                    {align === 'right' && SVG_ICONS.alignRight}
+                    {align === 'justify' && SVG_ICONS.alignJustify}
                   </button>
                 ))}
               </div>
@@ -769,7 +818,7 @@ export const EditTab: FC<EditTabProps> = ({
                   onClick={() => handleEyeDropper('color', 'color')}
                   title="Sample color from screen (EyeDropper)"
                 >
-                  💧
+                  {SVG_ICONS.eyedropper}
                 </button>
               </div>
             </div>
@@ -781,7 +830,7 @@ export const EditTab: FC<EditTabProps> = ({
       <div className="vi-section">
         <div className="vi-section-header">
           <div className="vi-section-title" onClick={() => toggleSection('image')}>
-            <span className="vi-section-arrow">{collapsedSections.image ? '▶' : '▼'}</span>
+            <span className="vi-section-arrow">{collapsedSections.image ? SVG_ICONS.right : SVG_ICONS.down}</span>
             <span>Image</span>
           </div>
           <button
@@ -789,7 +838,7 @@ export const EditTab: FC<EditTabProps> = ({
             onClick={() => toggleOptionalSection('image')}
             title={activeSections.image ? 'Remove Image controls' : 'Add Image controls'}
           >
-            {activeSections.image ? '−' : '+'}
+            {activeSections.image ? SVG_ICONS.minus : SVG_ICONS.plus}
           </button>
         </div>
 
@@ -829,8 +878,9 @@ export const EditTab: FC<EditTabProps> = ({
             {/* Local Preview Swap */}
             <div className="vi-field-row">
               <span className="vi-field-label">Swap Preview</span>
-              <label className="vi-btn-ghost-sm" style={{ cursor: 'pointer' }}>
-                📁 Choose File...
+              <label className="vi-btn-ghost-sm" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                {SVG_ICONS.upload}
+                <span>Choose File...</span>
                 <input type="file" accept="image/*" onChange={handleImageSwap} style={{ display: 'none' }} />
               </label>
             </div>
@@ -842,7 +892,7 @@ export const EditTab: FC<EditTabProps> = ({
       <div className="vi-section">
         <div className="vi-section-header">
           <div className="vi-section-title" onClick={() => toggleSection('background')}>
-            <span className="vi-section-arrow">{collapsedSections.background ? '▶' : '▼'}</span>
+            <span className="vi-section-arrow">{collapsedSections.background ? SVG_ICONS.right : SVG_ICONS.down}</span>
             <span>Background</span>
           </div>
           <button
@@ -850,7 +900,7 @@ export const EditTab: FC<EditTabProps> = ({
             onClick={() => toggleOptionalSection('background')}
             title={activeSections.background ? 'Remove Background controls' : 'Add Background controls'}
           >
-            {activeSections.background ? '−' : '+'}
+            {activeSections.background ? SVG_ICONS.minus : SVG_ICONS.plus}
           </button>
         </div>
 
@@ -876,7 +926,7 @@ export const EditTab: FC<EditTabProps> = ({
                   onClick={() => handleEyeDropper('background-color', 'backgroundColor')}
                   title="Sample screen color"
                 >
-                  💧
+                  {SVG_ICONS.eyedropper}
                 </button>
               </div>
             </div>
@@ -897,7 +947,7 @@ export const EditTab: FC<EditTabProps> = ({
       <div className="vi-section">
         <div className="vi-section-header">
           <div className="vi-section-title" onClick={() => toggleSection('spacing')}>
-            <span className="vi-section-arrow">{collapsedSections.spacing ? '▶' : '▼'}</span>
+            <span className="vi-section-arrow">{collapsedSections.spacing ? SVG_ICONS.right : SVG_ICONS.down}</span>
             <span>Spacing & Box Model</span>
           </div>
           <button
@@ -905,7 +955,7 @@ export const EditTab: FC<EditTabProps> = ({
             onClick={() => toggleOptionalSection('spacing')}
             title={activeSections.spacing ? 'Remove Spacing controls' : 'Add Spacing controls'}
           >
-            {activeSections.spacing ? '−' : '+'}
+            {activeSections.spacing ? SVG_ICONS.minus : SVG_ICONS.plus}
           </button>
         </div>
 
@@ -952,7 +1002,7 @@ export const EditTab: FC<EditTabProps> = ({
       <div className="vi-section">
         <div className="vi-section-header">
           <div className="vi-section-title" onClick={() => toggleSection('border')}>
-            <span className="vi-section-arrow">{collapsedSections.border ? '▶' : '▼'}</span>
+            <span className="vi-section-arrow">{collapsedSections.border ? SVG_ICONS.right : SVG_ICONS.down}</span>
             <span>Border</span>
           </div>
           <button
@@ -960,7 +1010,7 @@ export const EditTab: FC<EditTabProps> = ({
             onClick={() => toggleOptionalSection('border')}
             title={activeSections.border ? 'Remove Border controls' : 'Add Border controls'}
           >
-            {activeSections.border ? '−' : '+'}
+            {activeSections.border ? SVG_ICONS.minus : SVG_ICONS.plus}
           </button>
         </div>
 
@@ -1041,7 +1091,7 @@ export const EditTab: FC<EditTabProps> = ({
       <div className="vi-section">
         <div className="vi-section-header">
           <div className="vi-section-title" onClick={() => toggleSection('boxShadow')}>
-            <span className="vi-section-arrow">{collapsedSections.boxShadow ? '▶' : '▼'}</span>
+            <span className="vi-section-arrow">{collapsedSections.boxShadow ? SVG_ICONS.right : SVG_ICONS.down}</span>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
               {SVG_ICONS.shadow} Shadow & Effects
             </span>
@@ -1051,7 +1101,7 @@ export const EditTab: FC<EditTabProps> = ({
             onClick={() => toggleOptionalSection('boxShadow')}
             title={activeSections.boxShadow ? 'Remove Shadow controls' : 'Add Shadow controls'}
           >
-            {activeSections.boxShadow ? '−' : '+'}
+            {activeSections.boxShadow ? SVG_ICONS.minus : SVG_ICONS.plus}
           </button>
         </div>
 
@@ -1206,7 +1256,7 @@ export const EditTab: FC<EditTabProps> = ({
       <div className="vi-section">
         <div className="vi-section-header" onClick={() => toggleSection('layout')}>
           <div className="vi-section-title">
-            <span className="vi-section-arrow">{collapsedSections.layout ? '▶' : '▼'}</span>
+            <span className="vi-section-arrow">{collapsedSections.layout ? SVG_ICONS.right : SVG_ICONS.down}</span>
             <span>Layout</span>
           </div>
         </div>
@@ -1312,7 +1362,15 @@ export const EditTab: FC<EditTabProps> = ({
                     onClick={() => setGapLinked(!gapLinked)}
                     title={gapLinked ? 'Gaps linked' : 'Gaps unlinked'}
                   >
-                    {gapLinked ? '🔗 Linked' : '🔓 Unlinked'}
+                    {gapLinked ? (
+                      <>
+                        {SVG_ICONS.link} <span>Linked</span>
+                      </>
+                    ) : (
+                      <>
+                        {SVG_ICONS.unlink} <span>Unlinked</span>
+                      </>
+                    )}
                   </button>
                 </div>
 
@@ -1356,7 +1414,7 @@ export const EditTab: FC<EditTabProps> = ({
       <div className="vi-section">
         <div className="vi-section-header" onClick={() => toggleSection('export')}>
           <div className="vi-section-title">
-            <span className="vi-section-arrow">{collapsedSections.export ? '▶' : '▼'}</span>
+            <span className="vi-section-arrow">{collapsedSections.export ? SVG_ICONS.right : SVG_ICONS.down}</span>
             <span>Export</span>
           </div>
         </div>

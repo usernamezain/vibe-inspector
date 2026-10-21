@@ -315,7 +315,13 @@ export default function App() {
             gap: '8px',
           }}
         >
-          <span style={{ fontSize: '13px', lineHeight: 1 }}>⚠️</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', color: '#09090b', marginTop: '1px' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          </span>
           <div style={{ flex: 1 }}>{panelError}</div>
           <button
             onClick={() => setPanelError(null)}
@@ -325,12 +331,15 @@ export default function App() {
               color: '#09090b',
               cursor: 'pointer',
               padding: '0 2px',
-              fontSize: '12px',
-              lineHeight: 1,
+              display: 'inline-flex',
+              alignItems: 'center',
             }}
             title="Dismiss notice"
           >
-            ✕
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
           </button>
         </div>
       )}

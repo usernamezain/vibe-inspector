@@ -128,27 +128,40 @@ function initContentScript() {
 
     .vibe-highlight-flash {
       position: fixed;
-      border: 2px solid #000000;
-      background: rgba(0, 0, 0, 0.08);
+      border: 2px solid #2563eb;
+      background: rgba(37, 99, 235, 0.22);
       border-radius: 4px;
-      box-shadow: none;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.45), 0 0 25px rgba(59, 130, 246, 0.8);
       pointer-events: none;
       transition: opacity 0.3s ease;
       z-index: 2147483647;
+      animation: vibe-pulse-highlight 0.75s infinite alternate ease-in-out;
+    }
+
+    @keyframes vibe-pulse-highlight {
+      0% {
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.4), 0 0 16px rgba(59, 130, 246, 0.6);
+        background: rgba(37, 99, 235, 0.16);
+      }
+      100% {
+        box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.75), 0 0 35px rgba(59, 130, 246, 0.95);
+        background: rgba(37, 99, 235, 0.32);
+      }
     }
 
     .vibe-highlight-label {
       position: fixed;
-      background: #000000;
+      background: #1d4ed8;
       color: #ffffff;
-      padding: 3px 8px;
+      padding: 4px 10px;
       border-radius: 4px;
       font-size: 11px;
-      font-weight: 600;
+      font-weight: 700;
       pointer-events: none;
-      box-shadow: none;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
       z-index: 2147483647;
       transition: opacity 0.3s ease;
+      letter-spacing: 0.02em;
     }
 
     /* Phase 5: Pins & Annotations */
@@ -1600,20 +1613,25 @@ function initContentScript() {
         popover.innerHTML = `
           <div class="vibe-pin-popover-header">
             <span class="vibe-pin-popover-title">
-              <span>📌 Pin #${ann.index}</span>
+              <span style="display:inline-flex;align-items:center;gap:4px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span>Pin #${ann.index}</span>
+              </span>
               <span class="vibe-pin-popover-status ${ann.status}">${ann.status}</span>
             </span>
-            <button class="vibe-pin-popover-close" data-action="close">✕</button>
+            <button class="vibe-pin-popover-close" data-action="close" title="Close">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
           </div>
           <div class="vibe-pin-popover-body">${ann.comment}</div>
           ${ann.resolutionNote ? `<div class="vibe-pin-popover-note">Resolution Note: ${ann.resolutionNote}</div>` : ''}
           <div class="vibe-pin-popover-actions">
             ${
               ann.status === 'open'
-                ? '<button class="vibe-pin-btn vibe-pin-btn-resolve" data-action="resolve">✓ Resolve</button>'
-                : '<button class="vibe-pin-btn vibe-pin-btn-reopen" data-action="reopen">↺ Reopen</button>'
+                ? '<button class="vibe-pin-btn vibe-pin-btn-resolve" data-action="resolve"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> <span>Resolve</span></button>'
+                : '<button class="vibe-pin-btn vibe-pin-btn-reopen" data-action="reopen"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg> <span>Reopen</span></button>'
             }
-            <button class="vibe-pin-btn vibe-pin-btn-delete" data-action="delete">🗑 Delete</button>
+            <button class="vibe-pin-btn vibe-pin-btn-delete" data-action="delete"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> <span>Delete</span></button>
           </div>
         `;
 
@@ -1664,6 +1682,11 @@ function initContentScript() {
       } catch {}
     }
 
+    // Direct fallback: if selector query didn't match, fall back to currently selected element
+    if (!target && selectedElement && document.contains(selectedElement)) {
+      target = selectedElement;
+    }
+
     if (!target && dataAt) {
       try {
         target = document.querySelector(`[data-at^="${dataAt}"], [data-inspector-line="${dataAt}"]`);
@@ -1672,7 +1695,11 @@ function initContentScript() {
 
     if (!target) return;
 
-    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    try {
+      target.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+    } catch {
+      target.scrollIntoView();
+    }
 
     const flash = document.createElement('div');
     flash.className = 'vibe-highlight-flash';
@@ -1682,7 +1709,7 @@ function initContentScript() {
     if (labelText) {
       labelEl = document.createElement('div');
       labelEl.className = 'vibe-highlight-label';
-      labelEl.textContent = labelText;
+      labelEl.innerHTML = `<span style="display:inline-flex;align-items:center;gap:4px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/><line x1="12" y1="6" x2="12" y2="2"/><line x1="12" y1="22" x2="12" y2="18"/></svg> ${labelText}</span>`;
       shadow.appendChild(labelEl);
     }
 
@@ -1703,10 +1730,10 @@ function initContentScript() {
 
       if (labelEl) {
         labelEl.style.left = `${r.x}px`;
-        labelEl.style.top = `${Math.max(8, r.y - 28)}px`;
+        labelEl.style.top = `${Math.max(8, r.y - 30)}px`;
       }
 
-      if (Date.now() - startTime > 2500) {
+      if (Date.now() - startTime > 3500) {
         clearInterval(interval);
         flash.style.opacity = '0';
         if (labelEl) labelEl.style.opacity = '0';
