@@ -18,6 +18,7 @@ import {
   WebVitalsSummary,
   analyzePageDesign,
 } from '@vibe-inspector/shared';
+import { createFloatingToolbar } from './toolbar.js';
 
 // Guard against multiple injections
 if (!(window as any).__vibeInspectorInjected) {
@@ -34,6 +35,7 @@ function initContentScript() {
   let currentAnnotations: AnnotationItem[] = [];
   let activePopoverPinId: string | null = null;
   let pickerSensitivity = 50;
+  let toolbar: ReturnType<typeof createFloatingToolbar> | null = null;
 
   // 1. Create Shadow DOM Host
   const host = document.createElement('div');
@@ -347,6 +349,396 @@ function initContentScript() {
       z-index: 2147483647;
       transition: opacity 0.3s ease;
     }
+
+    /* Floating Toolbar Container */
+    .vi-toolbar-container {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 2147483647;
+      pointer-events: none;
+      gap: 10px;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .vi-toolbar-container.bottom {
+      bottom: 24px;
+    }
+
+    .vi-toolbar-container.top {
+      top: 24px;
+      flex-direction: column-reverse;
+    }
+
+    /* Main Floating Pill Bar (Matching Reference Screenshot) */
+    .vi-pill-bar {
+      pointer-events: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      background: rgba(20, 20, 24, 0.95);
+      color: #e4e4e7;
+      border-radius: 9999px;
+      padding: 6px 12px;
+      box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      user-select: none;
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+    }
+
+    .vi-pill-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 9999px;
+      background: transparent;
+      border: none;
+      color: #a1a1aa;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      position: relative;
+    }
+
+    .vi-pill-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+
+    .vi-pill-btn:active {
+      transform: translateY(0px) scale(0.95);
+    }
+
+    .vi-pill-btn.pill-primary {
+      border-radius: 8px;
+      padding: 4px;
+    }
+
+    .vi-pill-btn.pill-primary.active {
+      background: #93c5fd;
+      color: #0f172a;
+      box-shadow: 0 0 12px rgba(147, 197, 253, 0.4);
+    }
+
+    .vi-pill-btn.active:not(.pill-primary) {
+      background: rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+    }
+
+    .vi-pill-btn.disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .vi-pill-btn.power-btn:hover {
+      color: #ef4444;
+      background: rgba(239, 68, 68, 0.15);
+    }
+
+    .vi-pill-divider {
+      width: 1px;
+      height: 18px;
+      background: rgba(255, 255, 255, 0.15);
+      margin: 0 5px;
+    }
+
+    /* Panels (Scrubbers & Presets) */
+    .vi-panels-wrapper {
+      pointer-events: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+
+    .vi-panel {
+      display: none;
+      flex-direction: column;
+      background: rgba(24, 24, 27, 0.96);
+      color: #fafafa;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      width: 580px;
+      max-width: 94vw;
+      padding: 14px 16px;
+      gap: 12px;
+      animation: vi-panel-pop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes vi-panel-pop {
+      from { opacity: 0; transform: translateY(10px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .vi-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 8px;
+    }
+
+    .vi-panel-title {
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #f4f4f5;
+    }
+
+    .vi-panel-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .vi-panel-hint {
+      font-size: 11px;
+      color: #a1a1aa;
+    }
+
+    .vi-panel-close {
+      background: transparent;
+      border: none;
+      color: #71717a;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+      border-radius: 4px;
+      transition: all 0.15s ease;
+    }
+
+    .vi-panel-close:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .vi-panel-empty {
+      font-size: 12px;
+      color: #a1a1aa;
+      text-align: center;
+      padding: 24px 12px;
+    }
+
+    /* Scrubber Grid */
+    .vi-scrubber-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .vi-scrubber-item {
+      display: flex;
+      flex-direction: column;
+      background: #27272a;
+      border-radius: 6px;
+      padding: 8px 10px;
+      cursor: col-resize;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+
+    .vi-scrubber-item:hover,
+    .vi-scrubber-item.scrubbing {
+      background: #3f3f46;
+      border-color: #f97316;
+    }
+
+    .vi-scrubber-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: #a1a1aa;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .vi-scrubber-val-wrapper {
+      display: flex;
+      align-items: baseline;
+      gap: 2px;
+      margin-top: 2px;
+    }
+
+    .vi-scrubber-value {
+      font-size: 14px;
+      font-weight: 700;
+      color: #ffffff;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    .vi-scrubber-unit {
+      font-size: 11px;
+      color: #71717a;
+    }
+
+    /* Presets Panel */
+    .vi-presets-categories {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .vi-cat-chip {
+      background: #27272a;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #a1a1aa;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+
+    .vi-cat-chip:hover {
+      color: #ffffff;
+      background: #3f3f46;
+    }
+
+    .vi-cat-chip.active {
+      background: #f97316;
+      color: #ffffff;
+      border-color: #f97316;
+    }
+
+    .vi-presets-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      max-height: 300px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .vi-preset-card {
+      background: #27272a;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: border-color 0.15s ease;
+    }
+
+    .vi-preset-card:hover {
+      border-color: #f97316;
+    }
+
+    .vi-preset-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .vi-preset-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: #f4f4f5;
+    }
+
+    .vi-preset-cat {
+      font-size: 9px;
+      text-transform: uppercase;
+      color: #a1a1aa;
+      background: #18181b;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .vi-preset-desc {
+      font-size: 11px;
+      color: #a1a1aa;
+      line-height: 1.3;
+      margin: 0;
+    }
+
+    .vi-preset-apply-btn {
+      margin-top: 4px;
+      background: #18181b;
+      color: #f4f4f5;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .vi-preset-apply-btn:hover {
+      background: #f97316;
+      color: #ffffff;
+      border-color: #f97316;
+    }
+
+    /* Minimized Launcher */
+    .vi-minimized-launcher {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      background: #18181b;
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 8px 16px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      z-index: 2147483647;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    .vi-minimized-launcher:hover {
+      transform: scale(1.05);
+      background: #27272a;
+    }
+
+    /* Toast Notification */
+    .vi-toast {
+      position: fixed;
+      left: 50%;
+      bottom: 84px;
+      transform: translateX(-50%) translateY(20px);
+      background: #09090b;
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 8px 18px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      pointer-events: none;
+      opacity: 0;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 2147483647;
+      white-space: nowrap;
+    }
+
+    .vi-toast.visible {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
   `;
   shadow.appendChild(styleEl);
 
@@ -604,6 +996,7 @@ function initContentScript() {
     positionBox(selectedBox, rect);
 
     setPickerMode(false);
+    toolbar?.updateSelection();
 
     const info = extractElementInfo(target);
     chrome.runtime.sendMessage({
@@ -649,6 +1042,7 @@ function initContentScript() {
       window.removeEventListener('keydown', onKeyDown, true);
       chrome.runtime.sendMessage({ type: 'PICKER_STATUS', active: false }).catch(() => {});
     }
+    toolbar?.updatePickerState();
   }
 
   // --- Phase 5: Marquee Group Selection ---
@@ -989,6 +1383,7 @@ function initContentScript() {
       selectedBox.style.display = 'none';
     }
     renderPins();
+    toolbar?.updateSelection();
   }
   window.addEventListener('scroll', updatePositions, { passive: true });
   window.addEventListener('resize', updatePositions, { passive: true });
@@ -1007,6 +1402,30 @@ function initContentScript() {
 
   // Initial load
   loadAnnotations();
+
+  // Floating Interactive Toolbar (Undo/Redo, Presets, Value Scrubbers)
+  toolbar = createFloatingToolbar({
+    shadow,
+    isPicking: () => isPicking,
+    onTogglePicker: () => setPickerMode(!isPicking),
+    getSelectedElement: () => selectedElement,
+    onSelectElement: (el) => {
+      selectedElement = el;
+      if (el) {
+        positionBox(selectedBox, el.getBoundingClientRect());
+      } else {
+        selectedBox.style.display = 'none';
+      }
+    },
+    onUpdatePositions: () => updatePositions(),
+    onNotifySelection: (el) => {
+      const info = extractElementInfo(el);
+      chrome.runtime.sendMessage({
+        type: 'ELEMENT_SELECTED',
+        element: info,
+      }).catch(() => {});
+    },
+  });
 
   // --- Phase 6: Core Web Vitals & Accessibility ---
   const webVitalsData: WebVitalsSummary = {
@@ -1387,7 +1806,10 @@ function initContentScript() {
           try {
             const els = document.querySelectorAll<HTMLElement>(message.selector);
             els.forEach((el) => {
+              const prev = el.getAttribute('style') || '';
               el.style.setProperty(message.property, message.value);
+              const next = el.getAttribute('style') || '';
+              toolbar?.notifyStyleApplied(el, prev, next, `${message.property}: ${message.value}`);
             });
             updatePositions();
             sendResponse({ success: true, count: els.length });
@@ -1402,7 +1824,11 @@ function initContentScript() {
         if (message.selector) {
           try {
             const els = document.querySelectorAll<HTMLElement>(message.selector);
-            els.forEach((el) => el.removeAttribute('style'));
+            els.forEach((el) => {
+              const prev = el.getAttribute('style') || '';
+              el.removeAttribute('style');
+              toolbar?.notifyStyleApplied(el, prev, '', 'Reset styles');
+            });
             updatePositions();
             sendResponse({ success: true });
           } catch {}
