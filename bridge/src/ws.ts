@@ -17,6 +17,8 @@ export class BridgeWebSocketServer extends EventEmitter {
   private httpServer: http.Server | null = null;
   private activeClient: WebSocket | null = null;
   private pendingRequests = new Map<string, { resolve: (val: any) => void; reject: (err: any) => void; timer: NodeJS.Timeout }>();
+  public lastSelection: any = null;
+  public lastAnnotations: any[] = [];
   private readonly options: BridgeServerOptions;
 
   constructor(options: BridgeServerOptions) {
@@ -30,10 +32,85 @@ export class BridgeWebSocketServer extends EventEmitter {
 
   public async start(): Promise<number> {
     return new Promise((resolve, reject) => {
-      this.httpServer = http.createServer((_req, res) => {
-        // Plain HTTP requests to the bridge port receive 403 Forbidden
-        res.writeHead(403, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: 'Direct HTTP access forbidden. Connect via WebSocket from authorized Chrome Extension.' }));
+      this.httpServer = http.createServer(async (req, res) => {
+        const parsed = new URL(req.url || '/', 'http://127.0.0.1');
+        const token = parsed.searchParams.get('token');
+
+        // Only authenticated local requests with valid token
+        if (!token || token.trim() !== this.options.token.trim()) {
+          res.writeHead(403, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Direct HTTP access requires valid ?token parameter.' }));
+          return;
+        }
+
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Content-Type', 'application/json');
+
+        if (parsed.pathname === '/api/selection') {
+          if (this.isConnected()) {
+            try {
+              const current = await this.sendRequest('GET_SELECTION', undefined, 2000);
+              if (current) this.lastSelection = current;
+              res.writeHead(200);
+              res.end(JSON.stringify({ success: true, connected: true, selection: current || this.lastSelection }));
+              return;
+            } catch {}
+          }
+          res.writeHead(200);
+          res.end(JSON.stringify({ success: true, connected: this.isConnected(), selection: this.lastSelection }));
+          return;
+        }
+
+        if (parsed.pathname === '/api/annotations') {
+          if (this.isConnected()) {
+            try {
+              const current = await this.sendRequest('GET_ANNOTATIONS', undefined, 2000);
+              if (current) this.lastAnnotations = current;
+              res.writeHead(200);
+              res.end(JSON.stringify({ success: true, connected: true, annotations: current || this.lastAnnotations }));
+              return;
+            } catch {}
+          }
+          res.writeHead(200);
+          res.end(JSON.stringify({ success: true, connected: this.isConnected(), annotations: this.lastAnnotations }));
+          return;
+        }
+
+        if (parsed.pathname === '/api/resolve_annotation') {
+          const indexParam = parsed.searchParams.get('index');
+          const idParam = parsed.searchParams.get('id');
+          const note = parsed.searchParams.get('note') || 'Resolved by AI assistant';
+          const index = indexParam ? parseInt(indexParam, 10) : undefined;
+          if (this.isConnected()) {
+            try {
+              const resPayload = await this.sendRequest('RESOLVE_ANNOTATION', { id: idParam || undefined, index, note }, 3000);
+              res.writeHead(200);
+              res.end(JSON.stringify({ success: true, result: resPayload }));
+              return;
+            } catch (err: any) {
+              res.writeHead(500);
+              res.end(JSON.stringify({ error: err.message }));
+              return;
+            }
+          }
+          res.writeHead(503);
+          res.end(JSON.stringify({ error: 'Extension not connected' }));
+          return;
+        }
+
+        if (parsed.pathname === '/api/status') {
+          res.writeHead(200);
+          res.end(JSON.stringify({
+            success: true,
+            connected: this.isConnected(),
+            hasSelection: Boolean(this.lastSelection),
+            annotationsCount: this.lastAnnotations.length,
+          }));
+          return;
+        }
+
+        res.writeHead(404);
+        res.end(JSON.stringify({ error: 'Endpoint not found' }));
       });
 
       this.wss = new WebSocketServer({
@@ -173,6 +250,12 @@ export class BridgeWebSocketServer extends EventEmitter {
     }
 
     // Broadcast notifications from extension
+    if (msg.type === 'SELECTION_CHANGED' || msg.type === 'ELEMENT_SELECTED') {
+      this.lastSelection = msg.payload;
+    }
+    if (msg.type === 'ANNOTATIONS_UPDATED') {
+      this.lastAnnotations = msg.payload;
+    }
     this.emit(msg.type, msg.payload);
   }
 
