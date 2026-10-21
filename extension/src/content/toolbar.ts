@@ -626,7 +626,7 @@ export function createFloatingToolbar(options: FloatingToolbarOptions) {
   // 5. Render the 20+ Visual Presets Library
   let selectedCategory = 'All';
   function renderPresets() {
-    const categories = ['All', 'Gradients & Text', 'Glass & Shadows', 'Cyber & Glow', 'Borders & Shape', 'Animations'];
+    const categories = ['All', 'Text Animations', 'Gradients & Text', 'Glass & Shadows', 'Cyber & Glow', 'Borders & Shape', 'Animations'];
 
     const filtered = selectedCategory === 'All'
       ? VISUAL_PRESETS

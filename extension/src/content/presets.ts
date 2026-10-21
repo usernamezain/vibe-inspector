@@ -1,14 +1,234 @@
 export interface VisualPreset {
   id: string;
   name: string;
-  category: 'Gradients & Text' | 'Glass & Shadows' | 'Cyber & Glow' | 'Borders & Shape' | 'Animations';
+  category: 'Text Animations' | 'Gradients & Text' | 'Glass & Shadows' | 'Cyber & Glow' | 'Borders & Shape' | 'Animations';
   description: string;
   styles: Record<string, string>;
   keyframes?: string;
 }
 
 export const VISUAL_PRESETS: VisualPreset[] = [
-  // 1. Gradients & Text
+  // ==========================================
+  // 1. Text Animations (Kinetic & Typographic)
+  // ==========================================
+  {
+    id: 'cyberpunk-glitch-text',
+    name: 'Cyberpunk Glitch',
+    category: 'Text Animations',
+    description: 'High-tech RGB-split horizontal jitter glitch with chromatic aberration',
+    styles: {
+      display: 'inline-block',
+      position: 'relative',
+      animation: 'vi-glitch-text 2s infinite ease-in-out',
+      willChange: 'transform, text-shadow',
+    },
+    keyframes: `@keyframes vi-glitch-text {
+      0%, 100% { text-shadow: 2px 0 #ef4444, -2px 0 #06b6d4; transform: skew(0deg); }
+      20% { text-shadow: -2.5px 0 #ef4444, 2.5px 0 #06b6d4; transform: skew(-1deg); }
+      40% { text-shadow: 3px 0 #ef4444, -1.5px 0 #06b6d4; transform: skew(1.5deg); }
+      60% { text-shadow: -1.5px 0 #ef4444, 3px 0 #06b6d4; transform: skew(-0.5deg); }
+      80% { text-shadow: 2px 0 #ef4444, -2px 0 #06b6d4; transform: skew(0.5deg); }
+    }`,
+  },
+  {
+    id: 'neon-sign-strobe',
+    name: 'Neon Sign Strobe',
+    category: 'Text Animations',
+    description: 'Warm glowing neon sign with realistic electrical flicker & ambient aura',
+    styles: {
+      color: '#ffedd5',
+      display: 'inline-block',
+      textShadow: '0 0 7px #f97316, 0 0 15px #ea580c, 0 0 25px #ea580c, 0 0 45px #c2410c',
+      animation: 'vi-neon-flicker 3s infinite',
+    },
+    keyframes: `@keyframes vi-neon-flicker {
+      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+        text-shadow: 0 0 7px #f97316, 0 0 15px #ea580c, 0 0 25px #ea580c, 0 0 45px #c2410c;
+        opacity: 1;
+      }
+      20%, 24%, 55% {
+        text-shadow: none;
+        opacity: 0.45;
+      }
+    }`,
+  },
+  {
+    id: 'liquid-gold-flow',
+    name: 'Liquid Gold Flow',
+    category: 'Text Animations',
+    description: 'Lustrous 24k polished gold gradient with continuous reflective light pass',
+    styles: {
+      background: 'linear-gradient(90deg, #b45309 0%, #fbbf24 25%, #fef08a 50%, #f59e0b 75%, #b45309 100%)',
+      backgroundSize: '200% auto',
+      webkitBackgroundClip: 'text',
+      webkitTextFillColor: 'transparent',
+      backgroundClip: 'text',
+      color: 'transparent',
+      display: 'inline-block',
+      fontWeight: '800',
+      animation: 'vi-gold-sweep 3.5s linear infinite',
+    },
+    keyframes: `@keyframes vi-gold-sweep {
+      0% { background-position: 0% center; }
+      100% { background-position: -200% center; }
+    }`,
+  },
+  {
+    id: 'holographic-prism-text',
+    name: 'Holographic Prism',
+    category: 'Text Animations',
+    description: 'Shifting pastel rainbow iridescent prism gradient across letterforms',
+    styles: {
+      background: 'linear-gradient(135deg, #a78bfa 0%, #38bdf8 25%, #f472b6 50%, #fb923c 75%, #a78bfa 100%)',
+      backgroundSize: '300% 300%',
+      webkitBackgroundClip: 'text',
+      webkitTextFillColor: 'transparent',
+      backgroundClip: 'text',
+      color: 'transparent',
+      display: 'inline-block',
+      fontWeight: '800',
+      animation: 'vi-holo-prism 4s ease infinite',
+    },
+    keyframes: `@keyframes vi-holo-prism {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }`,
+  },
+  {
+    id: 'typewriter-cursor-blink',
+    name: 'Typewriter Cursor',
+    category: 'Text Animations',
+    description: 'Monospace terminal styling with pulsing vertical caret cursor',
+    styles: {
+      fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+      borderRight: '3px solid #f97316',
+      paddingRight: '6px',
+      display: 'inline-block',
+      animation: 'vi-cursor-blink 0.85s step-end infinite',
+    },
+    keyframes: `@keyframes vi-cursor-blink {
+      from, to { border-color: transparent; }
+      50% { border-color: #f97316; }
+    }`,
+  },
+  {
+    id: 'blur-focus-reveal',
+    name: 'Cinematic Blur Reveal',
+    category: 'Text Animations',
+    description: 'Dreamy optical defocus to razor-sharp typography cycle',
+    styles: {
+      display: 'inline-block',
+      animation: 'vi-blur-focus 3.2s ease-in-out infinite',
+      willChange: 'filter, opacity',
+    },
+    keyframes: `@keyframes vi-blur-focus {
+      0%, 100% { filter: blur(5px); opacity: 0.55; }
+      50% { filter: blur(0px); opacity: 1; }
+    }`,
+  },
+  {
+    id: 'letter-spacing-breath',
+    name: 'Tracking Breath',
+    category: 'Text Animations',
+    description: 'Kinetic typography expanding and compressing letter tracking',
+    styles: {
+      display: 'inline-block',
+      animation: 'vi-tracking-breath 4s ease-in-out infinite',
+      textTransform: 'uppercase',
+      fontWeight: '700',
+    },
+    keyframes: `@keyframes vi-tracking-breath {
+      0%, 100% { letter-spacing: -0.5px; }
+      50% { letter-spacing: 6px; }
+    }`,
+  },
+  {
+    id: 'isometric-3d-text',
+    name: '3D Extrusion Pop',
+    category: 'Text Animations',
+    description: 'Layered retro isometric depth shadows with tactile hover extrusion',
+    styles: {
+      color: '#ffffff',
+      fontWeight: '800',
+      display: 'inline-block',
+      textShadow: '1px 1px 0 #d97706, 2px 2px 0 #b45309, 3px 3px 0 #92400e, 4px 4px 0 #78350f, 6px 6px 14px rgba(0,0,0,0.5)',
+      transform: 'translateY(-2px)',
+      transition: 'transform 0.2s ease, text-shadow 0.2s ease',
+    },
+  },
+  {
+    id: 'heartbeat-pulse-text',
+    name: 'Heartbeat Pulse',
+    category: 'Text Animations',
+    description: 'Rhythmic tactile double-pump heartbeat scale bounce',
+    styles: {
+      display: 'inline-block',
+      animation: 'vi-heartbeat 2s ease-in-out infinite',
+      transformOrigin: 'center center',
+    },
+    keyframes: `@keyframes vi-heartbeat {
+      0%, 100% { transform: scale(1); }
+      14% { transform: scale(1.1); }
+      28% { transform: scale(1.03); }
+      42% { transform: scale(1.08); }
+      70% { transform: scale(1); }
+    }`,
+  },
+  {
+    id: 'wavy-undulation-float',
+    name: 'Wave Undulation',
+    category: 'Text Animations',
+    description: 'Gentle floating buoyancy on invisible water currents',
+    styles: {
+      display: 'inline-block',
+      animation: 'vi-text-wave 3.5s ease-in-out infinite',
+      willChange: 'transform',
+    },
+    keyframes: `@keyframes vi-text-wave {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      33% { transform: translateY(-6px) rotate(1deg); }
+      66% { transform: translateY(4px) rotate(-1deg); }
+    }`,
+  },
+  {
+    id: 'fiery-ember-pulse',
+    name: 'Fiery Ember Glow',
+    category: 'Text Animations',
+    description: 'Deep crimson and blazing orange ambient ember text flame',
+    styles: {
+      color: '#fff7ed',
+      fontWeight: '800',
+      display: 'inline-block',
+      textShadow: '0 -2px 4px #ffedd5, 0 -4px 10px #f97316, 0 -8px 18px #ea580c, 0 -12px 28px #dc2626',
+      animation: 'vi-fire-pulse 2.2s ease-in-out infinite alternate',
+    },
+    keyframes: `@keyframes vi-fire-pulse {
+      from { text-shadow: 0 -2px 4px #ffedd5, 0 -4px 10px #f97316, 0 -8px 18px #ea580c, 0 -12px 28px #dc2626; }
+      to { text-shadow: 0 -3px 6px #ffedd5, 0 -6px 14px #ea580c, 0 -12px 24px #dc2626, 0 -16px 36px #991b1b; }
+    }`,
+  },
+  {
+    id: 'arcade-crt-green',
+    name: 'Phosphor Green CRT',
+    category: 'Text Animations',
+    description: 'Retro 80s arcade terminal phosphor green glow and scanline pulse',
+    styles: {
+      color: '#4ade80',
+      fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+      display: 'inline-block',
+      textShadow: '0 0 6px #22c55e, 0 0 14px rgba(34, 197, 94, 0.6)',
+      animation: 'vi-crt-phosphor 2s ease-in-out infinite alternate',
+    },
+    keyframes: `@keyframes vi-crt-phosphor {
+      from { opacity: 0.9; text-shadow: 0 0 6px #22c55e, 0 0 14px rgba(34, 197, 94, 0.6); }
+      to { opacity: 1; text-shadow: 0 0 10px #22c55e, 0 0 22px rgba(34, 197, 94, 0.9); }
+    }`,
+  },
+
+  // ==========================================
+  // 2. Gradients & Text
+  // ==========================================
   {
     id: 'animated-black-orange-gradient',
     name: 'Black & Orange Flow',
@@ -75,7 +295,9 @@ export const VISUAL_PRESETS: VisualPreset[] = [
     },
   },
 
-  // 2. Glass & Shadows
+  // ==========================================
+  // 3. Glass & Shadows
+  // ==========================================
   {
     id: 'glassmorphism-frost',
     name: 'Frosted Glass Card',
@@ -153,7 +375,9 @@ export const VISUAL_PRESETS: VisualPreset[] = [
     },
   },
 
-  // 3. Cyber & Glow
+  // ==========================================
+  // 4. Cyber & Glow
+  // ==========================================
   {
     id: 'neon-orange-glow',
     name: 'Neon Orange Aura',
@@ -205,7 +429,9 @@ export const VISUAL_PRESETS: VisualPreset[] = [
     }`,
   },
 
-  // 4. Borders & Shape
+  // ==========================================
+  // 5. Borders & Shape
+  // ==========================================
   {
     id: 'retro-brutalism',
     name: 'Retro Brutalism',
@@ -284,7 +510,9 @@ export const VISUAL_PRESETS: VisualPreset[] = [
     },
   },
 
-  // 5. Animations
+  // ==========================================
+  // 6. Animations (Component & Card Level)
+  // ==========================================
   {
     id: 'breathing-float-pulse',
     name: 'Gentle Float Levitation',
