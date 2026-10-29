@@ -14,6 +14,7 @@
     "test:site:run": "node testing-website/run-test.js",
     "serve:site": "node testing-website/serve.js",
     "dev:extension": "pnpm --filter @vibe-inspector/extension dev",
+    "link:cli": "npm link ./bridge",
     "vibe": "node bridge/dist/cli.js",
     "vibe:init": "node bridge/dist/cli.js init",
     "vibe:dev": "node bridge/dist/cli.js dev"

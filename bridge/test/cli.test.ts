@@ -58,7 +58,7 @@ describe('Vibe Inspector CLI: Project & AI Agent Auto-Configuration', () => {
 
     const data = JSON.parse(fs.readFileSync(cursorFile, 'utf-8'));
     expect(data.mcpServers['vibe-inspector']).toBeDefined();
-    expect(data.mcpServers['vibe-inspector'].command).toBe('npx');
+    expect(data.mcpServers['vibe-inspector'].command).toBe('vibe-inspector');
     expect(data.mcpServers['vibe-inspector'].args).toContain(token);
     expect(data.mcpServers['vibe-inspector'].args).toContain('7890');
   });

@@ -80,8 +80,8 @@ export function detectFramework(cwd: string): FrameworkInfo {
 export function configureAiAgents(cwd: string, token: string, port: number): AgentConfigResult[] {
   const results: AgentConfigResult[] = [];
   const mcpEntry = {
-    command: 'npx',
-    args: ['-y', '@vibe-inspector/bridge', '--port', String(port), '--token', token],
+    command: 'vibe-inspector',
+    args: ['--port', String(port), '--token', token],
   };
 
   const updateJsonMcpConfig = (filePath: string, agentName: string, rootKey: 'mcpServers' | 'mcp_servers' = 'mcpServers') => {
@@ -219,7 +219,7 @@ export async function runInit(cwd: string, options: { port?: number; token?: str
   console.log('================================================================');
   console.log('\n🚀 Next Steps:');
   console.log('  1. Start your dev session with:');
-  console.log('     \x1b[32mnpx vibe-inspector dev\x1b[0m\n');
+  console.log('     \x1b[32mvibe-inspector dev\x1b[0m (or: \x1b[32mnpx vibe-inspector dev\x1b[0m)\n');
   console.log('  2. Open your web app in Google Chrome and click the');
   console.log('     \x1b[36mVibe Inspector Side Panel\x1b[0m icon to start inspecting elements!\n');
   console.log('  3. In your AI agent (Cursor, Claude, Antigravity, etc.), ask:');
@@ -315,13 +315,13 @@ export function runDoctor(cwd: string) {
   if (fs.existsSync(configPath)) {
     console.log(`  • Local Project Config: \x1b[32mFound\x1b[0m (.vibe-inspector.json)`);
   } else {
-    console.log(`  • Local Project Config: \x1b[33mNot initialized\x1b[0m (Run 'npx vibe-inspector init')`);
+    console.log(`  • Local Project Config: \x1b[33mNot initialized\x1b[0m (Run 'vibe-inspector init')`);
   }
 
   const cursorPath = path.join(cwd, '.cursor', 'mcp.json');
   console.log(`  • Cursor Config: ${fs.existsSync(cursorPath) ? '\x1b[32mConfigured\x1b[0m' : '\x1b[33mNot found\x1b[0m'}`);
 
-  console.log('\nDiagnosis complete. Run \x1b[32mnpx vibe-inspector init\x1b[0m to configure any project.\n');
+  console.log('\nDiagnosis complete. Run \x1b[32mvibe-inspector init\x1b[0m to configure any project.\n');
 }
 
 /**
@@ -343,6 +343,7 @@ export async function main() {
 Vibe Inspector CLI 🎯
 
 Usage:
+  vibe-inspector <command> [options]
   npx vibe-inspector <command> [options]
 
 Commands:

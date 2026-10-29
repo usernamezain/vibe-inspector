@@ -36,10 +36,12 @@ Set up Vibe Inspector in **any frontend project** (Next.js, Vite React/Vue/Svelt
 
 ```bash
 # Step 1: In your project root, configure framework & all AI agents automatically:
-npx vibe-inspector init
+vibe-inspector init
+# (or: npx vibe-inspector init)
 
 # Step 2: Start your dev environment (runs bridge + project dev server together):
-npx vibe-inspector dev
+vibe-inspector dev
+# (or: npx vibe-inspector dev)
 ```
 
 `npx vibe-inspector init` will automatically detect your framework and write the MCP server configuration into:
