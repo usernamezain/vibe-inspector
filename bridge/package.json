@@ -7,6 +7,7 @@
     "dist"
   ],
   "bin": {
+    "vibe-inspector": "./dist/cli.js",
     "vibe-inspector-bridge": "./dist/index.js"
   },
   "scripts": {

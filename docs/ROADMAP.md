@@ -142,3 +142,5 @@
 - [x] Documentation: Install guides, per-agent configurations, troubleshooting (`README.md`, `docs/COMPANION-MCP-GUIDE.md`). *(Owner: Agent, Status: Complete, Notes: Tested copy-paste setup configs for Antigravity, Claude Code, Cursor, and Codex)*
 - [x] Prepare npm package for bridge CLI (`bridge/package.json` updated with files whitelist for `npx vibe-inspector-bridge`). *(Owner: Agent, Status: Complete)*
 - [x] Final `/ponytail-audit` and technical debt consolidation (`docs/TECH-DEBT.md`). *(Owner: Agent, Status: Complete, Notes: 4 deliberate shortcuts documented with clean upgrade paths, zero high-risk debt)*
+- [x] Universal 1-2 Command CLI & AI Agent Auto-Configurator (`npx vibe-inspector init` & `dev`, supporting Cursor, Antigravity, Claude Code, Windsurf, VS Code). *(Owner: Agent, Status: Complete)*
+- [x] Standalone AI Agent Starting Prompt & GitHub guide (`AI-AGENT-INSTRUCTIONS.md`, updated `README.md` and `starter-prompt.md`). *(Owner: Agent, Status: Complete, Notes: 77/77 tests passing)*

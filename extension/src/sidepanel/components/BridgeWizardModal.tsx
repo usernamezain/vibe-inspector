@@ -38,7 +38,6 @@ export const BridgeWizardModal: FC<BridgeWizardModalProps> = ({
   if (!isOpen && !pendingApproval) return null;
 
   const getAgentSnippet = () => {
-    const bridgePath = 'C:/Users/SHABBIR TRADERS/Desktop/New Ext MCP/bridge/dist/index.js';
     const effectiveToken = token || '<YOUR_TOKEN_HERE>';
 
     switch (activeGuideTab) {
@@ -47,8 +46,8 @@ export const BridgeWizardModal: FC<BridgeWizardModalProps> = ({
           {
             mcpServers: {
               'vibe-inspector': {
-                command: 'node',
-                args: [bridgePath, '--port', String(port), '--token', effectiveToken],
+                command: 'npx',
+                args: ['-y', '@vibe-inspector/bridge', '--port', String(port), '--token', effectiveToken],
               },
             },
           },
@@ -57,15 +56,15 @@ export const BridgeWizardModal: FC<BridgeWizardModalProps> = ({
         );
 
       case 'claude':
-        return `claude mcp add vibe-inspector node "${bridgePath}" -- --port ${port} --token ${effectiveToken}`;
+        return `claude mcp add vibe-inspector npx -y @vibe-inspector/bridge --port ${port} --token ${effectiveToken}`;
 
       case 'cursor':
         return JSON.stringify(
           {
             mcpServers: {
               'vibe-inspector': {
-                command: 'node',
-                args: [bridgePath, '--port', String(port), '--token', effectiveToken],
+                command: 'npx',
+                args: ['-y', '@vibe-inspector/bridge', '--port', String(port), '--token', effectiveToken],
               },
             },
           },
@@ -74,7 +73,7 @@ export const BridgeWizardModal: FC<BridgeWizardModalProps> = ({
         );
 
       case 'codex':
-        return `codex mcp add vibe-inspector -- node "${bridgePath}" --port ${port} --token ${effectiveToken}`;
+        return `codex mcp add vibe-inspector -- npx -y @vibe-inspector/bridge --port ${port} --token ${effectiveToken}`;
     }
   };
 

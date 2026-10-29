@@ -13,7 +13,10 @@
     "test:site": "vitest run testing-website/mcp-testbed.test.ts",
     "test:site:run": "node testing-website/run-test.js",
     "serve:site": "node testing-website/serve.js",
-    "dev:extension": "pnpm --filter @vibe-inspector/extension dev"
+    "dev:extension": "pnpm --filter @vibe-inspector/extension dev",
+    "vibe": "node bridge/dist/cli.js",
+    "vibe:init": "node bridge/dist/cli.js init",
+    "vibe:dev": "node bridge/dist/cli.js dev"
   },
   "devDependencies": {
     "happy-dom": "^21.0.3",
