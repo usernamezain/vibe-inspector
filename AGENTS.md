@@ -18,6 +18,7 @@
 6. **Documentation as a Deliverable:** Update `docs/ROADMAP.md`, `CONTEXT.md`, and `docs/DECISIONS.md` at the end of each phase.
 7. **Small Atomic Commits:** Commit per completed task with clear "what and why" messages.
 8. **Consult `.agent/skills/`:**
+   - [`.agent/skills/vibe-release/SKILL.md`](.agent/skills/vibe-release/SKILL.md)
    - [`.agent/skills/ponytail/SKILL.md`](.agent/skills/ponytail/SKILL.md)
    - [`.agent/skills/mcp-tool-design/SKILL.md`](.agent/skills/mcp-tool-design/SKILL.md)
    - [`.agent/skills/extension-security/SKILL.md`](.agent/skills/extension-security/SKILL.md)

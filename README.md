@@ -5,10 +5,11 @@
 <h1 align="center">Vibe Inspector 🎯</h1>
 
 <p align="center">
-  <strong>Click any element in the browser, tweak it visually, and your AI assistant receives the exact element, its source location, and its styles, then writes the code.</strong>
+  <strong>Click any element in Chrome, tweak it visually with live preview, and your AI assistant receives the exact element, its source location, styles, and annotations, then edits the code directly on disk.</strong>
 </p>
 
 <p align="center">
+  <a href="https://github.com/usernamezain/vibe-inspector/releases/tag/v1.0.0"><img src="https://img.shields.io/badge/Release-v1.0.0-green.svg?style=for-the-badge" alt="GitHub Release" /></a>
   <a href="https://github.com/usernamezain/vibe-inspector/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
   <a href="https://github.com/usernamezain/vibe-inspector"><img src="https://img.shields.io/badge/TypeScript-5.7-blue?style=for-the-badge&logo=typescript" alt="TypeScript" /></a>
   <a href="https://github.com/usernamezain/vibe-inspector"><img src="https://img.shields.io/badge/Chrome_Extension-MV3-orange?style=for-the-badge&logo=googlechrome" alt="Chrome MV3" /></a>
@@ -18,53 +19,128 @@
 ---
 
 <p align="center">
-  ✨ <strong>Join for more exclusive drops & updates:</strong><br/>
+  ✨ <strong>Join for exclusive drops, skills & updates:</strong><br/>
   👉 <a href="https://whatsapp.com/channel/0029VbBUVv35fM5eAnXw3w2D"><strong>Join our Official WhatsApp Channel</strong></a>
 </p>
 
 ---
 
-## 📖 New to Vibe Inspector?
-> 💡 **Looking for a complete step-by-step beginner guide?**  
-> Check out the [📘 Complete Beginner Manual (COMPLETE-GUIDE.md)](COMPLETE-GUIDE.md) covering every click, terminal command, and configuration from scratch!
+## 🧭 Documentation & Navigation Map
+
+To find the exact instructions you need without scrolling, use this quick guide:
+
+| Looking For... | Document / File | What it covers |
+| :--- | :--- | :--- |
+| **Complete Beginner Walkthrough** | [📘 `COMPLETE-GUIDE.md`](COMPLETE-GUIDE.md) | Step-by-step tutorial with screenshots, every click, and zero-knowledge setup |
+| **AI Agent Directives & Prompts** | [🤖 `AI-AGENT-INSTRUCTIONS.md`](AI-AGENT-INSTRUCTIONS.md) | Prompt templates for Cursor, Claude, Antigravity, and multi-agent workflows |
+| **One-Click Agent Starter Prompt** | [🚀 `starter-prompt.md`](starter-prompt.md) | Copy-paste starting prompt to give your AI coding assistant |
+| **MCP Tool API Reference (36 Tools)**| [🛠️ `docs/MCP-TOOLS.md`](docs/MCP-TOOLS.md) | Complete schemas, arguments, and return types for all 36 MCP tools |
+| **Architecture & Internal State** | [📐 `CONTEXT.md`](CONTEXT.md) | High-level system design, security rules, and architectural context |
+| **Development Roadmap & History** | [🗺️ `docs/ROADMAP.md`](docs/ROADMAP.md) | Phase-by-phase implementation log and milestone verification |
+| **Architectural Decisions (ADRs)** | [📜 `docs/DECISIONS.md`](docs/DECISIONS.md) | Key technical trade-offs (Shadow DOM, 127.0.0.1, token auth, etc.) |
 
 ---
 
-## ⚡ Instant 1–2 Command Setup (Any Project)
+## ⚡ Instant Setup: Choose Your Path
 
-Set up Vibe Inspector in **any frontend project** (Next.js, Vite React/Vue/Svelte, Astro, Remix, HTML) with zero manual JSON editing:
+### Path A: Zero Build / Fast Track (Recommended for Users)
+You don't need `pnpm`, TypeScript, or build tools!
 
+1. **Download the Pre-built Chrome Extension**:
+   - Go to [GitHub Release v1.0.0](https://github.com/usernamezain/vibe-inspector/releases/tag/v1.0.0) and download `vibe-inspector-chrome-extension-v1.0.0.zip`.
+   - Unzip it anywhere on your computer.
+   - In Chrome, open `chrome://extensions`, enable **Developer mode** (top right), click **Load unpacked**, and choose the unzipped folder.
+
+2. **Install the CLI Globally (Works with regular `npm` — no `pnpm` needed)**:
+   ```bash
+   npm install -g https://github.com/usernamezain/vibe-inspector/releases/download/v1.0.0/vibe-inspector-bridge-1.0.0.tgz
+   ```
+   *(Or if you cloned the repo: `npm link ./bridge`)*
+
+3. **In Any Website / Project Folder**:
+   ```bash
+   # Configure AI agents (Cursor, Claude, Antigravity, VS Code) in 1 second:
+   vibe-inspector init
+
+   # Start bridge & dev server together:
+   vibe-inspector dev
+   ```
+
+---
+
+### Path B: Developer Setup (From Source Code)
+If you want to contribute or build from source:
 ```bash
-# Step 1: In your project root, configure framework & all AI agents automatically:
-vibe-inspector init
-# (or: npx vibe-inspector init)
+git clone https://github.com/usernamezain/vibe-inspector.git
+cd vibe-inspector
 
-# Step 2: Start your dev environment (runs bridge + project dev server together):
-vibe-inspector dev
-# (or: npx vibe-inspector dev)
+# If using pnpm:
+pnpm install
+pnpm build
+pnpm link:cli
+
+# If you don't have pnpm installed:
+npm install
+npm run build
+npm link ./bridge
 ```
-
-`npx vibe-inspector init` will automatically detect your framework and write the MCP server configuration into:
-- 🟢 **Cursor** (`.cursor/mcp.json`)
-- 🟢 **Antigravity / Gemini** (`mcp_config.json`)
-- 🟢 **Claude Code & Desktop** (`.claude/mcp.json` / `claude_desktop_config.json`)
-- 🟢 **Windsurf** (`~/.codeium/windsurf/mcp_config.json`)
-- 🟢 **VS Code** (`.vscode/mcp.json`)
+Then load `extension/dist` into `chrome://extensions` via **Load unpacked**.
 
 ---
 
-## 🤖 AI Agent Starting Prompt (Copy & Paste for any AI)
+## 🎯 Two Ways to Pair With Your AI Agent
 
-Give this prompt to **any AI coding assistant** (Antigravity, Claude Code, Cursor, Codex, Windsurf) so it can install, connect, and use Vibe Inspector autonomously:
+Vibe Inspector gives you complete freedom whether you want a live WebSocket MCP connection or a manual zero-bridge copy-paste workflow:
+
+### Mode 1: Live MCP Bridge (Fully Autonomous)
+1. Run `vibe-inspector dev` in your project terminal.
+2. Open Chrome, click the **Vibe Inspector Side Panel** icon, and ensure it says **Connected (ws://127.0.0.1:7890)**.
+3. Select any element or tweak styles.
+4. Tell your AI agent:
+   > *"Inspect the selected element in Vibe Inspector and update the code."*
+5. The AI agent queries the bridge via MCP, retrieves the exact tag, classes, computed styles, and source file line, then modifies your code on disk.
+
+---
+
+### Mode 2: Zero-Bridge / Offline Workflow (Copy Annotation & Pin Prompt)
+**Don't want to run a background bridge or configure MCP? No problem!**
+
+1. Click on any element in the webpage using Vibe Inspector.
+2. Drop numbered pins or write your comment/task in the Side Panel (or tweak colors/margins).
+3. In the Side Panel, simply click **"Copy Prompt"** (or **"Copy Annotation"**).
+4. Paste it directly into your AI chat (Cursor, Claude, ChatGPT, etc.) or save it to your prompt file!
+5. **What the copied prompt includes automatically:**
+   - Exact HTML tag and element selector
+   - Component name & resolved source location (`file:line`)
+   - Complete attributes, class names, and text preview
+   - Live visual style deltas (CSS, Tailwind utility classes, or React style objects)
+   - User pin messages and instructions
+6. Your AI agent reads the pasted prompt and writes the exact code edit without needing any live bridge running!
+
+---
+
+## 🤖 AI Agent Starting Prompts
+
+### Quick 30-Second MCP Verification Prompt
+Give this short prompt to verify your MCP bridge is active and functioning:
+```markdown
+Check if the 'vibe-inspector' MCP server is configured and active. Call the tool 'get_page_info' or 'bridge_status' to confirm the live browser connection, and report the current page title and URL.
+```
+*(Agent takes **5–15 seconds** to query the bridge and confirm connection).*
+
+---
+
+### Full AI Agent Operational Prompt
+Copy and paste this into Cursor (`.cursorrules`), Claude Code, Antigravity (`AGENTS.md`), or Windsurf:
 
 ```markdown
 You are paired with Vibe Inspector (Chrome Extension + Local MCP Bridge).
 Your role is to inspect UI elements visually selected by the user in Chrome, read their exact source code locations and styles, and edit the code directly on disk.
 
-Follow these operational instructions:
+Operational Instructions:
 1. Setup & Connection Check:
-   - Check if Vibe Inspector is configured in this repository. If not, run: `npx vibe-inspector init`
-   - Start the local dev bridge with: `npx vibe-inspector dev` (or ensure `npx -y @vibe-inspector/bridge` is running).
+   - Check if Vibe Inspector is configured in this repository. If not, run: `vibe-inspector init`
+   - Start the local dev bridge with: `vibe-inspector dev` (or run `--bridge-only` if dev server is already running).
    - Verify connection by calling the MCP tool `get_page_info` or `get_selection`.
 
 2. The Visual Inspection & Edit Loop:
@@ -82,11 +158,21 @@ Follow these operational instructions:
 Begin by checking the current project configuration and verifying the bridge status.
 ```
 
-*(See [AI-AGENT-INSTRUCTIONS.md](AI-AGENT-INSTRUCTIONS.md) for full instructions and multi-agent options).*
+---
+
+## ⏱️ Agent Response & Execution Times
+
+| Action / Operation | Typical Agent Execution Time | What Happens Behind the Scenes |
+| :--- | :---: | :--- |
+| **MCP Connection Verification** | **5 – 15 seconds** | Calls `bridge_status` or `get_page_info` over stdio |
+| **Inspect Selected Element** | **10 – 25 seconds** | Calls `get_selection`, parses waterfall name, resolves source file |
+| **Direct Code Edit (with source map)** | **20 – 45 seconds** | Opens mapped file (`file:line`), modifies JSX/CSS/Tailwind, saves to disk |
+| **Full Heuristic Search & Edit (unmapped)**| **30 – 60 seconds** | Searches project using CSS selector/classes, identifies component, applies changes |
+| **Accessibility & Design QA Audit** | **15 – 30 seconds** | Runs axe-core WCAG 2.1 AA audit or checks contrast/spacing scales |
 
 ---
 
-## 🌟 Key Features
+## 🌟 Key Features & Capabilities
 
 ### 🎯 Precision Element Picker & Inspector
 - Hover over any element on any web page with smooth bounding box outlines and informative UI badges.
@@ -125,83 +211,6 @@ Begin by checking the current project configuration and verifying the bridge sta
 
 ---
 
-## 🏗️ Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                      Chrome Browser                         │
-│                                                             │
-│  ┌───────────────────────┐       ┌───────────────────────┐  │
-│  │   Host Web Page       │       │ Extension Side Panel  │  │
-│  │   (Any website)       │       │ (Edit/Page/Pins/CSS)  │  │
-│  │                       │       │                       │  │
-│  │   Shadow DOM Overlay  │◀─────▶│ Visual property       │  │
-│  │   - Hover highlight   │ Msg   │ editors, presets,     │  │
-│  │   - Click picker      │ Bus   │ a11y, pins, approvals │  │
-│  │   - Numbered pins     │       └───────────┬───────────┘  │
-│  └───────────────────────┘                   │              │
-└──────────────────────────────────────────────┼──────────────┘
-                                               │ WebSocket
-                                               │ (Token + Origin Auth)
-                                               │ ws://127.0.0.1:7890
-                                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│             Local Node.js Bridge (npx package)              │
-│                                                             │
-│  - Binds strictly to 127.0.0.1                              │
-│  - Validates random token & Origin: chrome-extension://<id> │
-│  - Bridges WebSocket messages to MCP tools                  │
-│  - Enforces explicit user confirmation on writes            │
-│  - MCP Server (StdioTransport & Streamable HTTP / SSE)      │
-└──────────────────────────────┬──────────────────────────────┘
-                               │
-                               │ MCP Protocol (Stdio / SSE)
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│                       AI Coding Agent                       │
-│        (Antigravity / Claude Code / Cursor / Codex)         │
-│                                                             │
-│  - Calls tools: get_selection, highlight_element, etc.      │
-│  - Reads verified source file locations (data-at / plugins) │
-│  - Edits real source files on disk                          │
-└─────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 🚀 Monorepo Local Setup (For Extension Developers)
-
-### 1. Prerequisites
-- **Node.js:** v18.0.0 or higher
-- **pnpm:** v9.0.0 or higher
-- **Google Chrome:** Version 114+ (for Side Panel API)
-
-### 2. Build the Monorepo
-Clone this repository and build all packages:
-```bash
-git clone https://github.com/usernamezain/vibe-inspector.git
-cd vibe-inspector
-pnpm install
-pnpm build
-```
-
-### 3. Load the Chrome Extension
-1. Open Google Chrome and navigate to `chrome://extensions`.
-2. Enable **Developer mode** (toggle in the top-right corner).
-3. Click **Load unpacked**.
-4. Select the `extension/dist` folder in this repository.
-5. Click the Vibe Inspector puzzle-piece icon in your browser toolbar to open the Side Panel.
-
-### 4. Start the Local Bridge
-Run the bridge CLI in your terminal:
-```bash
-pnpm vibe:dev
-# Or using npx:
-npx vibe-inspector dev
-```
-
----
-
 ## 🛠️ Complete MCP Tool Catalog (36 Tools)
 
 Vibe Inspector provides 36 production tools across 7 categories. See [`docs/MCP-TOOLS.md`](docs/MCP-TOOLS.md) for full schemas:
@@ -221,6 +230,8 @@ Vibe Inspector provides 36 production tools across 7 categories. See [`docs/MCP-
 Run the comprehensive unit and integration test suite:
 ```bash
 pnpm test
+# Or using npm:
+npm test
 ```
 The suite executes **77 automated tests across 11 test suites** using Vitest and Happy-DOM, verifying element waterfall resolution, selector synthesis, Tailwind utility conversion, design token extraction, and WebSocket bridge authentication security.
 
